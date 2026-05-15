@@ -1,0 +1,98 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum KeyStatus {
+  ACTIVE
+  USED
+  REVOKED
+  EXPIRED
+}
+
+enum ValidationResult {
+  SUCCESS
+  INVALID_KEY
+  REVOKED
+  EXPIRED
+  ALREADY_USED
+}
+
+model Admin {
+  id           String    @id @default(uuid())
+  username     String    @unique
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  lastLoginAt  DateTime?
+
+  keys Key[]
+  logs AccessLog[]
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  keys Key[]
+}
+
+model Key {
+  id String @id @default(uuid())
+
+  value String @unique
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  createdById String
+  createdBy   Admin  @relation(fields: [createdById], references: [id])
+
+  customerEmail String?
+  customerName  String?
+
+  status KeyStatus @default(ACTIVE)
+
+  activatedAt DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  usageLogs KeyUsageLog[]
+}
+
+model KeyUsageLog {
+  id String @id @default(uuid())
+
+  keyId String
+  key   Key    @relation(fields: [keyId], references: [id])
+
+  ipAddress String
+  userAgent String?
+
+  result ValidationResult
+
+  attemptedAt DateTime @default(now())
+}
+
+model AccessLog {
+  id String @id @default(uuid())
+
+  adminId String?
+  admin   Admin?  @relation(fields: [adminId], references: [id])
+
+  usernameAttempted String
+
+  ipAddress String
+
+  success Boolean
+
+  reason String?
+
+  createdAt DateTime @default(now())
+}
