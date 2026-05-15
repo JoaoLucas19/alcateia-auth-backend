@@ -1,7 +1,7 @@
 {
   "name": "alcateiaauth",
   "version": "1.0.0",
-  "description": "",
+  "description": "AlcateiaAuth Backend",
   "main": "index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
