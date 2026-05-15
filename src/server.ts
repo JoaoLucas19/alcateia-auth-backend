@@ -10,7 +10,7 @@ const app = express();
 
 app.use(helmet());
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://whitexcorporation.com.br'],
+  origin: ['https://whitexcorporation.com.br', 'http://localhost:5173'],
   credentials: true,
 }));
 app.use(express.json());
