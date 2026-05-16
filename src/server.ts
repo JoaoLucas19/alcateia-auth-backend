@@ -8,11 +8,34 @@ import authRoutes from "./modules/auth/auth.routes";
 
 const app = express();
 
+// Lista de origins permitidos — adicione aqui qualquer novo domínio/porta
+const allowedOrigins = [
+  "https://whitexcorporation.com.br",
+  "https://www.whitexcorporation.com.br",
+  "http://localhost:5173",  // dev Vite
+  "http://localhost:4173",  // preview Vite (npm run preview)
+];
+
 app.use(helmet());
-app.use(cors({
-  origin: ['https://whitexcorporation.com.br', 'http://localhost:5173'],
-  credentials: true,
-}));
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Permite requisições sem origin (Postman, curl, Railway health checks, etc.)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      // Loga o origin bloqueado para facilitar debug
+      console.warn(`[CORS] Origin bloqueado: ${origin}`);
+      return callback(new Error(`CORS: origin não permitido → ${origin}`));
+    },
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 // Rate limiter global
