@@ -1,15 +1,13 @@
 import crypto from "crypto";
 
-// Charset sem 0/O/1/I para evitar confusão visual
-const CHARSET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+function generateSegment(): string {
+  // Gera 4 dígitos numéricos aleatórios (1000–9999)
+  const num = 1000 + (crypto.randomBytes(2).readUInt16BE(0) % 9000);
+  return num.toString();
+}
 
-function generateKey(): string {
-  const randomSegment = (length: number) =>
-    Array.from(crypto.randomBytes(length))
-      .map((b) => CHARSET[b % CHARSET.length])
-      .join("");
-
-  return `ALCATEIA-${randomSegment(4)}-${randomSegment(4)}`;
+export function generateKeyValue(): string {
+  return `ALCATEIA-${generateSegment()}-${generateSegment()}`;
 }
 
 export async function generateUniqueKeys(
@@ -19,7 +17,7 @@ export async function generateUniqueKeys(
   const keys: string[] = [];
 
   while (keys.length < quantity) {
-    const key = generateKey();
+    const key = generateKeyValue();
     const exists = await existingChecker(key);
     if (!exists && !keys.includes(key)) keys.push(key);
   }
