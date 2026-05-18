@@ -12,6 +12,7 @@ const error_middleware_1 = require("./middlewares/error.middleware");
 const auth_routes_1 = __importDefault(require("./modules/auth/auth.routes"));
 const product_routes_1 = __importDefault(require("./modules/products/product.routes")); // ROTA ADICIONADA
 const key_routes_1 = __importDefault(require("./modules/key/key.routes")); // ROTA ADICIONADA
+const log_routes_1 = __importDefault(require("./modules/logs/log.routes")); // ← ADICIONA
 const app = (0, express_1.default)();
 // Lista de origins permitidos — adicione aqui qualquer novo domínio/porta
 const allowedOrigins = [
@@ -43,6 +44,8 @@ app.get("/", (_req, res) => res.send("API AlcateiaAuth Online!"));
 app.use("/api/auth", auth_routes_1.default);
 app.use("/api/products", product_routes_1.default); // NOVA ROTA ADICIONADA
 app.use("/api/keys", key_routes_1.default); // NOVA ROTA ADICIONADA
+// Na seção de Rotas:
+app.use("/api/logs", log_routes_1.default); // ← ADICIONA
 // Handler global de erros — deve ser o último middleware
 app.use(error_middleware_1.errorHandler);
 app.listen(env_1.env.PORT, () => console.log(`API rodando na porta ${env_1.env.PORT}!`));

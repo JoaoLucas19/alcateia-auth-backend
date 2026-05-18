@@ -7,6 +7,7 @@ import { errorHandler } from "./middlewares/error.middleware";
 import authRoutes from "./modules/auth/auth.routes";
 import productRoutes from "./modules/products/product.routes"; // ROTA ADICIONADA
 import keyRoutes from "./modules/key/key.routes";              // ROTA ADICIONADA
+import logRoutes from "./modules/logs/log.routes"; // ← ADICIONA
 
 const app = express();
 
@@ -49,6 +50,8 @@ app.get("/", (_req, res) => res.send("API AlcateiaAuth Online!"));
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes); // NOVA ROTA ADICIONADA
 app.use("/api/keys", keyRoutes);         // NOVA ROTA ADICIONADA
+// Na seção de Rotas:
+app.use("/api/logs", logRoutes); // ← ADICIONA
 
 // Handler global de erros — deve ser o último middleware
 app.use(errorHandler);
