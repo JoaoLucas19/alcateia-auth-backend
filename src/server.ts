@@ -50,8 +50,7 @@ app.get("/", (_req, res) => res.send("API AlcateiaAuth Online!"));
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes); // NOVA ROTA ADICIONADA
 app.use("/api/keys", keyRoutes);         // NOVA ROTA ADICIONADA
-// Na seção de Rotas:
-app.use("/api/logs", logRoutes); // ← ADICIONA
+app.use("/api/logs", logRoutes);        // NOVA ADICIONADA
 
 // Handler global de erros — deve ser o último middleware
 app.use(errorHandler);
