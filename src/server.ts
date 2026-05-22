@@ -93,15 +93,10 @@ const corsOptions: CorsOptions = {
 };
 
 /**
- * Aplica CORS globalmente
+ * Aplica CORS globalmente (inclui resposta automatica a preflight OPTIONS).
+ * Nao usar app.options("*") — Express 5 + path-to-regexp nao aceita "*" solto.
  */
 app.use(cors(corsOptions));
-
-/**
- * Responde preflight requests
- * MUITO IMPORTANTE para Railway + Frontend externo
- */
-app.options("*", cors(corsOptions));
 
 /**
  * Body parser
