@@ -12,6 +12,7 @@ import clientAuthRoutes from "./modules/client-auth/client-auth.routes";
 import productRoutes from "./modules/products/product.routes";
 import keyRoutes from "./modules/key/key.routes";
 import logRoutes from "./modules/logs/log.routes";
+import clientRoutes from "./modules/clients/client.routes"; // Nova rota adicionada para clientes
 
 const app = express();
 
@@ -139,6 +140,9 @@ app.use("/api/products", productRoutes);
 app.use("/api/keys", keyRoutes);
 
 app.use("/api/logs", logRoutes);
+
+// Rota para clientes
+app.use("/api/admin/clients", clientRoutes);
 
 /**
  * Middleware global de erros
