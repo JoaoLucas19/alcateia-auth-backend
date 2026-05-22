@@ -6,6 +6,9 @@ import { KeyStatus, ValidationResult } from "@prisma/client";
 
 const DEFAULT_SUBSCRIPTION_DAYS = 30;
 const BCRYPT_ROUNDS = 12;
+/** Data sentinela para keys permanentes (expiresAt null no painel). */
+const LIFETIME_EXPIRY = new Date("2099-12-31T23:59:59.999Z");
+const LIFETIME_DAYS_REMAINING = 99999;
 
 export interface ClientAuthInput {
   username: string;
@@ -18,7 +21,19 @@ export interface ClientRegisterInput extends ClientAuthInput {
   license: string;
 }
 
+function isLifetimeExpiry(expiresAt: Date): boolean {
+  return expiresAt.getTime() >= LIFETIME_EXPIRY.getTime();
+}
+
+/** Key permanente = expiresAt null na geracao (opcao "Permanente" do painel). */
+function isLifetimeKey(keyExpiresAt: Date | null): boolean {
+  return keyExpiresAt === null;
+}
+
 function computeClientExpiry(keyExpiresAt: Date | null): Date {
+  if (isLifetimeKey(keyExpiresAt)) {
+    return LIFETIME_EXPIRY;
+  }
   if (keyExpiresAt && keyExpiresAt > new Date()) {
     return keyExpiresAt;
   }
@@ -28,6 +43,9 @@ function computeClientExpiry(keyExpiresAt: Date | null): Date {
 }
 
 function daysRemaining(expiresAt: Date): number {
+  if (isLifetimeExpiry(expiresAt)) {
+    return LIFETIME_DAYS_REMAINING;
+  }
   const diff = expiresAt.getTime() - Date.now();
   return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 }
@@ -37,13 +55,16 @@ function formatUserPayload(client: {
   isBanned: boolean;
   expiresAt: Date;
   loginCount: number;
-  key: { product: { name: string } };
+  key: { expiresAt: Date | null; product: { name: string } };
 }) {
+  const lifetime = isLifetimeKey(client.key.expiresAt) || isLifetimeExpiry(client.expiresAt);
+
   return {
     username: client.username,
     productName: client.key.product.name,
-    daysRemaining: daysRemaining(client.expiresAt),
-    expirationDate: client.expiresAt.toISOString().split("T")[0],
+    daysRemaining: lifetime ? LIFETIME_DAYS_REMAINING : daysRemaining(client.expiresAt),
+    expirationDate: lifetime ? "Lifetime" : client.expiresAt.toISOString().split("T")[0],
+    isLifetime: lifetime,
     timesUsed: client.loginCount,
     maxUsers: 1,
     isBanned: client.isBanned,
@@ -176,7 +197,10 @@ export async function loginClientService(input: ClientAuthInput) {
     throw new AppError("Credenciais invalidas", 401, "INVALID_CREDENTIALS");
   }
 
-  if (client.expiresAt < new Date()) {
+  const lifetime =
+    isLifetimeKey(client.key.expiresAt) || isLifetimeExpiry(client.expiresAt);
+
+  if (!lifetime && client.expiresAt < new Date()) {
     throw new AppError("Assinatura expirada", 403, "SUBSCRIPTION_EXPIRED");
   }
 
