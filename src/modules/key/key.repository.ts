@@ -17,6 +17,7 @@ export const keyRepository = {
     customerEmail?: string;
     customerName?: string;
     expiresAt?: Date;
+    isPermanent?: boolean;
   }) => prisma.key.create({ data }),
 
   createMany: (keys: {
@@ -26,6 +27,7 @@ export const keyRepository = {
     customerEmail?: string;
     customerName?: string;
     expiresAt?: Date;
+    isPermanent?: boolean;
   }[]) => prisma.key.createMany({ data: keys }),
 
   findPaginated: async ({ page, limit, status, productId, search }: KeyFilters) => {
@@ -70,8 +72,10 @@ export const keyRepository = {
   valueExists: async (value: string) =>
     !!(await prisma.key.findUnique({ where: { value }, select: { id: true } })),
 
-  update: (id: string, data: { customerEmail?: string; customerName?: string; expiresAt?: Date | null }) =>
-    prisma.key.update({ where: { id }, data }),
+  update: (
+    id: string,
+    data: { customerEmail?: string; customerName?: string; expiresAt?: Date | null; isPermanent?: boolean }
+  ) => prisma.key.update({ where: { id }, data }),
 
   revoke: (id: string) =>
     prisma.key.update({ where: { id }, data: { status: "REVOKED" } }),

@@ -25,17 +25,17 @@ function isLifetimeExpiry(expiresAt: Date): boolean {
   return expiresAt.getTime() >= LIFETIME_EXPIRY.getTime();
 }
 
-/** Key permanente = expiresAt null na geracao (opcao "Permanente" do painel). */
-function isLifetimeKey(keyExpiresAt: Date | null): boolean {
-  return keyExpiresAt === null;
+/** Key permanente = flag isPermanent ou expiresAt null / sentinela 2099. */
+function isLifetimeKey(key: { expiresAt: Date | null; isPermanent: boolean }): boolean {
+  return key.isPermanent || key.expiresAt === null || isLifetimeExpiry(key.expiresAt);
 }
 
-function computeClientExpiry(keyExpiresAt: Date | null): Date {
-  if (isLifetimeKey(keyExpiresAt)) {
+function computeClientExpiry(key: { expiresAt: Date | null; isPermanent: boolean }): Date {
+  if (isLifetimeKey(key)) {
     return LIFETIME_EXPIRY;
   }
-  if (keyExpiresAt && keyExpiresAt > new Date()) {
-    return keyExpiresAt;
+  if (key.expiresAt && key.expiresAt > new Date()) {
+    return key.expiresAt;
   }
   const expiry = new Date();
   expiry.setDate(expiry.getDate() + DEFAULT_SUBSCRIPTION_DAYS);
@@ -55,9 +55,9 @@ function formatUserPayload(client: {
   isBanned: boolean;
   expiresAt: Date;
   loginCount: number;
-  key: { expiresAt: Date | null; product: { name: string } };
+  key: { expiresAt: Date | null; isPermanent: boolean; product: { name: string } };
 }) {
-  const lifetime = isLifetimeKey(client.key.expiresAt) || isLifetimeExpiry(client.expiresAt);
+  const lifetime = isLifetimeKey(client.key) || isLifetimeExpiry(client.expiresAt);
 
   return {
     username: client.username,
@@ -131,7 +131,7 @@ export async function registerClientService(input: ClientRegisterInput) {
   }
 
   const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
-  const expiresAt = computeClientExpiry(key.expiresAt);
+  const expiresAt = computeClientExpiry(key);
 
   const client = await prisma.$transaction(async (tx) => {
     const created = await tx.client.create({
@@ -152,7 +152,8 @@ export async function registerClientService(input: ClientRegisterInput) {
       data: {
         status: KeyStatus.USED,
         activatedAt: new Date(),
-        expiresAt: expiresAt,
+        expiresAt,
+        isPermanent: key.isPermanent,
       },
     });
 
@@ -197,8 +198,7 @@ export async function loginClientService(input: ClientAuthInput) {
     throw new AppError("Credenciais invalidas", 401, "INVALID_CREDENTIALS");
   }
 
-  const lifetime =
-    isLifetimeKey(client.key.expiresAt) || isLifetimeExpiry(client.expiresAt);
+  const lifetime = isLifetimeKey(client.key) || isLifetimeExpiry(client.expiresAt);
 
   if (!lifetime && client.expiresAt < new Date()) {
     throw new AppError("Assinatura expirada", 403, "SUBSCRIPTION_EXPIRED");
@@ -213,13 +213,19 @@ export async function loginClientService(input: ClientAuthInput) {
     throw new AppError("HWID nao autorizado", 403, "HWID_MISMATCH");
   }
 
+  const clientUpdate: { hwid: string; lastLoginAt: Date; loginCount: { increment: number }; expiresAt?: Date } = {
+    hwid: client.hwid ?? hwid,
+    lastLoginAt: new Date(),
+    loginCount: { increment: 1 },
+  };
+
+  if (lifetime && !isLifetimeExpiry(client.expiresAt)) {
+    clientUpdate.expiresAt = LIFETIME_EXPIRY;
+  }
+
   const updated = await prisma.client.update({
     where: { id: client.id },
-    data: {
-      hwid: client.hwid ?? hwid,
-      lastLoginAt: new Date(),
-      loginCount: { increment: 1 },
-    },
+    data: clientUpdate,
     include: { key: { include: { product: true } } },
   });
 

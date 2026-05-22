@@ -4,6 +4,8 @@ import { generateUniqueKeys } from "../../utils/keyGenerator";
 import { AppError } from "../../utils/AppError";
 import { KeyStatus } from "@prisma/client";
 
+const LIFETIME_EXPIRY = new Date("2099-12-31T23:59:59.999Z");
+
 export async function generateKeys(data: {
   productId: string;
   quantity: number;
@@ -11,12 +13,15 @@ export async function generateKeys(data: {
   customerEmail?: string;
   customerName?: string;
   expiresAt?: Date;
+  isPermanent?: boolean;
 }) {
   const product = await productRepository.findById(data.productId);
   if (!product) throw new AppError("Produto não encontrado", 404, "PRODUCT_NOT_FOUND");
   if (!product.isActive) throw new AppError("Produto inativo", 400, "PRODUCT_INACTIVE");
 
   const values = await generateUniqueKeys(data.quantity, keyRepository.valueExists);
+  const isPermanent = data.isPermanent === true;
+  const expiresAt = isPermanent ? LIFETIME_EXPIRY : data.expiresAt;
 
   await keyRepository.createMany(
     values.map((value) => ({
@@ -25,7 +30,8 @@ export async function generateKeys(data: {
       createdById: data.createdById,
       customerEmail: data.customerEmail,
       customerName: data.customerName,
-      expiresAt: data.expiresAt,
+      isPermanent,
+      expiresAt,
     }))
   );
 
@@ -56,10 +62,26 @@ export async function revokeKey(id: string) {
   return keyRepository.revoke(id);
 }
 
-export async function updateKey(id: string, data: { customerEmail?: string; customerName?: string; expiresAt?: Date }) {
+export async function updateKey(
+  id: string,
+  data: { customerEmail?: string; customerName?: string; expiresAt?: Date; isPermanent?: boolean }
+) {
   const key = await keyRepository.findById(id);
   if (!key) throw new AppError("Key não encontrada", 404, "KEY_NOT_FOUND");
-  return keyRepository.update(id, data);
+
+  const patch: {
+    customerEmail?: string;
+    customerName?: string;
+    expiresAt?: Date | null;
+    isPermanent?: boolean;
+  } = { ...data };
+
+  if (data.isPermanent === true) {
+    patch.isPermanent = true;
+    patch.expiresAt = LIFETIME_EXPIRY;
+  }
+
+  return keyRepository.update(id, patch);
 }
 
 export async function deleteKey(id: string) {

@@ -10,6 +10,7 @@ const key_repository_1 = require("./key.repository");
 const product_repository_1 = require("../products/product.repository");
 const keyGenerator_1 = require("../../utils/keyGenerator");
 const AppError_1 = require("../../utils/AppError");
+const LIFETIME_EXPIRY = new Date("2099-12-31T23:59:59.999Z");
 async function generateKeys(data) {
     const product = await product_repository_1.productRepository.findById(data.productId);
     if (!product)
@@ -17,13 +18,16 @@ async function generateKeys(data) {
     if (!product.isActive)
         throw new AppError_1.AppError("Produto inativo", 400, "PRODUCT_INACTIVE");
     const values = await (0, keyGenerator_1.generateUniqueKeys)(data.quantity, key_repository_1.keyRepository.valueExists);
+    const isPermanent = data.isPermanent === true;
+    const expiresAt = isPermanent ? LIFETIME_EXPIRY : data.expiresAt;
     await key_repository_1.keyRepository.createMany(values.map((value) => ({
         value,
         productId: data.productId,
         createdById: data.createdById,
         customerEmail: data.customerEmail,
         customerName: data.customerName,
-        expiresAt: data.expiresAt,
+        isPermanent,
+        expiresAt,
     })));
     return { generated: values.length, keys: values };
 }
@@ -48,7 +52,12 @@ async function updateKey(id, data) {
     const key = await key_repository_1.keyRepository.findById(id);
     if (!key)
         throw new AppError_1.AppError("Key não encontrada", 404, "KEY_NOT_FOUND");
-    return key_repository_1.keyRepository.update(id, data);
+    const patch = { ...data };
+    if (data.isPermanent === true) {
+        patch.isPermanent = true;
+        patch.expiresAt = LIFETIME_EXPIRY;
+    }
+    return key_repository_1.keyRepository.update(id, patch);
 }
 async function deleteKey(id) {
     const key = await key_repository_1.keyRepository.findById(id);

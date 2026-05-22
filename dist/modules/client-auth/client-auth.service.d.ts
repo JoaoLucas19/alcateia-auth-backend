@@ -14,6 +14,7 @@ export declare function registerClientService(input: ClientRegisterInput): Promi
         productName: string;
         daysRemaining: number;
         expirationDate: string;
+        isLifetime: boolean;
         timesUsed: number;
         maxUsers: number;
         isBanned: boolean;
@@ -26,6 +27,7 @@ export declare function loginClientService(input: ClientAuthInput): Promise<{
         productName: string;
         daysRemaining: number;
         expirationDate: string;
+        isLifetime: boolean;
         timesUsed: number;
         maxUsers: number;
         isBanned: boolean;

@@ -59,6 +59,8 @@ model Key {
 
   status KeyStatus @default(ACTIVE)
 
+  isPermanent Boolean @default(false)
+
   activatedAt DateTime?
   expiresAt   DateTime?
   createdAt   DateTime  @default(now())

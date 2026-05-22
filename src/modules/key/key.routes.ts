@@ -13,12 +13,14 @@ const generateSchema = z.object({
     (v) => !v || new Date(v) > new Date(),
     { message: "expiresAt deve ser uma data futura" }
   ),
+  isPermanent: z.boolean().optional(),
 });
 
 const updateSchema = z.object({
   customerEmail: z.string().email().optional(),
   customerName: z.string().optional(),
   expiresAt: z.string().datetime().optional(),
+  isPermanent: z.boolean().optional(),
 });
 
 const router = Router();

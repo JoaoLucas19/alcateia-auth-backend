@@ -12,24 +12,42 @@ const logger_1 = require("../../utils/logger");
 const client_2 = require("@prisma/client");
 const DEFAULT_SUBSCRIPTION_DAYS = 30;
 const BCRYPT_ROUNDS = 12;
-function computeClientExpiry(keyExpiresAt) {
-    if (keyExpiresAt && keyExpiresAt > new Date()) {
-        return keyExpiresAt;
+/** Data sentinela para keys permanentes (expiresAt null no painel). */
+const LIFETIME_EXPIRY = new Date("2099-12-31T23:59:59.999Z");
+const LIFETIME_DAYS_REMAINING = 99999;
+function isLifetimeExpiry(expiresAt) {
+    return expiresAt.getTime() >= LIFETIME_EXPIRY.getTime();
+}
+/** Key permanente = flag isPermanent ou expiresAt null / sentinela 2099. */
+function isLifetimeKey(key) {
+    return key.isPermanent || key.expiresAt === null || isLifetimeExpiry(key.expiresAt);
+}
+function computeClientExpiry(key) {
+    if (isLifetimeKey(key)) {
+        return LIFETIME_EXPIRY;
+    }
+    if (key.expiresAt && key.expiresAt > new Date()) {
+        return key.expiresAt;
     }
     const expiry = new Date();
     expiry.setDate(expiry.getDate() + DEFAULT_SUBSCRIPTION_DAYS);
     return expiry;
 }
 function daysRemaining(expiresAt) {
+    if (isLifetimeExpiry(expiresAt)) {
+        return LIFETIME_DAYS_REMAINING;
+    }
     const diff = expiresAt.getTime() - Date.now();
     return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 }
 function formatUserPayload(client) {
+    const lifetime = isLifetimeKey(client.key) || isLifetimeExpiry(client.expiresAt);
     return {
         username: client.username,
         productName: client.key.product.name,
-        daysRemaining: daysRemaining(client.expiresAt),
-        expirationDate: client.expiresAt.toISOString().split("T")[0],
+        daysRemaining: lifetime ? LIFETIME_DAYS_REMAINING : daysRemaining(client.expiresAt),
+        expirationDate: lifetime ? "Lifetime" : client.expiresAt.toISOString().split("T")[0],
+        isLifetime: lifetime,
         timesUsed: client.loginCount,
         maxUsers: 1,
         isBanned: client.isBanned,
@@ -81,7 +99,7 @@ async function registerClientService(input) {
         throw new AppError_1.AppError("Usuario ja cadastrado", 409, "USERNAME_TAKEN");
     }
     const passwordHash = await bcrypt_1.default.hash(password, BCRYPT_ROUNDS);
-    const expiresAt = computeClientExpiry(key.expiresAt);
+    const expiresAt = computeClientExpiry(key);
     const client = await client_1.default.$transaction(async (tx) => {
         const created = await tx.client.create({
             data: {
@@ -100,7 +118,8 @@ async function registerClientService(input) {
             data: {
                 status: client_2.KeyStatus.USED,
                 activatedAt: new Date(),
-                expiresAt: expiresAt,
+                expiresAt,
+                isPermanent: key.isPermanent,
             },
         });
         await tx.keyUsageLog.create({
@@ -135,7 +154,8 @@ async function loginClientService(input) {
     if (!passwordMatch) {
         throw new AppError_1.AppError("Credenciais invalidas", 401, "INVALID_CREDENTIALS");
     }
-    if (client.expiresAt < new Date()) {
+    const lifetime = isLifetimeKey(client.key) || isLifetimeExpiry(client.expiresAt);
+    if (!lifetime && client.expiresAt < new Date()) {
         throw new AppError_1.AppError("Assinatura expirada", 403, "SUBSCRIPTION_EXPIRED");
     }
     if (client.key.status === client_2.KeyStatus.REVOKED) {
@@ -145,13 +165,17 @@ async function loginClientService(input) {
         await logKeyAttempt(client.keyId, ipAddress, client_2.ValidationResult.INVALID_KEY);
         throw new AppError_1.AppError("HWID nao autorizado", 403, "HWID_MISMATCH");
     }
+    const clientUpdate = {
+        hwid: client.hwid ?? hwid,
+        lastLoginAt: new Date(),
+        loginCount: { increment: 1 },
+    };
+    if (lifetime && !isLifetimeExpiry(client.expiresAt)) {
+        clientUpdate.expiresAt = LIFETIME_EXPIRY;
+    }
     const updated = await client_1.default.client.update({
         where: { id: client.id },
-        data: {
-            hwid: client.hwid ?? hwid,
-            lastLoginAt: new Date(),
-            loginCount: { increment: 1 },
-        },
+        data: clientUpdate,
         include: { key: { include: { product: true } } },
     });
     logger_1.logger.info("Login cliente", { clientId: client.id, username, ipAddress });

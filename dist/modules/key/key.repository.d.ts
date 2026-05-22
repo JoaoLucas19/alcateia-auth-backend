@@ -14,6 +14,7 @@ export declare const keyRepository: {
         customerEmail?: string;
         customerName?: string;
         expiresAt?: Date;
+        isPermanent?: boolean;
     }) => import("@prisma/client").Prisma.Prisma__KeyClient<{
         id: string;
         createdAt: Date;
@@ -23,6 +24,7 @@ export declare const keyRepository: {
         customerEmail: string | null;
         customerName: string | null;
         status: import("@prisma/client").$Enums.KeyStatus;
+        isPermanent: boolean;
         activatedAt: Date | null;
         expiresAt: Date | null;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
@@ -33,6 +35,7 @@ export declare const keyRepository: {
         customerEmail?: string;
         customerName?: string;
         expiresAt?: Date;
+        isPermanent?: boolean;
     }[]) => import("@prisma/client").Prisma.PrismaPromise<import("@prisma/client").Prisma.BatchPayload>;
     findPaginated: ({ page, limit, status, productId, search }: KeyFilters) => Promise<{
         data: ({
@@ -51,6 +54,7 @@ export declare const keyRepository: {
             customerEmail: string | null;
             customerName: string | null;
             status: import("@prisma/client").$Enums.KeyStatus;
+            isPermanent: boolean;
             activatedAt: Date | null;
             expiresAt: Date | null;
         })[];
@@ -87,6 +91,7 @@ export declare const keyRepository: {
         customerEmail: string | null;
         customerName: string | null;
         status: import("@prisma/client").$Enums.KeyStatus;
+        isPermanent: boolean;
         activatedAt: Date | null;
         expiresAt: Date | null;
     }) | null, null, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
@@ -99,6 +104,7 @@ export declare const keyRepository: {
         customerEmail: string | null;
         customerName: string | null;
         status: import("@prisma/client").$Enums.KeyStatus;
+        isPermanent: boolean;
         activatedAt: Date | null;
         expiresAt: Date | null;
     } | null, null, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
@@ -107,6 +113,7 @@ export declare const keyRepository: {
         customerEmail?: string;
         customerName?: string;
         expiresAt?: Date | null;
+        isPermanent?: boolean;
     }) => import("@prisma/client").Prisma.Prisma__KeyClient<{
         id: string;
         createdAt: Date;
@@ -116,6 +123,7 @@ export declare const keyRepository: {
         customerEmail: string | null;
         customerName: string | null;
         status: import("@prisma/client").$Enums.KeyStatus;
+        isPermanent: boolean;
         activatedAt: Date | null;
         expiresAt: Date | null;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
@@ -128,6 +136,7 @@ export declare const keyRepository: {
         customerEmail: string | null;
         customerName: string | null;
         status: import("@prisma/client").$Enums.KeyStatus;
+        isPermanent: boolean;
         activatedAt: Date | null;
         expiresAt: Date | null;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
@@ -140,6 +149,7 @@ export declare const keyRepository: {
         customerEmail: string | null;
         customerName: string | null;
         status: import("@prisma/client").$Enums.KeyStatus;
+        isPermanent: boolean;
         activatedAt: Date | null;
         expiresAt: Date | null;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
@@ -152,6 +162,7 @@ export declare const keyRepository: {
         customerEmail: string | null;
         customerName: string | null;
         status: import("@prisma/client").$Enums.KeyStatus;
+        isPermanent: boolean;
         activatedAt: Date | null;
         expiresAt: Date | null;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;

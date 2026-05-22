@@ -11,11 +11,13 @@ const generateSchema = zod_1.z.object({
     customerEmail: zod_1.z.string().email().optional(),
     customerName: zod_1.z.string().optional(),
     expiresAt: zod_1.z.string().datetime().optional().refine((v) => !v || new Date(v) > new Date(), { message: "expiresAt deve ser uma data futura" }),
+    isPermanent: zod_1.z.boolean().optional(),
 });
 const updateSchema = zod_1.z.object({
     customerEmail: zod_1.z.string().email().optional(),
     customerName: zod_1.z.string().optional(),
     expiresAt: zod_1.z.string().datetime().optional(),
+    isPermanent: zod_1.z.boolean().optional(),
 });
 const router = (0, express_1.Router)();
 router.use(auth_middleware_1.authMiddleware);

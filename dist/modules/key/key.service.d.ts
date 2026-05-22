@@ -6,6 +6,7 @@ export declare function generateKeys(data: {
     customerEmail?: string;
     customerName?: string;
     expiresAt?: Date;
+    isPermanent?: boolean;
 }): Promise<{
     generated: number;
     keys: string[];
@@ -33,6 +34,7 @@ export declare function listKeys(filters: {
         customerEmail: string | null;
         customerName: string | null;
         status: import("@prisma/client").$Enums.KeyStatus;
+        isPermanent: boolean;
         activatedAt: Date | null;
         expiresAt: Date | null;
     })[];
@@ -69,6 +71,7 @@ export declare function getKey(id: string): Promise<{
     customerEmail: string | null;
     customerName: string | null;
     status: import("@prisma/client").$Enums.KeyStatus;
+    isPermanent: boolean;
     activatedAt: Date | null;
     expiresAt: Date | null;
 }>;
@@ -81,6 +84,7 @@ export declare function revokeKey(id: string): Promise<{
     customerEmail: string | null;
     customerName: string | null;
     status: import("@prisma/client").$Enums.KeyStatus;
+    isPermanent: boolean;
     activatedAt: Date | null;
     expiresAt: Date | null;
 }>;
@@ -88,6 +92,7 @@ export declare function updateKey(id: string, data: {
     customerEmail?: string;
     customerName?: string;
     expiresAt?: Date;
+    isPermanent?: boolean;
 }): Promise<{
     id: string;
     createdAt: Date;
@@ -97,6 +102,7 @@ export declare function updateKey(id: string, data: {
     customerEmail: string | null;
     customerName: string | null;
     status: import("@prisma/client").$Enums.KeyStatus;
+    isPermanent: boolean;
     activatedAt: Date | null;
     expiresAt: Date | null;
 }>;
@@ -109,6 +115,7 @@ export declare function deleteKey(id: string): Promise<{
     customerEmail: string | null;
     customerName: string | null;
     status: import("@prisma/client").$Enums.KeyStatus;
+    isPermanent: boolean;
     activatedAt: Date | null;
     expiresAt: Date | null;
 }>;
