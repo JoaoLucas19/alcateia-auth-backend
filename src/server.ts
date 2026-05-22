@@ -4,6 +4,7 @@ import cors, { CorsOptions } from "cors";
 import rateLimit from "express-rate-limit";
 
 import { env } from "./config/env";
+import { isOriginAllowed } from "./config/cors";
 
 import { errorHandler } from "./middlewares/error.middleware";
 
@@ -21,18 +22,6 @@ const app = express();
  * Sem isso o rate limiter quebra em toda requisição
  */
 app.set("trust proxy", 1);
-
-/**
- * Origins permitidos
- */
-const allowedOrigins = [
-  "https://whitexcorporation.com.br",
-  "https://www.whitexcorporation.com.br",
-
-  // DEV
-  "http://localhost:5173",
-  "http://localhost:4173",
-];
 
 /**
  * Configuração segura do Helmet
@@ -59,18 +48,12 @@ const corsOptions: CorsOptions = {
       return callback(null, true);
     }
 
-    /**
-     * Verifica se origin está liberado
-     */
-    if (allowedOrigins.includes(origin)) {
+    if (isOriginAllowed(origin)) {
       return callback(null, true);
     }
 
     console.warn(`[CORS] Origin bloqueado: ${origin}`);
-
-    return callback(
-      new Error(`CORS: Origin não permitido -> ${origin}`)
-    );
+    return callback(null, false);
   },
 
   credentials: true,
