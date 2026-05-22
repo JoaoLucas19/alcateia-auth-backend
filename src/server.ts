@@ -15,6 +15,12 @@ import logRoutes from "./modules/logs/log.routes";
 const app = express();
 
 /**
+ * Obrigatório para Railway (proxy reverso)
+ * Sem isso o rate limiter quebra em toda requisição
+ */
+app.set("trust proxy", 1);
+
+/**
  * Origins permitidos
  */
 const allowedOrigins = [
