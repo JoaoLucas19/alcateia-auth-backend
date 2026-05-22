@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 const prisma = new PrismaClient();
 
 async function main() {
+  // ── Admins ──────────────────────────────────────────────
   const admins = [
     { username: "whitex",  password: process.env.ADMIN_PASSWORD_1 },
     { username: "juninho", password: process.env.ADMIN_PASSWORD_2 },
@@ -29,6 +30,30 @@ async function main() {
     });
 
     console.log(`✓ Admin "${admin.username}" criado com sucesso.`);
+  }
+
+  // ── Produtos ─────────────────────────────────────────────
+  const products = [
+    { name: "Free Fire", description: "Keys de acesso para Free Fire" },
+  ];
+
+  for (const product of products) {
+    const existing = await prisma.product.findFirst({ where: { name: product.name } });
+
+    if (existing) {
+      console.log(`Produto "${product.name}" já existe — pulando.`);
+      continue;
+    }
+
+    await prisma.product.create({
+      data: {
+        name: product.name,
+        description: product.description,
+        isActive: true,
+      },
+    });
+
+    console.log(`✓ Produto "${product.name}" criado com sucesso.`);
   }
 }
 
