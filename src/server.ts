@@ -8,6 +8,7 @@ import { env } from "./config/env";
 import { errorHandler } from "./middlewares/error.middleware";
 
 import authRoutes from "./modules/auth/auth.routes";
+import clientAuthRoutes from "./modules/client-auth/client-auth.routes";
 import productRoutes from "./modules/products/product.routes";
 import keyRoutes from "./modules/key/key.routes";
 import logRoutes from "./modules/logs/log.routes";
@@ -134,6 +135,9 @@ app.get("/", (_req, res) => {
  * Rotas da API
  */
 app.use("/api/auth", authRoutes);
+
+/** Login/cadastro do cliente no cheat (NeverApi C++) */
+app.use("/auth", clientAuthRoutes);
 
 app.use("/api/products", productRoutes);
 

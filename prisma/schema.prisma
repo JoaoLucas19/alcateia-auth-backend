@@ -64,6 +64,25 @@ model Key {
   createdAt   DateTime  @default(now())
 
   usageLogs KeyUsageLog[]
+  client    Client?
+}
+
+/// Usuário final do cheat (cadastro com key no menu interno)
+model Client {
+  id           String    @id @default(uuid())
+  username     String    @unique
+  passwordHash String
+  hwid         String?
+  isBanned     Boolean   @default(false)
+  expiresAt    DateTime
+  loginCount   Int       @default(0)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+
+  keyId String @unique
+  key   Key    @relation(fields: [keyId], references: [id])
+
+  @@index([hwid])
 }
 
 model KeyUsageLog {

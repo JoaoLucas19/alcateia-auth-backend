@@ -30,9 +30,9 @@ export declare const logRepository: {
             id: string;
             result: import("@prisma/client").$Enums.ValidationResult;
             ipAddress: string;
+            userAgent: string | null;
             attemptedAt: Date;
             keyId: string;
-            userAgent: string | null;
         })[];
         total: number;
         page: number;

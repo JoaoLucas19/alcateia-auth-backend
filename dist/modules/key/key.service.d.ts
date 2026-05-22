@@ -56,9 +56,9 @@ export declare function getKey(id: string): Promise<{
         id: string;
         result: import("@prisma/client").$Enums.ValidationResult;
         ipAddress: string;
+        userAgent: string | null;
         attemptedAt: Date;
         keyId: string;
-        userAgent: string | null;
     }[];
 } & {
     id: string;
