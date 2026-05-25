@@ -47,13 +47,22 @@ export const keyRepository = {
         where,
         skip: (page - 1) * limit,
         take: limit,
-        include: { product: { select: { name: true } }, createdBy: { select: { username: true } } },
+        include: {
+          product: { select: { name: true } },
+          createdBy: { select: { username: true } },
+        },
         orderBy: { createdAt: "desc" },
       }),
+
       prisma.key.count({ where }),
     ]);
 
-    return { data, total, page, totalPages: Math.ceil(total / limit) };
+    return {
+      data,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    };
   },
 
   findById: (id: string) =>
@@ -61,28 +70,100 @@ export const keyRepository = {
       where: { id },
       include: {
         product: true,
-        createdBy: { select: { id: true, username: true } },
-        usageLogs: { orderBy: { attemptedAt: "desc" } },
+        createdBy: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+        usageLogs: {
+          orderBy: {
+            attemptedAt: "desc",
+          },
+        },
       },
     }),
 
   findByValue: (value: string) =>
-    prisma.key.findUnique({ where: { value } }),
+    prisma.key.findUnique({
+      where: { value },
+    }),
 
   valueExists: async (value: string) =>
-    !!(await prisma.key.findUnique({ where: { value }, select: { id: true } })),
+    !!(
+      await prisma.key.findUnique({
+        where: { value },
+        select: { id: true },
+      })
+    ),
 
   update: (
     id: string,
-    data: { customerEmail?: string; customerName?: string; expiresAt?: Date | null; isPermanent?: boolean }
-  ) => prisma.key.update({ where: { id }, data }),
+    data: {
+      customerEmail?: string;
+      customerName?: string;
+      expiresAt?: Date | null;
+      isPermanent?: boolean;
+    }
+  ) =>
+    prisma.key.update({
+      where: { id },
+      data,
+    }),
 
   revoke: (id: string) =>
-    prisma.key.update({ where: { id }, data: { status: "REVOKED" } }),
+    prisma.key.update({
+      where: { id },
+      data: { status: "REVOKED" },
+    }),
 
   activate: (id: string) =>
-    prisma.key.update({ where: { id }, data: { status: "USED", activatedAt: new Date() } }),
+    prisma.key.update({
+      where: { id },
+      data: {
+        status: "USED",
+        activatedAt: new Date(),
+      },
+    }),
+
+  // Marca keys expiradas
+  markExpiredKeys: () =>
+    prisma.key.updateMany({
+      where: {
+        isPermanent: false,
+
+        expiresAt: {
+          lt: new Date(),
+        },
+
+        status: {
+          not: "EXPIRED",
+        },
+      },
+
+      data: {
+        status: "EXPIRED",
+      },
+    }),
+
+  // 🔥 Remove keys expiradas automaticamente
+  deleteExpiredKeys: () =>
+    prisma.key.deleteMany({
+      where: {
+        isPermanent: false,
+
+        status: {
+          in: ["USED", "EXPIRED"],
+        },
+
+        expiresAt: {
+          lt: new Date(),
+        },
+      },
+    }),
 
   delete: (id: string) =>
-    prisma.key.delete({ where: { id } }),
+    prisma.key.delete({
+      where: { id },
+    }),
 };

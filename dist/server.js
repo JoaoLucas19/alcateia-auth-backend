@@ -8,28 +8,20 @@ const helmet_1 = __importDefault(require("helmet"));
 const cors_1 = __importDefault(require("cors"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const env_1 = require("./config/env");
+const cors_2 = require("./config/cors");
 const error_middleware_1 = require("./middlewares/error.middleware");
 const auth_routes_1 = __importDefault(require("./modules/auth/auth.routes"));
 const client_auth_routes_1 = __importDefault(require("./modules/client-auth/client-auth.routes"));
 const product_routes_1 = __importDefault(require("./modules/products/product.routes"));
 const key_routes_1 = __importDefault(require("./modules/key/key.routes"));
 const log_routes_1 = __importDefault(require("./modules/logs/log.routes"));
+const client_routes_1 = __importDefault(require("./modules/clients/client.routes")); // Nova rota adicionada para clientes
 const app = (0, express_1.default)();
 /**
  * Obrigatório para Railway (proxy reverso)
  * Sem isso o rate limiter quebra em toda requisição
  */
 app.set("trust proxy", 1);
-/**
- * Origins permitidos
- */
-const allowedOrigins = [
-    "https://whitexcorporation.com.br",
-    "https://www.whitexcorporation.com.br",
-    // DEV
-    "http://localhost:5173",
-    "http://localhost:4173",
-];
 /**
  * Configuração segura do Helmet
  */
@@ -51,14 +43,11 @@ const corsOptions = {
         if (!origin) {
             return callback(null, true);
         }
-        /**
-         * Verifica se origin está liberado
-         */
-        if (allowedOrigins.includes(origin)) {
+        if ((0, cors_2.isOriginAllowed)(origin)) {
             return callback(null, true);
         }
         console.warn(`[CORS] Origin bloqueado: ${origin}`);
-        return callback(new Error(`CORS: Origin não permitido -> ${origin}`));
+        return callback(null, false);
     },
     credentials: true,
     methods: [
@@ -113,6 +102,8 @@ app.use("/auth", client_auth_routes_1.default);
 app.use("/api/products", product_routes_1.default);
 app.use("/api/keys", key_routes_1.default);
 app.use("/api/logs", log_routes_1.default);
+// Rota para clientes
+app.use("/api/admin/clients", client_routes_1.default);
 /**
  * Middleware global de erros
  * SEMPRE o último middleware
