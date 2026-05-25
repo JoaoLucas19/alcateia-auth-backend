@@ -183,8 +183,11 @@ export const keyRepository = {
     });
   },
 
-  delete: (id: string) =>
-    prisma.key.delete({
-      where: { id },
+  /** Remove key e dependências (cliente do cheat + logs de uso). */
+  deleteWithDependencies: (id: string) =>
+    prisma.$transaction(async (tx) => {
+      await tx.keyUsageLog.deleteMany({ where: { keyId: id } });
+      await tx.client.deleteMany({ where: { keyId: id } });
+      return tx.key.delete({ where: { id } });
     }),
 };

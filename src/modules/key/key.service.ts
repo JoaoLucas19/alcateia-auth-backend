@@ -11,6 +11,26 @@ function parseExpiresAt(value?: Date | string): Date | undefined {
   return value instanceof Date ? value : new Date(value);
 }
 
+function isPermanentKey(key: {
+  isPermanent: boolean;
+  expiresAt: Date | null;
+}): boolean {
+  if (key.isPermanent) return true;
+  if (!key.expiresAt) return false;
+  return key.expiresAt.getTime() >= LIFETIME_EXPIRY.getTime();
+}
+
+function canDeleteKey(key: {
+  status: KeyStatus;
+  activatedAt: Date | null;
+  isPermanent: boolean;
+  expiresAt: Date | null;
+}): boolean {
+  if (isPermanentKey(key)) return false;
+  if (key.status === "USED") return true;
+  return key.status === "ACTIVE" && !key.activatedAt;
+}
+
 // Limpeza automática de keys expiradas
 async function cleanupExpiredKeys() {
 
@@ -79,7 +99,15 @@ export async function listKeys(filters: {
   // Remove automaticamente keys expiradas
   await cleanupExpiredKeys();
 
-  return keyRepository.findPaginated(filters);
+  const result = await keyRepository.findPaginated(filters);
+
+  return {
+    ...result,
+    data: result.data.map((key) => ({
+      ...key,
+      canDelete: canDeleteKey(key),
+    })),
+  };
 }
 
 export async function getKey(id: string) {
@@ -89,7 +117,7 @@ export async function getKey(id: string) {
   if (!key)
     throw new AppError("Key não encontrada", 404, "KEY_NOT_FOUND");
 
-  return key;
+  return { ...key, canDelete: canDeleteKey(key) };
 }
 
 export async function revokeKey(id: string) {
@@ -154,16 +182,21 @@ export async function deleteKey(id: string) {
   if (!key)
     throw new AppError("Key não encontrada", 404, "KEY_NOT_FOUND");
 
-  if (
-    key.status !== "ACTIVE" ||
-    key.activatedAt
-  ) {
+  if (isPermanentKey(key)) {
     throw new AppError(
-      "Apenas keys ativas e não utilizadas podem ser deletadas",
+      "Keys permanentes não podem ser deletadas",
+      409,
+      "KEY_PERMANENT_CANNOT_DELETE"
+    );
+  }
+
+  if (!canDeleteKey(key)) {
+    throw new AppError(
+      "Esta key não pode ser deletada",
       409,
       "KEY_CANNOT_BE_DELETED"
     );
   }
 
-  return keyRepository.delete(id);
+  return keyRepository.deleteWithDependencies(id);
 }
