@@ -27,7 +27,7 @@ function canDeleteKey(key: {
   expiresAt: Date | null;
 }): boolean {
   if (isPermanentKey(key)) return false;
-  if (key.status === "USED") return true;
+  if (key.status === "USED" || key.status === "REVOKED") return true;
   return key.status === "ACTIVE" && !key.activatedAt;
 }
 
