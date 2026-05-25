@@ -37,7 +37,7 @@ export declare const keyRepository: {
         expiresAt?: Date;
         isPermanent?: boolean;
     }[]) => import("@prisma/client").Prisma.PrismaPromise<import("@prisma/client").Prisma.BatchPayload>;
-    findPaginated: ({ page, limit, status, productId, search }: KeyFilters) => Promise<{
+    findPaginated: ({ page, limit, status, productId, search, }: KeyFilters) => Promise<{
         data: ({
             product: {
                 name: string;
@@ -153,6 +153,8 @@ export declare const keyRepository: {
         activatedAt: Date | null;
         expiresAt: Date | null;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    markExpiredKeys: () => import("@prisma/client").Prisma.PrismaPromise<import("@prisma/client").Prisma.BatchPayload>;
+    deleteExpiredKeys: () => Promise<import("@prisma/client").Prisma.BatchPayload>;
     delete: (id: string) => import("@prisma/client").Prisma.Prisma__KeyClient<{
         id: string;
         createdAt: Date;

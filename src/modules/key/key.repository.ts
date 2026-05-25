@@ -40,7 +40,8 @@ export const keyRepository = {
     search,
   }: KeyFilters) => {
     const where = {
-      ...(status && { status }),
+      // Painel: por padrão oculta keys já expiradas (período encerrado)
+      ...(status ? { status } : { status: { not: KeyStatus.EXPIRED } }),
       ...(productId && { productId }),
       ...(search && {
         OR: [
@@ -132,43 +133,55 @@ export const keyRepository = {
       },
     }),
 
-  // Marca keys expiradas
+  // Marca keys expiradas (permanentes e lifetime nunca entram)
   markExpiredKeys: () =>
     prisma.key.updateMany({
       where: {
-        // Nunca toca permanentes
         isPermanent: false,
-
-        // Só keys com data válida
         expiresAt: {
           not: null,
           lt: new Date(),
         },
-
-        // Não remarka expiradas
         status: {
           not: "EXPIRED",
         },
       },
-
       data: {
         status: "EXPIRED",
       },
     }),
 
-  deleteExpiredKeys: () =>
-    prisma.key.deleteMany({
-      where: {
-        isPermanent: false,
-
-        status: "EXPIRED",
-
-        expiresAt: {
-          not: null,
-          lt: new Date(),
-        },
+  // Remove keys expiradas sem cliente; apaga logs antes (FK em KeyUsageLog)
+  deleteExpiredKeys: async () => {
+    const expiredFilter = {
+      isPermanent: false,
+      status: KeyStatus.EXPIRED,
+      expiresAt: {
+        not: null,
+        lt: new Date(),
       },
-    }),
+      client: { is: null },
+    } as const;
+
+    const keysToDelete = await prisma.key.findMany({
+      where: expiredFilter,
+      select: { id: true },
+    });
+
+    if (keysToDelete.length === 0) {
+      return { count: 0 };
+    }
+
+    const ids = keysToDelete.map((k) => k.id);
+
+    await prisma.keyUsageLog.deleteMany({
+      where: { keyId: { in: ids } },
+    });
+
+    return prisma.key.deleteMany({
+      where: { id: { in: ids } },
+    });
+  },
 
   delete: (id: string) =>
     prisma.key.delete({

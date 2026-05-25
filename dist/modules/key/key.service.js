@@ -11,6 +11,18 @@ const product_repository_1 = require("../products/product.repository");
 const keyGenerator_1 = require("../../utils/keyGenerator");
 const AppError_1 = require("../../utils/AppError");
 const LIFETIME_EXPIRY = new Date("2099-12-31T23:59:59.999Z");
+function parseExpiresAt(value) {
+    if (value == null)
+        return undefined;
+    return value instanceof Date ? value : new Date(value);
+}
+// Limpeza automática de keys expiradas
+async function cleanupExpiredKeys() {
+    // Marca keys expiradas
+    await key_repository_1.keyRepository.markExpiredKeys();
+    // Remove keys expiradas
+    await key_repository_1.keyRepository.deleteExpiredKeys();
+}
 async function generateKeys(data) {
     const product = await product_repository_1.productRepository.findById(data.productId);
     if (!product)
@@ -19,7 +31,9 @@ async function generateKeys(data) {
         throw new AppError_1.AppError("Produto inativo", 400, "PRODUCT_INACTIVE");
     const values = await (0, keyGenerator_1.generateUniqueKeys)(data.quantity, key_repository_1.keyRepository.valueExists);
     const isPermanent = data.isPermanent === true;
-    const expiresAt = isPermanent ? LIFETIME_EXPIRY : data.expiresAt;
+    const expiresAt = isPermanent
+        ? LIFETIME_EXPIRY
+        : parseExpiresAt(data.expiresAt);
     await key_repository_1.keyRepository.createMany(values.map((value) => ({
         value,
         productId: data.productId,
@@ -29,9 +43,14 @@ async function generateKeys(data) {
         isPermanent,
         expiresAt,
     })));
-    return { generated: values.length, keys: values };
+    return {
+        generated: values.length,
+        keys: values,
+    };
 }
 async function listKeys(filters) {
+    // Remove automaticamente keys expiradas
+    await cleanupExpiredKeys();
     return key_repository_1.keyRepository.findPaginated(filters);
 }
 async function getKey(id) {
@@ -44,8 +63,10 @@ async function revokeKey(id) {
     const key = await key_repository_1.keyRepository.findById(id);
     if (!key)
         throw new AppError_1.AppError("Key não encontrada", 404, "KEY_NOT_FOUND");
-    if (key.status === "REVOKED" || key.status === "USED")
+    if (key.status === "REVOKED" ||
+        key.status === "USED") {
         throw new AppError_1.AppError("Key já inativa", 400, "KEY_ALREADY_INACTIVE");
+    }
     return key_repository_1.keyRepository.revoke(id);
 }
 async function updateKey(id, data) {
@@ -53,6 +74,9 @@ async function updateKey(id, data) {
     if (!key)
         throw new AppError_1.AppError("Key não encontrada", 404, "KEY_NOT_FOUND");
     const patch = { ...data };
+    if (data.expiresAt !== undefined) {
+        patch.expiresAt = parseExpiresAt(data.expiresAt);
+    }
     if (data.isPermanent === true) {
         patch.isPermanent = true;
         patch.expiresAt = LIFETIME_EXPIRY;
@@ -63,8 +87,10 @@ async function deleteKey(id) {
     const key = await key_repository_1.keyRepository.findById(id);
     if (!key)
         throw new AppError_1.AppError("Key não encontrada", 404, "KEY_NOT_FOUND");
-    if (key.status !== "ACTIVE" || key.activatedAt)
+    if (key.status !== "ACTIVE" ||
+        key.activatedAt) {
         throw new AppError_1.AppError("Apenas keys ativas e não utilizadas podem ser deletadas", 409, "KEY_CANNOT_BE_DELETED");
+    }
     return key_repository_1.keyRepository.delete(id);
 }
 //# sourceMappingURL=key.service.js.map

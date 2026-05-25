@@ -6,6 +6,11 @@ import { KeyStatus } from "@prisma/client";
 
 const LIFETIME_EXPIRY = new Date("2099-12-31T23:59:59.999Z");
 
+function parseExpiresAt(value?: Date | string): Date | undefined {
+  if (value == null) return undefined;
+  return value instanceof Date ? value : new Date(value);
+}
+
 // Limpeza automática de keys expiradas
 async function cleanupExpiredKeys() {
 
@@ -43,7 +48,7 @@ export async function generateKeys(data: {
 
   const expiresAt = isPermanent
     ? LIFETIME_EXPIRY
-    : data.expiresAt;
+    : parseExpiresAt(data.expiresAt);
 
   await keyRepository.createMany(
     values.map((value) => ({
@@ -129,6 +134,10 @@ export async function updateKey(
     expiresAt?: Date | null;
     isPermanent?: boolean;
   } = { ...data };
+
+  if (data.expiresAt !== undefined) {
+    patch.expiresAt = parseExpiresAt(data.expiresAt);
+  }
 
   if (data.isPermanent === true) {
     patch.isPermanent = true;
