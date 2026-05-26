@@ -5,9 +5,8 @@ exports.sendDiscordMessage = sendDiscordMessage;
 exports.sendSecurityAlert = sendSecurityAlert;
 exports.sendSecuritySummary = sendSecuritySummary;
 exports.sendDiscordTest = sendDiscordTest;
-const env_1 = require("../../config/env");
 const logger_1 = require("../../utils/logger");
-const DISCORD_WEBHOOK_PREFIX = "https://discord.com/api/webhooks/";
+const notification_config_service_1 = require("./notification-config.service");
 function severityColor(severity) {
     switch (severity) {
         case "CRITICAL":
@@ -20,16 +19,15 @@ function severityColor(severity) {
             return 0x34c759;
     }
 }
-function isValidWebhookUrl(url) {
-    return url.startsWith(DISCORD_WEBHOOK_PREFIX) && url.length > DISCORD_WEBHOOK_PREFIX.length + 20;
-}
-function isDiscordConfigured() {
-    return env_1.env.DISCORD_ALERTS_ENABLED && Boolean(env_1.env.DISCORD_WEBHOOK_URL) && isValidWebhookUrl(env_1.env.DISCORD_WEBHOOK_URL);
+async function isDiscordConfigured() {
+    const cfg = await (0, notification_config_service_1.resolveNotificationDeliveryConfig)();
+    return cfg.configured;
 }
 async function sendDiscordMessage(payload) {
-    const webhookUrl = env_1.env.DISCORD_WEBHOOK_URL;
-    if (!isDiscordConfigured() || !webhookUrl)
+    const cfg = await (0, notification_config_service_1.resolveNotificationDeliveryConfig)();
+    if (!cfg.configured)
         return false;
+    const webhookUrl = cfg.webhookUrl;
     try {
         const res = await fetch(webhookUrl, {
             method: "POST",

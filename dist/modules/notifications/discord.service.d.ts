@@ -1,5 +1,5 @@
 import type { SecurityAlert, ThreatLevel } from "../logs/log.types";
-export declare function isDiscordConfigured(): boolean;
+export declare function isDiscordConfigured(): Promise<boolean>;
 export declare function sendDiscordMessage(payload: {
     content?: string;
     embeds?: Array<{

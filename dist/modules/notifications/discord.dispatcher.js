@@ -4,6 +4,7 @@ exports.dispatchSecurityAlerts = dispatchSecurityAlerts;
 exports.dispatchImmediateAlert = dispatchImmediateAlert;
 const env_1 = require("../../config/env");
 const logger_1 = require("../../utils/logger");
+const notification_config_service_1 = require("./notification-config.service");
 const discord_service_1 = require("./discord.service");
 const cooldownUntil = new Map();
 function alertFingerprint(alert) {
@@ -21,40 +22,46 @@ function isOnCooldown(key) {
 function markCooldown(key) {
     cooldownUntil.set(key, Date.now() + env_1.env.DISCORD_ALERT_COOLDOWN_MS);
 }
-function shouldNotifyType(type) {
+function shouldNotifyType(type, notify) {
     switch (type) {
         case "BRUTE_FORCE_IP":
-            return env_1.env.DISCORD_NOTIFY_BRUTE_FORCE;
+            return notify.notifyBruteForce;
         case "BRUTE_FORCE_USERNAME":
-            return env_1.env.DISCORD_NOTIFY_BRUTE_FORCE;
+            return notify.notifyBruteForce;
         case "KEY_SCANNING":
-            return env_1.env.DISCORD_NOTIFY_KEY_SCANNING;
+            return notify.notifyKeyScanning;
         case "HIGH_FAILURE_RATE":
         case "SPIKE_FAILURES":
-            return env_1.env.DISCORD_NOTIFY_HIGH_THREAT;
+            return notify.notifyHighThreat;
         case "HWID_MISMATCH":
-            return env_1.env.DISCORD_NOTIFY_HIGH_THREAT;
+            return notify.notifyHighThreat;
         default:
-            return env_1.env.DISCORD_NOTIFY_HIGH_THREAT;
+            return notify.notifyHighThreat;
     }
 }
-function shouldNotifySeverity(severity) {
+function shouldNotifySeverity(severity, notifyHighThreat) {
     if (severity === "CRITICAL" || severity === "HIGH")
         return true;
     if (severity === "MEDIUM")
-        return env_1.env.DISCORD_NOTIFY_HIGH_THREAT;
+        return notifyHighThreat;
     return false;
 }
 /**
  * Dispara alertas para o Discord com anti-spam (cooldown por fingerprint).
  */
 async function dispatchSecurityAlerts(alerts, context) {
-    if (!(0, discord_service_1.isDiscordConfigured)()) {
+    const cfg = await (0, notification_config_service_1.resolveNotificationDeliveryConfig)();
+    if (!cfg.configured) {
         return { sent: 0, skipped: alerts.length };
     }
+    const notifyPrefs = {
+        notifyBruteForce: cfg.notifyBruteForce,
+        notifyKeyScanning: cfg.notifyKeyScanning,
+        notifyHighThreat: cfg.notifyHighThreat,
+    };
     let sent = 0;
     let skipped = 0;
-    const eligible = alerts.filter((a) => shouldNotifyType(a.type) && shouldNotifySeverity(a.severity));
+    const eligible = alerts.filter((a) => shouldNotifyType(a.type, notifyPrefs) && shouldNotifySeverity(a.severity, cfg.notifyHighThreat));
     for (const alert of eligible) {
         const key = alertFingerprint(alert);
         if (isOnCooldown(key)) {
@@ -76,7 +83,7 @@ async function dispatchSecurityAlerts(alerts, context) {
     if (threatLevel &&
         (threatLevel === "HIGH" || threatLevel === "CRITICAL") &&
         eligible.length > 0 &&
-        env_1.env.DISCORD_NOTIFY_HIGH_THREAT) {
+        cfg.notifyHighThreat) {
         const summaryKey = `SUMMARY|${threatLevel}|${Math.floor(Date.now() / (env_1.env.DISCORD_ALERT_COOLDOWN_MS * 2))}`;
         if (!isOnCooldown(summaryKey)) {
             const ok = await (0, discord_service_1.sendSecuritySummary)({
@@ -98,8 +105,17 @@ async function dispatchSecurityAlerts(alerts, context) {
 }
 /** Evento imediato (ex.: HWID mismatch) — cooldown mais curto por tipo */
 async function dispatchImmediateAlert(alert, cooldownMs = 5 * 60 * 1000) {
-    if (!(0, discord_service_1.isDiscordConfigured)())
+    const cfg = await (0, notification_config_service_1.resolveNotificationDeliveryConfig)();
+    if (!cfg.configured)
         return false;
+    if (!shouldNotifyType(alert.type, {
+        notifyBruteForce: cfg.notifyBruteForce,
+        notifyKeyScanning: cfg.notifyKeyScanning,
+        notifyHighThreat: cfg.notifyHighThreat,
+    }) ||
+        !shouldNotifySeverity(alert.severity, cfg.notifyHighThreat)) {
+        return false;
+    }
     const key = `IMMEDIATE|${alertFingerprint(alert)}`;
     if (isOnCooldown(key))
         return false;

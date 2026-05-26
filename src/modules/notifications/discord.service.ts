@@ -1,8 +1,6 @@
-import { env } from "../../config/env";
 import { logger } from "../../utils/logger";
 import type { SecurityAlert, ThreatLevel } from "../logs/log.types";
-
-const DISCORD_WEBHOOK_PREFIX = "https://discord.com/api/webhooks/";
+import { resolveNotificationDeliveryConfig } from "./notification-config.service";
 
 function severityColor(severity: ThreatLevel): number {
   switch (severity) {
@@ -17,12 +15,9 @@ function severityColor(severity: ThreatLevel): number {
   }
 }
 
-function isValidWebhookUrl(url: string): boolean {
-  return url.startsWith(DISCORD_WEBHOOK_PREFIX) && url.length > DISCORD_WEBHOOK_PREFIX.length + 20;
-}
-
-export function isDiscordConfigured(): boolean {
-  return env.DISCORD_ALERTS_ENABLED && Boolean(env.DISCORD_WEBHOOK_URL) && isValidWebhookUrl(env.DISCORD_WEBHOOK_URL!);
+export async function isDiscordConfigured(): Promise<boolean> {
+  const cfg = await resolveNotificationDeliveryConfig();
+  return cfg.configured;
 }
 
 export async function sendDiscordMessage(payload: {
@@ -35,8 +30,9 @@ export async function sendDiscordMessage(payload: {
     timestamp?: string;
   }>;
 }): Promise<boolean> {
-  const webhookUrl = env.DISCORD_WEBHOOK_URL;
-  if (!isDiscordConfigured() || !webhookUrl) return false;
+  const cfg = await resolveNotificationDeliveryConfig();
+  if (!cfg.configured) return false;
+  const webhookUrl = cfg.webhookUrl;
 
   try {
     const res = await fetch(webhookUrl, {

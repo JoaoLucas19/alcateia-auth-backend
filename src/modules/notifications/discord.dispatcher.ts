@@ -1,7 +1,8 @@
 import { env } from "../../config/env";
 import { logger } from "../../utils/logger";
 import type { SecurityAlert, ThreatLevel } from "../logs/log.types";
-import { isDiscordConfigured, sendSecurityAlert, sendSecuritySummary } from "./discord.service";
+import { resolveNotificationDeliveryConfig } from "./notification-config.service";
+import { sendSecurityAlert, sendSecuritySummary } from "./discord.service";
 
 const cooldownUntil = new Map<string, number>();
 
@@ -21,27 +22,34 @@ function markCooldown(key: string): void {
   cooldownUntil.set(key, Date.now() + env.DISCORD_ALERT_COOLDOWN_MS);
 }
 
-function shouldNotifyType(type: SecurityAlert["type"]): boolean {
+function shouldNotifyType(
+  type: SecurityAlert["type"],
+  notify: {
+    notifyBruteForce: boolean;
+    notifyKeyScanning: boolean;
+    notifyHighThreat: boolean;
+  }
+): boolean {
   switch (type) {
     case "BRUTE_FORCE_IP":
-      return env.DISCORD_NOTIFY_BRUTE_FORCE;
+      return notify.notifyBruteForce;
     case "BRUTE_FORCE_USERNAME":
-      return env.DISCORD_NOTIFY_BRUTE_FORCE;
+      return notify.notifyBruteForce;
     case "KEY_SCANNING":
-      return env.DISCORD_NOTIFY_KEY_SCANNING;
+      return notify.notifyKeyScanning;
     case "HIGH_FAILURE_RATE":
     case "SPIKE_FAILURES":
-      return env.DISCORD_NOTIFY_HIGH_THREAT;
+      return notify.notifyHighThreat;
     case "HWID_MISMATCH":
-      return env.DISCORD_NOTIFY_HIGH_THREAT;
+      return notify.notifyHighThreat;
     default:
-      return env.DISCORD_NOTIFY_HIGH_THREAT;
+      return notify.notifyHighThreat;
   }
 }
 
-function shouldNotifySeverity(severity: ThreatLevel): boolean {
+function shouldNotifySeverity(severity: ThreatLevel, notifyHighThreat: boolean): boolean {
   if (severity === "CRITICAL" || severity === "HIGH") return true;
-  if (severity === "MEDIUM") return env.DISCORD_NOTIFY_HIGH_THREAT;
+  if (severity === "MEDIUM") return notifyHighThreat;
   return false;
 }
 
@@ -52,15 +60,22 @@ export async function dispatchSecurityAlerts(
   alerts: SecurityAlert[],
   context?: { threatLevel?: ThreatLevel; threatScore?: number }
 ): Promise<{ sent: number; skipped: number }> {
-  if (!isDiscordConfigured()) {
+  const cfg = await resolveNotificationDeliveryConfig();
+  if (!cfg.configured) {
     return { sent: 0, skipped: alerts.length };
   }
+
+  const notifyPrefs = {
+    notifyBruteForce: cfg.notifyBruteForce,
+    notifyKeyScanning: cfg.notifyKeyScanning,
+    notifyHighThreat: cfg.notifyHighThreat,
+  };
 
   let sent = 0;
   let skipped = 0;
 
   const eligible = alerts.filter(
-    (a) => shouldNotifyType(a.type) && shouldNotifySeverity(a.severity)
+    (a) => shouldNotifyType(a.type, notifyPrefs) && shouldNotifySeverity(a.severity, cfg.notifyHighThreat)
   );
 
   for (const alert of eligible) {
@@ -86,7 +101,7 @@ export async function dispatchSecurityAlerts(
     threatLevel &&
     (threatLevel === "HIGH" || threatLevel === "CRITICAL") &&
     eligible.length > 0 &&
-    env.DISCORD_NOTIFY_HIGH_THREAT
+    cfg.notifyHighThreat
   ) {
     const summaryKey = `SUMMARY|${threatLevel}|${Math.floor(Date.now() / (env.DISCORD_ALERT_COOLDOWN_MS * 2))}`;
     if (!isOnCooldown(summaryKey)) {
@@ -115,7 +130,19 @@ export async function dispatchImmediateAlert(
   alert: SecurityAlert,
   cooldownMs = 5 * 60 * 1000
 ): Promise<boolean> {
-  if (!isDiscordConfigured()) return false;
+  const cfg = await resolveNotificationDeliveryConfig();
+  if (!cfg.configured) return false;
+
+  if (
+    !shouldNotifyType(alert.type, {
+      notifyBruteForce: cfg.notifyBruteForce,
+      notifyKeyScanning: cfg.notifyKeyScanning,
+      notifyHighThreat: cfg.notifyHighThreat,
+    }) ||
+    !shouldNotifySeverity(alert.severity, cfg.notifyHighThreat)
+  ) {
+    return false;
+  }
 
   const key = `IMMEDIATE|${alertFingerprint(alert)}`;
   if (isOnCooldown(key)) return false;

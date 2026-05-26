@@ -9,7 +9,7 @@ let pollInFlight = false;
 
 async function runPoll(): Promise<void> {
   if (pollInFlight) return;
-  if (!isDiscordConfigured()) return;
+  if (!(await isDiscordConfigured())) return;
 
   pollInFlight = true;
   try {
@@ -27,21 +27,28 @@ async function runPoll(): Promise<void> {
   }
 }
 
+async function logPollerBootStatus(): Promise<void> {
+  if (await isDiscordConfigured()) {
+    logger.info("Discord alerts: poller ativo", {
+      intervalMs: env.DISCORD_ALERT_POLL_MS,
+    });
+  } else {
+    logger.info(
+      "Discord alerts: desativado (configure DISCORD_WEBHOOK_URL no servidor ou URL no painel + alertas ligados)"
+    );
+  }
+}
+
 export function startDiscordAlertPoller(): void {
   if (pollerStarted) return;
   pollerStarted = true;
 
-  if (!isDiscordConfigured()) {
-    logger.info("Discord alerts: desativado (defina DISCORD_WEBHOOK_URL no Railway)");
-    return;
-  }
-
-  logger.info("Discord alerts: poller ativo", {
+  logger.info("Discord alerts: poller agendado", {
     intervalMs: env.DISCORD_ALERT_POLL_MS,
   });
 
-  // Primeira verificação após 45s (servidor e DB estáveis)
   setTimeout(() => {
+    logPollerBootStatus().catch(() => undefined);
     runPoll().catch(() => undefined);
   }, 45_000);
 

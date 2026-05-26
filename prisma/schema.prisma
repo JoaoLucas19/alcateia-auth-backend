@@ -149,3 +149,24 @@ model AccessLog {
   @@index([success, createdAt])
   @@index([ipAddress, createdAt])
 }
+
+/// Config singleton (painel Alcateia) — sobrescreve variáveis de ambiente quando preenchido
+model NotificationSettings {
+  id String @id
+
+  discordWebhookUrl String? @db.Text
+
+  discordAlertsEnabled Boolean @default(true)
+
+  discordNotifyBruteForce Boolean @default(true)
+
+  discordNotifyKeyScanning Boolean @default(true)
+
+  discordNotifyHighThreat Boolean @default(true)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@map("notification_settings")
+}
