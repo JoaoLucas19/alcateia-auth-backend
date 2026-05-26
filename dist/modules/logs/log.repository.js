@@ -77,10 +77,22 @@ exports.logRepository = {
     findUnifiedFailedLogins: async ({ page, limit, source, ip, since, }) => {
         const dateFilter = since ? { gte: since } : undefined;
         const ipFilter = ip ? { contains: ip } : undefined;
-        const [adminRows, clientRows] = await Promise.all([
-            source === "client"
-                ? []
-                : client_1.default.accessLog.findMany({
+        let adminRows = [];
+        let clientRows = [];
+        if (source !== "client") {
+            adminRows = await client_1.default.accessLog.findMany({
+                where: {
+                    success: false,
+                    ...(dateFilter ? { createdAt: dateFilter } : {}),
+                    ...(ipFilter ? { ipAddress: ipFilter } : {}),
+                },
+                orderBy: { createdAt: "desc" },
+                take: 500,
+            });
+        }
+        if (source !== "admin") {
+            try {
+                clientRows = await client_1.default.clientAccessLog.findMany({
                     where: {
                         success: false,
                         ...(dateFilter ? { createdAt: dateFilter } : {}),
@@ -88,19 +100,14 @@ exports.logRepository = {
                     },
                     orderBy: { createdAt: "desc" },
                     take: 500,
-                }),
-            source === "admin"
-                ? []
-                : client_1.default.clientAccessLog.findMany({
-                    where: {
-                        success: false,
-                        ...(dateFilter ? { createdAt: dateFilter } : {}),
-                        ...(ipFilter ? { ipAddress: ipFilter } : {}),
-                    },
-                    orderBy: { createdAt: "desc" },
-                    take: 500,
-                }),
-        ]);
+                });
+            }
+            catch (err) {
+                // Tabela ClientAccessLog ausente (migration não aplicada) — não quebra o endpoint
+                console.warn("[logs] ClientAccessLog indisponível:", err);
+                clientRows = [];
+            }
+        }
         const merged = [
             ...adminRows.map((r) => ({
                 id: r.id,

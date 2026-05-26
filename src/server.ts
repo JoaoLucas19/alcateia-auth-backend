@@ -97,6 +97,14 @@ app.use(
 
     standardHeaders: true,
     legacyHeaders: false,
+
+    handler: (_req, res) => {
+      res.status(429).json({
+        success: false,
+        code: "RATE_LIMIT",
+        message: "Muitas requisições. Aguarde e tente novamente.",
+      });
+    },
   })
 );
 
@@ -126,6 +134,17 @@ app.use("/api/logs", logRoutes);
 
 // Rota para clientes
 app.use("/api/admin/clients", clientRoutes);
+
+/**
+ * 404 em rotas /api — sempre JSON (evita "Resposta inválida" no frontend)
+ */
+app.use("/api", (_req, res) => {
+  res.status(404).json({
+    success: false,
+    code: "NOT_FOUND",
+    message: "Rota da API não encontrada. Verifique se o backend está atualizado.",
+  });
+});
 
 /**
  * Middleware global de erros

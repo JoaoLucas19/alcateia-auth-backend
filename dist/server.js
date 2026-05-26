@@ -83,6 +83,13 @@ app.use((0, express_rate_limit_1.default)({
     max: env_1.env.RATE_LIMIT_MAX,
     standardHeaders: true,
     legacyHeaders: false,
+    handler: (_req, res) => {
+        res.status(429).json({
+            success: false,
+            code: "RATE_LIMIT",
+            message: "Muitas requisições. Aguarde e tente novamente.",
+        });
+    },
 }));
 /**
  * Health Check
@@ -104,6 +111,16 @@ app.use("/api/keys", key_routes_1.default);
 app.use("/api/logs", log_routes_1.default);
 // Rota para clientes
 app.use("/api/admin/clients", client_routes_1.default);
+/**
+ * 404 em rotas /api — sempre JSON (evita "Resposta inválida" no frontend)
+ */
+app.use("/api", (_req, res) => {
+    res.status(404).json({
+        success: false,
+        code: "NOT_FOUND",
+        message: "Rota da API não encontrada. Verifique se o backend está atualizado.",
+    });
+});
 /**
  * Middleware global de erros
  * SEMPRE o último middleware

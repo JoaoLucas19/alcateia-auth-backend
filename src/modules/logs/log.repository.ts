@@ -121,30 +121,38 @@ export const logRepository = {
     const dateFilter = since ? { gte: since } : undefined;
     const ipFilter = ip ? { contains: ip } : undefined;
 
-    const [adminRows, clientRows] = await Promise.all([
-      source === "client"
-        ? []
-        : prisma.accessLog.findMany({
-            where: {
-              success: false,
-              ...(dateFilter ? { createdAt: dateFilter } : {}),
-              ...(ipFilter ? { ipAddress: ipFilter } : {}),
-            },
-            orderBy: { createdAt: "desc" },
-            take: 500,
-          }),
-      source === "admin"
-        ? []
-        : prisma.clientAccessLog.findMany({
-            where: {
-              success: false,
-              ...(dateFilter ? { createdAt: dateFilter } : {}),
-              ...(ipFilter ? { ipAddress: ipFilter } : {}),
-            },
-            orderBy: { createdAt: "desc" },
-            take: 500,
-          }),
-    ]);
+    let adminRows: Awaited<ReturnType<typeof prisma.accessLog.findMany>> = [];
+    let clientRows: Awaited<ReturnType<typeof prisma.clientAccessLog.findMany>> = [];
+
+    if (source !== "client") {
+      adminRows = await prisma.accessLog.findMany({
+        where: {
+          success: false,
+          ...(dateFilter ? { createdAt: dateFilter } : {}),
+          ...(ipFilter ? { ipAddress: ipFilter } : {}),
+        },
+        orderBy: { createdAt: "desc" },
+        take: 500,
+      });
+    }
+
+    if (source !== "admin") {
+      try {
+        clientRows = await prisma.clientAccessLog.findMany({
+          where: {
+            success: false,
+            ...(dateFilter ? { createdAt: dateFilter } : {}),
+            ...(ipFilter ? { ipAddress: ipFilter } : {}),
+          },
+          orderBy: { createdAt: "desc" },
+          take: 500,
+        });
+      } catch (err) {
+        // Tabela ClientAccessLog ausente (migration não aplicada) — não quebra o endpoint
+        console.warn("[logs] ClientAccessLog indisponível:", err);
+        clientRows = [];
+      }
+    }
 
     const merged = [
       ...adminRows.map((r) => ({
