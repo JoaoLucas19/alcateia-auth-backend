@@ -155,7 +155,8 @@ export declare const keyRepository: {
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     markExpiredKeys: () => import("@prisma/client").Prisma.PrismaPromise<import("@prisma/client").Prisma.BatchPayload>;
     deleteExpiredKeys: () => Promise<import("@prisma/client").Prisma.BatchPayload>;
-    delete: (id: string) => import("@prisma/client").Prisma.Prisma__KeyClient<{
+    /** Remove key e dependências (cliente do cheat + logs de uso). */
+    deleteWithDependencies: (id: string) => Promise<{
         id: string;
         createdAt: Date;
         value: string;
@@ -167,6 +168,6 @@ export declare const keyRepository: {
         isPermanent: boolean;
         activatedAt: Date | null;
         expiresAt: Date | null;
-    }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    }>;
 };
 export {};

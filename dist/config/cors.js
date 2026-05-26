@@ -7,12 +7,16 @@ const env_1 = require("./env");
 const DEFAULT_ORIGINS = [
     "https://whitexcorporation.com.br",
     "https://www.whitexcorporation.com.br",
+    // Painel pode abrir em HTTP se o SSL/redirect do Hostinger estiver desativado
+    "http://whitexcorporation.com.br",
+    "http://www.whitexcorporation.com.br",
     "http://localhost:3000",
     "http://localhost:5173",
     "http://localhost:4173",
 ];
 /** Horizons / Hostinger / preview do editor */
 const ORIGIN_PATTERNS = [
+    /^https?:\/\/(www\.)?whitexcorporation\.com\.br$/i,
     /^https:\/\/[\w-]+\.hostingersite\.com$/i,
     /^https:\/\/[\w-]+\.horizons\.hostinger\.(com|dev)$/i,
     /^https:\/\/[\w-]+\.app-preview\.(io|com)$/i,

@@ -88,6 +88,28 @@ async function logKeyAttempt(
   });
 }
 
+async function logClientAccess(data: {
+  clientId?: string | null;
+  username: string;
+  ipAddress: string;
+  hwid?: string;
+  action: "LOGIN" | "REGISTER";
+  success: boolean;
+  reason?: string;
+}) {
+  await prisma.clientAccessLog.create({
+    data: {
+      clientId: data.clientId ?? null,
+      usernameAttempted: data.username,
+      ipAddress: data.ipAddress,
+      hwid: data.hwid || null,
+      action: data.action,
+      success: data.success,
+      reason: data.reason ?? null,
+    },
+  });
+}
+
 export async function registerClientService(input: ClientRegisterInput) {
   const { username, password, license, hwid, ipAddress } = input;
 
@@ -97,36 +119,93 @@ export async function registerClientService(input: ClientRegisterInput) {
   });
 
   if (!key) {
+    await logClientAccess({
+      username,
+      ipAddress,
+      hwid,
+      action: "REGISTER",
+      success: false,
+      reason: "INVALID_KEY",
+    });
     throw new AppError("Key invalida", 400, "INVALID_KEY");
   }
 
   if (key.status === KeyStatus.REVOKED) {
     await logKeyAttempt(key.id, ipAddress, ValidationResult.REVOKED);
+    await logClientAccess({
+      username,
+      ipAddress,
+      hwid,
+      action: "REGISTER",
+      success: false,
+      reason: "KEY_REVOKED",
+    });
     throw new AppError("Key revogada", 403, "KEY_REVOKED");
   }
 
   if (key.status === KeyStatus.USED || key.client) {
     await logKeyAttempt(key.id, ipAddress, ValidationResult.ALREADY_USED);
+    await logClientAccess({
+      username,
+      ipAddress,
+      hwid,
+      action: "REGISTER",
+      success: false,
+      reason: "KEY_ALREADY_USED",
+    });
     throw new AppError("Key ja utilizada", 409, "KEY_ALREADY_USED");
   }
 
   if (key.status === KeyStatus.EXPIRED) {
     await logKeyAttempt(key.id, ipAddress, ValidationResult.EXPIRED);
+    await logClientAccess({
+      username,
+      ipAddress,
+      hwid,
+      action: "REGISTER",
+      success: false,
+      reason: "KEY_EXPIRED",
+    });
     throw new AppError("Key expirada", 403, "KEY_EXPIRED");
   }
 
   if (key.expiresAt && key.expiresAt < new Date()) {
     await prisma.key.update({ where: { id: key.id }, data: { status: KeyStatus.EXPIRED } });
     await logKeyAttempt(key.id, ipAddress, ValidationResult.EXPIRED);
+    await logClientAccess({
+      username,
+      ipAddress,
+      hwid,
+      action: "REGISTER",
+      success: false,
+      reason: "KEY_EXPIRED",
+    });
     throw new AppError("Key expirada", 403, "KEY_EXPIRED");
   }
 
   if (!key.product.isActive) {
+    await logClientAccess({
+      username,
+      ipAddress,
+      hwid,
+      action: "REGISTER",
+      success: false,
+      reason: "PRODUCT_INACTIVE",
+    });
     throw new AppError("Produto inativo", 400, "PRODUCT_INACTIVE");
   }
 
   const existingUser = await prisma.client.findUnique({ where: { username } });
   if (existingUser) {
+    await logClientAccess({
+      clientId: existingUser.id,
+      username,
+      ipAddress,
+      hwid,
+      action: "REGISTER",
+      success: false,
+      reason: "USERNAME_TAKEN",
+    });
     throw new AppError("Usuario ja cadastrado", 409, "USERNAME_TAKEN");
   }
 
@@ -169,6 +248,15 @@ export async function registerClientService(input: ClientRegisterInput) {
     return created;
   });
 
+  await logClientAccess({
+    clientId: client.id,
+    username,
+    ipAddress,
+    hwid,
+    action: "REGISTER",
+    success: true,
+  });
+
   logger.info("Cliente cadastrado", { clientId: client.id, username, keyId: key.id });
 
   return {
@@ -186,30 +274,83 @@ export async function loginClientService(input: ClientAuthInput) {
   });
 
   if (!client) {
+    await logClientAccess({
+      username,
+      ipAddress,
+      hwid,
+      action: "LOGIN",
+      success: false,
+      reason: "USER_NOT_FOUND",
+    });
     throw new AppError("Credenciais invalidas", 401, "INVALID_CREDENTIALS");
   }
 
   if (client.isBanned) {
+    await logClientAccess({
+      clientId: client.id,
+      username,
+      ipAddress,
+      hwid,
+      action: "LOGIN",
+      success: false,
+      reason: "USER_BANNED",
+    });
     throw new AppError("Conta banida", 403, "USER_BANNED");
   }
 
   const passwordMatch = await bcrypt.compare(password, client.passwordHash);
   if (!passwordMatch) {
+    await logClientAccess({
+      clientId: client.id,
+      username,
+      ipAddress,
+      hwid,
+      action: "LOGIN",
+      success: false,
+      reason: "WRONG_PASSWORD",
+    });
     throw new AppError("Credenciais invalidas", 401, "INVALID_CREDENTIALS");
   }
 
   const lifetime = isLifetimeKey(client.key) || isLifetimeExpiry(client.expiresAt);
 
   if (!lifetime && client.expiresAt < new Date()) {
+    await logClientAccess({
+      clientId: client.id,
+      username,
+      ipAddress,
+      hwid,
+      action: "LOGIN",
+      success: false,
+      reason: "SUBSCRIPTION_EXPIRED",
+    });
     throw new AppError("Assinatura expirada", 403, "SUBSCRIPTION_EXPIRED");
   }
 
   if (client.key.status === KeyStatus.REVOKED) {
+    await logClientAccess({
+      clientId: client.id,
+      username,
+      ipAddress,
+      hwid,
+      action: "LOGIN",
+      success: false,
+      reason: "KEY_REVOKED",
+    });
     throw new AppError("Licenca revogada", 403, "KEY_REVOKED");
   }
 
   if (client.hwid && client.hwid !== hwid) {
     await logKeyAttempt(client.keyId, ipAddress, ValidationResult.INVALID_KEY);
+    await logClientAccess({
+      clientId: client.id,
+      username,
+      ipAddress,
+      hwid,
+      action: "LOGIN",
+      success: false,
+      reason: "HWID_MISMATCH",
+    });
     throw new AppError("HWID nao autorizado", 403, "HWID_MISMATCH");
   }
 
@@ -227,6 +368,15 @@ export async function loginClientService(input: ClientAuthInput) {
     where: { id: client.id },
     data: clientUpdate,
     include: { key: { include: { product: true } } },
+  });
+
+  await logClientAccess({
+    clientId: client.id,
+    username,
+    ipAddress,
+    hwid,
+    action: "LOGIN",
+    success: true,
   });
 
   logger.info("Login cliente", { clientId: client.id, username, ipAddress });

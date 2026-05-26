@@ -84,7 +84,31 @@ model Client {
   keyId String @unique
   key   Key    @relation(fields: [keyId], references: [id])
 
+  accessLogs ClientAccessLog[]
+
   @@index([hwid])
+}
+
+/// Tentativas de login/cadastro do cliente (cheat)
+model ClientAccessLog {
+  id String @id @default(uuid())
+
+  clientId String?
+  client   Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  usernameAttempted String
+  ipAddress         String
+  hwid              String?
+
+  action  String  @default("LOGIN")
+  success Boolean
+  reason  String?
+
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([success, createdAt])
+  @@index([ipAddress, createdAt])
 }
 
 model KeyUsageLog {
@@ -99,6 +123,10 @@ model KeyUsageLog {
   result ValidationResult
 
   attemptedAt DateTime @default(now())
+
+  @@index([attemptedAt])
+  @@index([result, attemptedAt])
+  @@index([ipAddress, attemptedAt])
 }
 
 model AccessLog {
@@ -116,4 +144,8 @@ model AccessLog {
   reason String?
 
   createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([success, createdAt])
+  @@index([ipAddress, createdAt])
 }

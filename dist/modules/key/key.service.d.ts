@@ -18,14 +18,14 @@ export declare function listKeys(filters: {
     productId?: string;
     search?: string;
 }): Promise<{
-    data: ({
+    data: {
+        canDelete: boolean;
         product: {
             name: string;
         };
         createdBy: {
             username: string;
         };
-    } & {
         id: string;
         createdAt: Date;
         value: string;
@@ -37,12 +37,13 @@ export declare function listKeys(filters: {
         isPermanent: boolean;
         activatedAt: Date | null;
         expiresAt: Date | null;
-    })[];
+    }[];
     total: number;
     page: number;
     totalPages: number;
 }>;
 export declare function getKey(id: string): Promise<{
+    canDelete: boolean;
     product: {
         id: string;
         createdAt: Date;
@@ -62,7 +63,6 @@ export declare function getKey(id: string): Promise<{
         attemptedAt: Date;
         keyId: string;
     }[];
-} & {
     id: string;
     createdAt: Date;
     value: string;

@@ -1,5 +1,11 @@
 import { Router } from "express";
-import { getAccessLogs, getKeyLogs, getDashboard } from "./log.controller";
+import {
+  getAccessLogs,
+  getDashboard,
+  getFailedLogins,
+  getKeyLogs,
+  getSecurity,
+} from "./log.controller";
 import { authMiddleware } from "../../middlewares/auth.middleware";
 
 const router = Router();
@@ -7,7 +13,9 @@ const router = Router();
 router.use(authMiddleware);
 
 router.get("/dashboard", getDashboard);
-router.get("/access",    getAccessLogs);
-router.get("/keys",      getKeyLogs);
+router.get("/security", getSecurity);
+router.get("/failed-logins", getFailedLogins);
+router.get("/access", getAccessLogs);
+router.get("/keys", getKeyLogs);
 
 export default router;

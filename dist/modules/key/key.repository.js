@@ -122,8 +122,11 @@ exports.keyRepository = {
             where: { id: { in: ids } },
         });
     },
-    delete: (id) => client_1.default.key.delete({
-        where: { id },
+    /** Remove key e dependências (cliente do cheat + logs de uso). */
+    deleteWithDependencies: (id) => client_1.default.$transaction(async (tx) => {
+        await tx.keyUsageLog.deleteMany({ where: { keyId: id } });
+        await tx.client.deleteMany({ where: { keyId: id } });
+        return tx.key.delete({ where: { id } });
     }),
 };
 //# sourceMappingURL=key.repository.js.map

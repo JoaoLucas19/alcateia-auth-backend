@@ -6,7 +6,10 @@ import { logger } from "../../utils/logger";
 
 export async function login(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const ip = (req.headers["x-forwarded-for"] as string) || req.ip || "unknown";
+    const ip =
+      (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
+      req.ip ||
+      "unknown";
     const result = await loginService({ ...req.body, ip });
     res.status(200).json({ data: result });
   } catch (err) {

@@ -16,6 +16,20 @@ function parseExpiresAt(value) {
         return undefined;
     return value instanceof Date ? value : new Date(value);
 }
+function isPermanentKey(key) {
+    if (key.isPermanent)
+        return true;
+    if (!key.expiresAt)
+        return false;
+    return key.expiresAt.getTime() >= LIFETIME_EXPIRY.getTime();
+}
+function canDeleteKey(key) {
+    if (isPermanentKey(key))
+        return false;
+    if (key.status === "USED" || key.status === "REVOKED")
+        return true;
+    return key.status === "ACTIVE" && !key.activatedAt;
+}
 // Limpeza automática de keys expiradas
 async function cleanupExpiredKeys() {
     // Marca keys expiradas
@@ -51,13 +65,20 @@ async function generateKeys(data) {
 async function listKeys(filters) {
     // Remove automaticamente keys expiradas
     await cleanupExpiredKeys();
-    return key_repository_1.keyRepository.findPaginated(filters);
+    const result = await key_repository_1.keyRepository.findPaginated(filters);
+    return {
+        ...result,
+        data: result.data.map((key) => ({
+            ...key,
+            canDelete: canDeleteKey(key),
+        })),
+    };
 }
 async function getKey(id) {
     const key = await key_repository_1.keyRepository.findById(id);
     if (!key)
         throw new AppError_1.AppError("Key não encontrada", 404, "KEY_NOT_FOUND");
-    return key;
+    return { ...key, canDelete: canDeleteKey(key) };
 }
 async function revokeKey(id) {
     const key = await key_repository_1.keyRepository.findById(id);
@@ -87,10 +108,12 @@ async function deleteKey(id) {
     const key = await key_repository_1.keyRepository.findById(id);
     if (!key)
         throw new AppError_1.AppError("Key não encontrada", 404, "KEY_NOT_FOUND");
-    if (key.status !== "ACTIVE" ||
-        key.activatedAt) {
-        throw new AppError_1.AppError("Apenas keys ativas e não utilizadas podem ser deletadas", 409, "KEY_CANNOT_BE_DELETED");
+    if (isPermanentKey(key)) {
+        throw new AppError_1.AppError("Keys permanentes não podem ser deletadas", 409, "KEY_PERMANENT_CANNOT_DELETE");
     }
-    return key_repository_1.keyRepository.delete(id);
+    if (!canDeleteKey(key)) {
+        throw new AppError_1.AppError("Esta key não pode ser deletada", 409, "KEY_CANNOT_BE_DELETED");
+    }
+    return key_repository_1.keyRepository.deleteWithDependencies(id);
 }
 //# sourceMappingURL=key.service.js.map

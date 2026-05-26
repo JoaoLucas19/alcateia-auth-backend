@@ -65,6 +65,19 @@ async function logKeyAttempt(keyId, ipAddress, result, userAgent) {
         },
     });
 }
+async function logClientAccess(data) {
+    await client_1.default.clientAccessLog.create({
+        data: {
+            clientId: data.clientId ?? null,
+            usernameAttempted: data.username,
+            ipAddress: data.ipAddress,
+            hwid: data.hwid || null,
+            action: data.action,
+            success: data.success,
+            reason: data.reason ?? null,
+        },
+    });
+}
 async function registerClientService(input) {
     const { username, password, license, hwid, ipAddress } = input;
     const key = await client_1.default.key.findUnique({
@@ -72,30 +85,87 @@ async function registerClientService(input) {
         include: { product: true, client: true },
     });
     if (!key) {
+        await logClientAccess({
+            username,
+            ipAddress,
+            hwid,
+            action: "REGISTER",
+            success: false,
+            reason: "INVALID_KEY",
+        });
         throw new AppError_1.AppError("Key invalida", 400, "INVALID_KEY");
     }
     if (key.status === client_2.KeyStatus.REVOKED) {
         await logKeyAttempt(key.id, ipAddress, client_2.ValidationResult.REVOKED);
+        await logClientAccess({
+            username,
+            ipAddress,
+            hwid,
+            action: "REGISTER",
+            success: false,
+            reason: "KEY_REVOKED",
+        });
         throw new AppError_1.AppError("Key revogada", 403, "KEY_REVOKED");
     }
     if (key.status === client_2.KeyStatus.USED || key.client) {
         await logKeyAttempt(key.id, ipAddress, client_2.ValidationResult.ALREADY_USED);
+        await logClientAccess({
+            username,
+            ipAddress,
+            hwid,
+            action: "REGISTER",
+            success: false,
+            reason: "KEY_ALREADY_USED",
+        });
         throw new AppError_1.AppError("Key ja utilizada", 409, "KEY_ALREADY_USED");
     }
     if (key.status === client_2.KeyStatus.EXPIRED) {
         await logKeyAttempt(key.id, ipAddress, client_2.ValidationResult.EXPIRED);
+        await logClientAccess({
+            username,
+            ipAddress,
+            hwid,
+            action: "REGISTER",
+            success: false,
+            reason: "KEY_EXPIRED",
+        });
         throw new AppError_1.AppError("Key expirada", 403, "KEY_EXPIRED");
     }
     if (key.expiresAt && key.expiresAt < new Date()) {
         await client_1.default.key.update({ where: { id: key.id }, data: { status: client_2.KeyStatus.EXPIRED } });
         await logKeyAttempt(key.id, ipAddress, client_2.ValidationResult.EXPIRED);
+        await logClientAccess({
+            username,
+            ipAddress,
+            hwid,
+            action: "REGISTER",
+            success: false,
+            reason: "KEY_EXPIRED",
+        });
         throw new AppError_1.AppError("Key expirada", 403, "KEY_EXPIRED");
     }
     if (!key.product.isActive) {
+        await logClientAccess({
+            username,
+            ipAddress,
+            hwid,
+            action: "REGISTER",
+            success: false,
+            reason: "PRODUCT_INACTIVE",
+        });
         throw new AppError_1.AppError("Produto inativo", 400, "PRODUCT_INACTIVE");
     }
     const existingUser = await client_1.default.client.findUnique({ where: { username } });
     if (existingUser) {
+        await logClientAccess({
+            clientId: existingUser.id,
+            username,
+            ipAddress,
+            hwid,
+            action: "REGISTER",
+            success: false,
+            reason: "USERNAME_TAKEN",
+        });
         throw new AppError_1.AppError("Usuario ja cadastrado", 409, "USERNAME_TAKEN");
     }
     const passwordHash = await bcrypt_1.default.hash(password, BCRYPT_ROUNDS);
@@ -132,6 +202,14 @@ async function registerClientService(input) {
         });
         return created;
     });
+    await logClientAccess({
+        clientId: client.id,
+        username,
+        ipAddress,
+        hwid,
+        action: "REGISTER",
+        success: true,
+    });
     logger_1.logger.info("Cliente cadastrado", { clientId: client.id, username, keyId: key.id });
     return {
         message: "Conta criada com sucesso",
@@ -145,24 +223,77 @@ async function loginClientService(input) {
         include: { key: { include: { product: true } } },
     });
     if (!client) {
+        await logClientAccess({
+            username,
+            ipAddress,
+            hwid,
+            action: "LOGIN",
+            success: false,
+            reason: "USER_NOT_FOUND",
+        });
         throw new AppError_1.AppError("Credenciais invalidas", 401, "INVALID_CREDENTIALS");
     }
     if (client.isBanned) {
+        await logClientAccess({
+            clientId: client.id,
+            username,
+            ipAddress,
+            hwid,
+            action: "LOGIN",
+            success: false,
+            reason: "USER_BANNED",
+        });
         throw new AppError_1.AppError("Conta banida", 403, "USER_BANNED");
     }
     const passwordMatch = await bcrypt_1.default.compare(password, client.passwordHash);
     if (!passwordMatch) {
+        await logClientAccess({
+            clientId: client.id,
+            username,
+            ipAddress,
+            hwid,
+            action: "LOGIN",
+            success: false,
+            reason: "WRONG_PASSWORD",
+        });
         throw new AppError_1.AppError("Credenciais invalidas", 401, "INVALID_CREDENTIALS");
     }
     const lifetime = isLifetimeKey(client.key) || isLifetimeExpiry(client.expiresAt);
     if (!lifetime && client.expiresAt < new Date()) {
+        await logClientAccess({
+            clientId: client.id,
+            username,
+            ipAddress,
+            hwid,
+            action: "LOGIN",
+            success: false,
+            reason: "SUBSCRIPTION_EXPIRED",
+        });
         throw new AppError_1.AppError("Assinatura expirada", 403, "SUBSCRIPTION_EXPIRED");
     }
     if (client.key.status === client_2.KeyStatus.REVOKED) {
+        await logClientAccess({
+            clientId: client.id,
+            username,
+            ipAddress,
+            hwid,
+            action: "LOGIN",
+            success: false,
+            reason: "KEY_REVOKED",
+        });
         throw new AppError_1.AppError("Licenca revogada", 403, "KEY_REVOKED");
     }
     if (client.hwid && client.hwid !== hwid) {
         await logKeyAttempt(client.keyId, ipAddress, client_2.ValidationResult.INVALID_KEY);
+        await logClientAccess({
+            clientId: client.id,
+            username,
+            ipAddress,
+            hwid,
+            action: "LOGIN",
+            success: false,
+            reason: "HWID_MISMATCH",
+        });
         throw new AppError_1.AppError("HWID nao autorizado", 403, "HWID_MISMATCH");
     }
     const clientUpdate = {
@@ -177,6 +308,14 @@ async function loginClientService(input) {
         where: { id: client.id },
         data: clientUpdate,
         include: { key: { include: { product: true } } },
+    });
+    await logClientAccess({
+        clientId: client.id,
+        username,
+        ipAddress,
+        hwid,
+        action: "LOGIN",
+        success: true,
     });
     logger_1.logger.info("Login cliente", { clientId: client.id, username, ipAddress });
     return {
