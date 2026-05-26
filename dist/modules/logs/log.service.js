@@ -43,29 +43,35 @@ function buildRecentFailedLogins(adminRows, clientRows, limit = 25) {
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         .slice(0, limit);
 }
+async function evaluateSecurityFromRaw(raw) {
+    const adminLogins = mapLoginStats(raw.logins24h, raw.adminFailed7d, raw.adminUniqueFailedIps24h);
+    const clientLogins = mapLoginStats(raw.clientLogins24h, raw.clientFailed7d, raw.clientUniqueFailedIps24h);
+    const suspiciousIps = (0, log_analytics_1.aggregateSuspiciousIps)({
+        adminFailures: raw.adminFailures24hList,
+        clientFailures: raw.clientFailures24hList,
+        invalidKeyByIp: raw.invalidKeyByIpFull,
+    });
+    const alerts = (0, log_analytics_1.detectSecurityAlerts)({
+        adminFailed24h: adminLogins.failed24h,
+        adminTotal24h: adminLogins.total24h,
+        adminFailuresByIp: raw.adminFailuresByIp,
+        adminFailuresByUsername: raw.adminFailuresByUsername,
+        invalidKeyByIp: raw.topInvalidIps,
+        adminFailuresLastHour: raw.adminFailuresLastHour,
+    });
+    const { level: threatLevel, score: threatScore } = (0, log_analytics_1.computeThreatLevel)(alerts, suspiciousIps);
+    return { alerts, threatLevel, threatScore, suspiciousIps, adminLogins, clientLogins };
+}
 exports.logService = {
+    async evaluateSecurity() {
+        const raw = await log_repository_1.logRepository.getDashboardStats();
+        return evaluateSecurityFromRaw(raw);
+    },
     async getDashboard() {
         const raw = await log_repository_1.logRepository.getDashboardStats();
-        const adminLogins = mapLoginStats(raw.logins24h, raw.adminFailed7d, raw.adminUniqueFailedIps24h);
-        const clientLogins = mapLoginStats(raw.clientLogins24h, raw.clientFailed7d, raw.clientUniqueFailedIps24h);
+        const { alerts, threatLevel, threatScore, suspiciousIps, adminLogins, clientLogins } = await evaluateSecurityFromRaw(raw);
         const validationsMap = Object.fromEntries(raw.validations24h.map((v) => [v.result, v._count]));
         const activations24h = validationsMap.SUCCESS ?? 0;
-        const suspiciousIps = (0, log_analytics_1.aggregateSuspiciousIps)({
-            adminFailures: raw.adminFailures24hList,
-            clientFailures: raw.clientFailures24hList,
-            invalidKeyByIp: raw.invalidKeyByIpFull,
-        });
-        const adminFailed24h = adminLogins.failed24h;
-        const adminTotal24h = adminLogins.total24h;
-        const alerts = (0, log_analytics_1.detectSecurityAlerts)({
-            adminFailed24h,
-            adminTotal24h,
-            adminFailuresByIp: raw.adminFailuresByIp,
-            adminFailuresByUsername: raw.adminFailuresByUsername,
-            invalidKeyByIp: raw.topInvalidIps,
-            adminFailuresLastHour: raw.adminFailuresLastHour,
-        });
-        const { level: threatLevel, score: threatScore } = (0, log_analytics_1.computeThreatLevel)(alerts, suspiciousIps);
         const timeline24h = (0, log_analytics_1.buildTimeline24h)(raw.adminTimelineRaw, raw.clientTimelineRaw, raw.keyTimelineRaw);
         const recentFailedLogins = buildRecentFailedLogins(raw.recentAdminFailed, raw.recentClientFailed, 25);
         const failuresByReason = [

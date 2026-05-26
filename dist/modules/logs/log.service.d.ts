@@ -1,5 +1,13 @@
 import type { LoginStatsBlock, UnifiedFailedLogin } from "./log.types";
 export declare const logService: {
+    evaluateSecurity(): Promise<{
+        alerts: import("./log.types").SecurityAlert[];
+        threatLevel: import("./log.types").ThreatLevel;
+        threatScore: number;
+        suspiciousIps: import("./log.types").SuspiciousIpEntry[];
+        adminLogins: LoginStatsBlock;
+        clientLogins: LoginStatsBlock;
+    }>;
     getDashboard(): Promise<{
         keysByStatus: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.KeyGroupByOutputType, "status"[]> & {
             _count: number;

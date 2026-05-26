@@ -16,6 +16,8 @@ const product_routes_1 = __importDefault(require("./modules/products/product.rou
 const key_routes_1 = __importDefault(require("./modules/key/key.routes"));
 const log_routes_1 = __importDefault(require("./modules/logs/log.routes"));
 const client_routes_1 = __importDefault(require("./modules/clients/client.routes")); // Nova rota adicionada para clientes
+const notification_routes_1 = __importDefault(require("./modules/notifications/notification.routes"));
+const discord_poller_1 = require("./modules/notifications/discord.poller");
 const app = (0, express_1.default)();
 /**
  * Obrigatório para Railway (proxy reverso)
@@ -109,6 +111,7 @@ app.use("/auth", client_auth_routes_1.default);
 app.use("/api/products", product_routes_1.default);
 app.use("/api/keys", key_routes_1.default);
 app.use("/api/logs", log_routes_1.default);
+app.use("/api/notifications", notification_routes_1.default);
 // Rota para clientes
 app.use("/api/admin/clients", client_routes_1.default);
 /**
@@ -130,6 +133,7 @@ app.use(error_middleware_1.errorHandler);
  * Inicialização do servidor
  */
 app.listen(env_1.env.PORT, () => {
+    (0, discord_poller_1.startDiscordAlertPoller)();
     console.log(`
 ========================================
 🚀 API AlcateiaAuth ONLINE

@@ -6,7 +6,8 @@ export type SecurityAlertType =
   | "HIGH_FAILURE_RATE"
   | "KEY_SCANNING"
   | "MULTI_IP_USERNAME"
-  | "SPIKE_FAILURES";
+  | "SPIKE_FAILURES"
+  | "HWID_MISMATCH";
 
 export interface SecurityAlert {
   type: SecurityAlertType;

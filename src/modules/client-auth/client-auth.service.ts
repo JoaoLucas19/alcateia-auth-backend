@@ -3,6 +3,7 @@ import prisma from "../../prisma/client";
 import { AppError } from "../../utils/AppError";
 import { logger } from "../../utils/logger";
 import { KeyStatus, ValidationResult } from "@prisma/client";
+import { dispatchImmediateAlert } from "../notifications/discord.dispatcher";
 
 const DEFAULT_SUBSCRIPTION_DAYS = 30;
 const BCRYPT_ROUNDS = 12;
@@ -351,6 +352,16 @@ export async function loginClientService(input: ClientAuthInput) {
       success: false,
       reason: "HWID_MISMATCH",
     });
+
+    void dispatchImmediateAlert({
+      type: "HWID_MISMATCH",
+      severity: "HIGH",
+      message: `HWID não autorizado no login do cliente "${username}"`,
+      ip: ipAddress,
+      username,
+      detectedAt: new Date().toISOString(),
+    });
+
     throw new AppError("HWID nao autorizado", 403, "HWID_MISMATCH");
   }
 

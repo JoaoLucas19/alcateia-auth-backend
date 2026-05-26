@@ -14,6 +14,8 @@ import productRoutes from "./modules/products/product.routes";
 import keyRoutes from "./modules/key/key.routes";
 import logRoutes from "./modules/logs/log.routes";
 import clientRoutes from "./modules/clients/client.routes"; // Nova rota adicionada para clientes
+import notificationRoutes from "./modules/notifications/notification.routes";
+import { startDiscordAlertPoller } from "./modules/notifications/discord.poller";
 
 const app = express();
 
@@ -132,6 +134,8 @@ app.use("/api/keys", keyRoutes);
 
 app.use("/api/logs", logRoutes);
 
+app.use("/api/notifications", notificationRoutes);
+
 // Rota para clientes
 app.use("/api/admin/clients", clientRoutes);
 
@@ -156,6 +160,8 @@ app.use(errorHandler);
  * Inicialização do servidor
  */
 app.listen(env.PORT, () => {
+  startDiscordAlertPoller();
+
   console.log(`
 ========================================
 🚀 API AlcateiaAuth ONLINE
