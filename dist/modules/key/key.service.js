@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.runCleanupExpiredKeys = runCleanupExpiredKeys;
+exports.runCleanupPermanentKeys = runCleanupPermanentKeys;
 exports.generateKeys = generateKeys;
 exports.listKeys = listKeys;
 exports.getKey = getKey;
@@ -26,8 +27,9 @@ function isPermanentKey(key) {
     return key.expiresAt.getTime() >= LIFETIME_EXPIRY.getTime();
 }
 function canDeleteKey(key) {
+    // Permanentes: admin pode excluir (remove cliente vinculado se houver)
     if (isPermanentKey(key))
-        return false;
+        return true;
     if (key.status === "USED" || key.status === "REVOKED")
         return true;
     return key.status === "ACTIVE" && !key.activatedAt;
@@ -45,6 +47,22 @@ async function runCleanupExpiredKeys() {
         markedExpired: marked.count,
         deleted: deleted.count,
         message: "Limpeza de keys expiradas concluída",
+    };
+}
+/** Remove todas as keys permanentes (inclui usadas/revogadas, com cliente se existir). */
+async function runCleanupPermanentKeys(onlyUnused = false) {
+    const ids = await key_repository_1.keyRepository.findPermanentKeyIds(onlyUnused);
+    let deleted = 0;
+    for (const id of ids) {
+        await key_repository_1.keyRepository.deleteWithDependencies(id);
+        deleted++;
+    }
+    return {
+        deleted,
+        onlyUnused,
+        message: onlyUnused
+            ? "Keys permanentes não utilizadas removidas"
+            : "Todas as keys permanentes foram removidas",
     };
 }
 async function generateKeys(data) {
@@ -130,9 +148,6 @@ async function deleteKey(id) {
     const key = await key_repository_1.keyRepository.findById(id);
     if (!key)
         throw new AppError_1.AppError("Key não encontrada", 404, "KEY_NOT_FOUND");
-    if (isPermanentKey(key)) {
-        throw new AppError_1.AppError("Keys permanentes não podem ser deletadas", 409, "KEY_PERMANENT_CANNOT_DELETE");
-    }
     if (!canDeleteKey(key)) {
         throw new AppError_1.AppError("Esta key não pode ser deletada", 409, "KEY_CANNOT_BE_DELETED");
     }

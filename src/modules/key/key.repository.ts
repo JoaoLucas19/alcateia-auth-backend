@@ -1,5 +1,7 @@
 import prisma from "../../prisma/client";
-import { KeyStatus } from "@prisma/client";
+import { KeyStatus, Prisma } from "@prisma/client";
+
+const LIFETIME_EXPIRY = new Date("2099-12-31T23:59:59.999Z");
 
 interface KeyFilters {
   page: number;
@@ -190,4 +192,27 @@ export const keyRepository = {
       await tx.client.deleteMany({ where: { keyId: id } });
       return tx.key.delete({ where: { id } });
     }),
+
+  /** IDs de keys permanentes (flag ou data sentinela 2099). */
+  findPermanentKeyIds: async (onlyUnused = false) => {
+    const permanentWhere: Prisma.KeyWhereInput = {
+      OR: [{ isPermanent: true }, { expiresAt: { gte: LIFETIME_EXPIRY } }],
+    };
+
+    const where: Prisma.KeyWhereInput = onlyUnused
+      ? {
+          ...permanentWhere,
+          status: KeyStatus.ACTIVE,
+          activatedAt: null,
+          client: { is: null },
+        }
+      : permanentWhere;
+
+    const rows = await prisma.key.findMany({
+      where,
+      select: { id: true },
+    });
+
+    return rows.map((r) => r.id);
+  },
 };

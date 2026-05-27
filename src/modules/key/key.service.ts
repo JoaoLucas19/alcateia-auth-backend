@@ -27,7 +27,8 @@ function canDeleteKey(key: {
   isPermanent: boolean;
   expiresAt: Date | null;
 }): boolean {
-  if (isPermanentKey(key)) return false;
+  // Permanentes: admin pode excluir (remove cliente vinculado se houver)
+  if (isPermanentKey(key)) return true;
   if (key.status === "USED" || key.status === "REVOKED") return true;
   return key.status === "ACTIVE" && !key.activatedAt;
 }
@@ -46,6 +47,25 @@ export async function runCleanupExpiredKeys() {
     markedExpired: marked.count,
     deleted: deleted.count,
     message: "Limpeza de keys expiradas concluída",
+  };
+}
+
+/** Remove todas as keys permanentes (inclui usadas/revogadas, com cliente se existir). */
+export async function runCleanupPermanentKeys(onlyUnused = false) {
+  const ids = await keyRepository.findPermanentKeyIds(onlyUnused);
+  let deleted = 0;
+
+  for (const id of ids) {
+    await keyRepository.deleteWithDependencies(id);
+    deleted++;
+  }
+
+  return {
+    deleted,
+    onlyUnused,
+    message: onlyUnused
+      ? "Keys permanentes não utilizadas removidas"
+      : "Todas as keys permanentes foram removidas",
   };
 }
 
@@ -199,26 +219,12 @@ export async function updateKey(
 }
 
 export async function deleteKey(id: string) {
-
   const key = await keyRepository.findById(id);
 
-  if (!key)
-    throw new AppError("Key não encontrada", 404, "KEY_NOT_FOUND");
-
-  if (isPermanentKey(key)) {
-    throw new AppError(
-      "Keys permanentes não podem ser deletadas",
-      409,
-      "KEY_PERMANENT_CANNOT_DELETE"
-    );
-  }
+  if (!key) throw new AppError("Key não encontrada", 404, "KEY_NOT_FOUND");
 
   if (!canDeleteKey(key)) {
-    throw new AppError(
-      "Esta key não pode ser deletada",
-      409,
-      "KEY_CANNOT_BE_DELETED"
-    );
+    throw new AppError("Esta key não pode ser deletada", 409, "KEY_CANNOT_BE_DELETED");
   }
 
   return keyRepository.deleteWithDependencies(id);

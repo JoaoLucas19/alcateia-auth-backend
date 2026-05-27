@@ -5,6 +5,12 @@ export declare function runCleanupExpiredKeys(): Promise<{
     deleted: number;
     message: string;
 }>;
+/** Remove todas as keys permanentes (inclui usadas/revogadas, com cliente se existir). */
+export declare function runCleanupPermanentKeys(onlyUnused?: boolean): Promise<{
+    deleted: number;
+    onlyUnused: boolean;
+    message: string;
+}>;
 export declare function generateKeys(data: {
     productId: string;
     quantity: number;

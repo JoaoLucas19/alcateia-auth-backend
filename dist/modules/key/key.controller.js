@@ -34,6 +34,7 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.cleanupExpired = cleanupExpired;
+exports.cleanupPermanent = cleanupPermanent;
 exports.generate = generate;
 exports.list = list;
 exports.getById = getById;
@@ -44,6 +45,16 @@ const keyService = __importStar(require("./key.service"));
 async function cleanupExpired(req, res, next) {
     try {
         const result = await keyService.runCleanupExpiredKeys();
+        res.status(200).json({ data: result });
+    }
+    catch (err) {
+        next(err);
+    }
+}
+async function cleanupPermanent(req, res, next) {
+    try {
+        const onlyUnused = req.query.onlyUnused === "true";
+        const result = await keyService.runCleanupPermanentKeys(onlyUnused);
         res.status(200).json({ data: result });
     }
     catch (err) {

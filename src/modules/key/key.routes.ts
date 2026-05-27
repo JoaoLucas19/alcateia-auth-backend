@@ -1,6 +1,15 @@
 import { Router } from "express";
 import { z } from "zod";
-import { generate, list, getById, revoke, update, remove, cleanupExpired } from "./key.controller";
+import {
+  generate,
+  list,
+  getById,
+  revoke,
+  update,
+  remove,
+  cleanupExpired,
+  cleanupPermanent,
+} from "./key.controller";
 import { authMiddleware } from "../../middlewares/auth.middleware";
 import { validate } from "../../middlewares/validate.middleware";
 
@@ -28,6 +37,7 @@ const router = Router();
 router.use(authMiddleware);
 
 router.post("/cleanup-expired", cleanupExpired);
+router.post("/cleanup-permanent", cleanupPermanent);
 router.post("/generate", validate(generateSchema), generate);
 router.get("/", list);
 router.get("/:id", getById);

@@ -11,6 +11,16 @@ export async function cleanupExpired(req: Request, res: Response, next: NextFunc
   }
 }
 
+export async function cleanupPermanent(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const onlyUnused = req.query.onlyUnused === "true";
+    const result = await keyService.runCleanupPermanentKeys(onlyUnused);
+    res.status(200).json({ data: result });
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function generate(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const result = await keyService.generateKeys({ ...req.body, createdById: req.admin!.id });

@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.keyRepository = void 0;
 const client_1 = __importDefault(require("../../prisma/client"));
 const client_2 = require("@prisma/client");
+const LIFETIME_EXPIRY = new Date("2099-12-31T23:59:59.999Z");
 exports.keyRepository = {
     create: (data) => client_1.default.key.create({ data }),
     createMany: (keys) => client_1.default.key.createMany({ data: keys }),
@@ -128,5 +129,24 @@ exports.keyRepository = {
         await tx.client.deleteMany({ where: { keyId: id } });
         return tx.key.delete({ where: { id } });
     }),
+    /** IDs de keys permanentes (flag ou data sentinela 2099). */
+    findPermanentKeyIds: async (onlyUnused = false) => {
+        const permanentWhere = {
+            OR: [{ isPermanent: true }, { expiresAt: { gte: LIFETIME_EXPIRY } }],
+        };
+        const where = onlyUnused
+            ? {
+                ...permanentWhere,
+                status: client_2.KeyStatus.ACTIVE,
+                activatedAt: null,
+                client: { is: null },
+            }
+            : permanentWhere;
+        const rows = await client_1.default.key.findMany({
+            where,
+            select: { id: true },
+        });
+        return rows.map((r) => r.id);
+    },
 };
 //# sourceMappingURL=key.repository.js.map
