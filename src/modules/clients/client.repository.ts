@@ -1,21 +1,32 @@
 import prisma from "../../prisma/client";
 
+const clientInclude = {
+  key: { include: { product: true } },
+} as const;
+
 export const clientRepository = {
   async findPaginated(filters: {
     page: number;
     limit: number;
     search?: string;
     status?: "active" | "banned" | "expired";
+    discordId?: string;
   }) {
-    const { page, limit, search, status } = filters;
+    const { page, limit, search, status, discordId } = filters;
     const skip = (page - 1) * limit;
 
-    const where: any = {};
+    const where: Record<string, unknown> = {};
+
+    if (discordId) {
+      where.discordId = discordId;
+    }
 
     if (search) {
       where.OR = [
         { username: { contains: search } },
         { hwid: { contains: search } },
+        { discordId: { contains: search } },
+        { key: { value: { contains: search } } },
       ];
     }
 
@@ -36,11 +47,7 @@ export const clientRepository = {
         skip,
         take: limit,
         orderBy: { createdAt: "desc" },
-        include: {
-          key: {
-            include: { product: true },
-          },
-        },
+        include: clientInclude,
       }),
     ]);
 
@@ -50,7 +57,56 @@ export const clientRepository = {
   async findById(id: string) {
     return prisma.client.findUnique({
       where: { id },
-      include: { key: { include: { product: true } } },
+      include: clientInclude,
+    });
+  },
+
+  async findByUsername(username: string) {
+    return prisma.client.findUnique({
+      where: { username },
+      include: clientInclude,
+    });
+  },
+
+  async findByDiscordId(discordId: string) {
+    return prisma.client.findFirst({
+      where: { discordId },
+      include: clientInclude,
+    });
+  },
+
+  async findByKeyValue(keyValue: string) {
+    return prisma.client.findFirst({
+      where: { key: { value: keyValue.trim() } },
+      include: clientInclude,
+    });
+  },
+
+  async findByKeyId(keyId: string) {
+    return prisma.client.findUnique({
+      where: { keyId },
+      include: clientInclude,
+    });
+  },
+
+  async updatePassword(id: string, passwordHash: string) {
+    return prisma.client.update({
+      where: { id },
+      data: { passwordHash },
+    });
+  },
+
+  async updateDiscordId(id: string, discordId: string | null) {
+    return prisma.client.update({
+      where: { id },
+      data: { discordId },
+    });
+  },
+
+  async updateExpiresAt(id: string, expiresAt: Date) {
+    return prisma.client.update({
+      where: { id },
+      data: { expiresAt },
     });
   },
 

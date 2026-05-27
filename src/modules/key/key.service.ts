@@ -1,5 +1,6 @@
 import { keyRepository } from "./key.repository";
 import { productRepository } from "../products/product.repository";
+import { clientRepository } from "../clients/client.repository";
 import { generateUniqueKeys } from "../../utils/keyGenerator";
 import { AppError } from "../../utils/AppError";
 import { KeyStatus } from "@prisma/client";
@@ -33,12 +34,19 @@ function canDeleteKey(key: {
 
 // Limpeza automática de keys expiradas
 async function cleanupExpiredKeys() {
-
-  // Marca keys expiradas
   await keyRepository.markExpiredKeys();
-
-  // Remove keys expiradas
   await keyRepository.deleteExpiredKeys();
+}
+
+/** Limpeza explícita (bot/admin) — retorna contagens */
+export async function runCleanupExpiredKeys() {
+  const marked = await keyRepository.markExpiredKeys();
+  const deleted = await keyRepository.deleteExpiredKeys();
+  return {
+    markedExpired: marked.count,
+    deleted: deleted.count,
+    message: "Limpeza de keys expiradas concluída",
+  };
 }
 
 export async function generateKeys(data: {
@@ -172,7 +180,22 @@ export async function updateKey(
     patch.expiresAt = LIFETIME_EXPIRY;
   }
 
-  return keyRepository.update(id, patch);
+  const updated = await keyRepository.update(id, patch);
+
+  const linkedClient = await clientRepository.findByKeyId(id);
+  if (linkedClient && (data.expiresAt !== undefined || data.isPermanent === true)) {
+    const clientExpiry =
+      data.isPermanent === true
+        ? LIFETIME_EXPIRY
+        : patch.expiresAt instanceof Date
+          ? patch.expiresAt
+          : patch.expiresAt
+            ? new Date(patch.expiresAt as Date)
+            : linkedClient.expiresAt;
+    await clientRepository.updateExpiresAt(linkedClient.id, clientExpiry);
+  }
+
+  return updated;
 }
 
 export async function deleteKey(id: string) {

@@ -1,28 +1,58 @@
 import { Router } from "express";
 import { authMiddleware } from "../../middlewares/auth.middleware";
-import { list, getOne, ban, unban, resetHwid, remove } from "./client.controller";
+import { validate } from "../../middlewares/validate.middleware";
+import {
+  changePasswordSchema,
+  clientLookupSchema,
+  linkDiscordLookupSchema,
+  patchDiscordSchema,
+  patchPasswordSchema,
+} from "./client.schemas";
+import {
+  list,
+  getOne,
+  getByDiscord,
+  getByKey,
+  getByUsername,
+  ban,
+  unban,
+  resetHwid,
+  resetHwidLookup,
+  changePassword,
+  changePasswordLookup,
+  patchDiscord,
+  linkDiscordLookup,
+  unlinkDiscord,
+  remove,
+} from "./client.controller";
 
 const router = Router();
 
-// Todas as rotas exigem admin autenticado
 router.use(authMiddleware);
 
-// GET  /api/admin/clients?page=1&limit=20&search=xxx&status=active|banned|expired
-router.get("/", list);
+// Rotas fixas antes de /:id
+router.get("/by-discord/:discordId", getByDiscord);
+router.get("/by-key/:keyValue", getByKey);
+router.get("/by-username/:username", getByUsername);
 
-// GET  /api/admin/clients/:id
+router.post("/reset-hwid", validate(clientLookupSchema), resetHwidLookup);
+router.post(
+  "/change-password",
+  validate(changePasswordSchema),
+  changePasswordLookup
+);
+router.post("/link-discord", validate(linkDiscordLookupSchema), linkDiscordLookup);
+
+router.get("/", list);
 router.get("/:id", getOne);
 
-// POST /api/admin/clients/:id/ban
+router.patch("/:id/password", validate(patchPasswordSchema), changePassword);
+router.patch("/:id/discord", validate(patchDiscordSchema), patchDiscord);
+router.delete("/:id/discord", unlinkDiscord);
+
 router.post("/:id/ban", ban);
-
-// POST /api/admin/clients/:id/unban
 router.post("/:id/unban", unban);
-
-// POST /api/admin/clients/:id/reset-hwid
 router.post("/:id/reset-hwid", resetHwid);
-
-// DELETE /api/admin/clients/:id
 router.delete("/:id", remove);
 
 export default router;

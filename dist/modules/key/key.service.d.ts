@@ -1,4 +1,10 @@
 import { KeyStatus } from "@prisma/client";
+/** Limpeza explícita (bot/admin) — retorna contagens */
+export declare function runCleanupExpiredKeys(): Promise<{
+    markedExpired: number;
+    deleted: number;
+    message: string;
+}>;
 export declare function generateKeys(data: {
     productId: string;
     quantity: number;

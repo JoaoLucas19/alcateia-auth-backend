@@ -5,15 +5,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.clientRepository = void 0;
 const client_1 = __importDefault(require("../../prisma/client"));
+const clientInclude = {
+    key: { include: { product: true } },
+};
 exports.clientRepository = {
     async findPaginated(filters) {
-        const { page, limit, search, status } = filters;
+        const { page, limit, search, status, discordId } = filters;
         const skip = (page - 1) * limit;
         const where = {};
+        if (discordId) {
+            where.discordId = discordId;
+        }
         if (search) {
             where.OR = [
                 { username: { contains: search } },
                 { hwid: { contains: search } },
+                { discordId: { contains: search } },
+                { key: { value: { contains: search } } },
             ];
         }
         if (status === "banned") {
@@ -34,11 +42,7 @@ exports.clientRepository = {
                 skip,
                 take: limit,
                 orderBy: { createdAt: "desc" },
-                include: {
-                    key: {
-                        include: { product: true },
-                    },
-                },
+                include: clientInclude,
             }),
         ]);
         return { total, clients, page, limit, totalPages: Math.ceil(total / limit) };
@@ -46,7 +50,49 @@ exports.clientRepository = {
     async findById(id) {
         return client_1.default.client.findUnique({
             where: { id },
-            include: { key: { include: { product: true } } },
+            include: clientInclude,
+        });
+    },
+    async findByUsername(username) {
+        return client_1.default.client.findUnique({
+            where: { username },
+            include: clientInclude,
+        });
+    },
+    async findByDiscordId(discordId) {
+        return client_1.default.client.findFirst({
+            where: { discordId },
+            include: clientInclude,
+        });
+    },
+    async findByKeyValue(keyValue) {
+        return client_1.default.client.findFirst({
+            where: { key: { value: keyValue.trim() } },
+            include: clientInclude,
+        });
+    },
+    async findByKeyId(keyId) {
+        return client_1.default.client.findUnique({
+            where: { keyId },
+            include: clientInclude,
+        });
+    },
+    async updatePassword(id, passwordHash) {
+        return client_1.default.client.update({
+            where: { id },
+            data: { passwordHash },
+        });
+    },
+    async updateDiscordId(id, discordId) {
+        return client_1.default.client.update({
+            where: { id },
+            data: { discordId },
+        });
+    },
+    async updateExpiresAt(id, expiresAt) {
+        return client_1.default.client.update({
+            where: { id },
+            data: { expiresAt },
         });
     },
     async ban(id) {

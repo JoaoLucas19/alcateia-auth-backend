@@ -2,6 +2,15 @@ import { Request, Response, NextFunction } from "express";
 import * as keyService from "./key.service";
 import { KeyStatus } from "@prisma/client";
 
+export async function cleanupExpired(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const result = await keyService.runCleanupExpiredKeys();
+    res.status(200).json({ data: result });
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function generate(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const result = await keyService.generateKeys({ ...req.body, createdById: req.admin!.id });

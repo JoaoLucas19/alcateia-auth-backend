@@ -21,6 +21,7 @@ const updateSchema = zod_1.z.object({
 });
 const router = (0, express_1.Router)();
 router.use(auth_middleware_1.authMiddleware);
+router.post("/cleanup-expired", key_controller_1.cleanupExpired);
 router.post("/generate", (0, validate_middleware_1.validate)(generateSchema), key_controller_1.generate);
 router.get("/", key_controller_1.list);
 router.get("/:id", key_controller_1.getById);

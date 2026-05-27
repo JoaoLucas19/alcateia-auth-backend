@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+export declare function cleanupExpired(req: Request, res: Response, next: NextFunction): Promise<void>;
 export declare function generate(req: Request, res: Response, next: NextFunction): Promise<void>;
 export declare function list(req: Request, res: Response, next: NextFunction): Promise<void>;
 export declare function getById(req: Request, res: Response, next: NextFunction): Promise<void>;

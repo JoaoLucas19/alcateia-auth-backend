@@ -11,6 +11,7 @@ const AppError_1 = require("../../utils/AppError");
 const logger_1 = require("../../utils/logger");
 const client_2 = require("@prisma/client");
 const discord_dispatcher_1 = require("../notifications/discord.dispatcher");
+const banned_hwid_service_1 = require("../banned-hwid/banned-hwid.service");
 const DEFAULT_SUBSCRIPTION_DAYS = 30;
 const BCRYPT_ROUNDS = 12;
 /** Data sentinela para keys permanentes (expiresAt null no painel). */
@@ -66,6 +67,21 @@ async function logKeyAttempt(keyId, ipAddress, result, userAgent) {
         },
     });
 }
+async function assertHwidNotBanned(hwid, ctx) {
+    if (!hwid?.trim())
+        return;
+    if (await (0, banned_hwid_service_1.isHwidBanned)(hwid)) {
+        await logClientAccess({
+            username: ctx.username,
+            ipAddress: ctx.ipAddress,
+            hwid,
+            action: ctx.action,
+            success: false,
+            reason: "HWID_BANNED",
+        });
+        throw new AppError_1.AppError("HWID banido", 403, "HWID_BANNED");
+    }
+}
 async function logClientAccess(data) {
     await client_1.default.clientAccessLog.create({
         data: {
@@ -81,6 +97,7 @@ async function logClientAccess(data) {
 }
 async function registerClientService(input) {
     const { username, password, license, hwid, ipAddress } = input;
+    await assertHwidNotBanned(hwid, { username, ipAddress, action: "REGISTER" });
     const key = await client_1.default.key.findUnique({
         where: { value: license.trim() },
         include: { product: true, client: true },
@@ -219,6 +236,7 @@ async function registerClientService(input) {
 }
 async function loginClientService(input) {
     const { username, password, hwid, ipAddress } = input;
+    await assertHwidNotBanned(hwid, { username, ipAddress, action: "LOGIN" });
     const client = await client_1.default.client.findUnique({
         where: { username },
         include: { key: { include: { product: true } } },

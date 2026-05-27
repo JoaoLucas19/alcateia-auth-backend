@@ -75,6 +75,7 @@ model Client {
   username     String    @unique
   passwordHash String
   hwid         String?
+  discordId    String?
   isBanned     Boolean   @default(false)
   expiresAt    DateTime
   loginCount   Int       @default(0)
@@ -87,6 +88,17 @@ model Client {
   accessLogs ClientAccessLog[]
 
   @@index([hwid])
+  @@index([discordId])
+}
+
+/// HWIDs bloqueados globalmente (login/cadastro do cheat)
+model BannedHwid {
+  id        String   @id @default(uuid())
+  hwid      String   @unique
+  reason    String?
+  createdAt DateTime @default(now())
+
+  @@map("banned_hwids")
 }
 
 /// Tentativas de login/cadastro do cliente (cheat)

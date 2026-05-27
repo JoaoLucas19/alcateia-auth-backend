@@ -4,6 +4,7 @@ export declare const clientRepository: {
         limit: number;
         search?: string;
         status?: "active" | "banned" | "expired";
+        discordId?: string;
     }): Promise<{
         total: number;
         clients: ({
@@ -34,9 +35,10 @@ export declare const clientRepository: {
             passwordHash: string;
             createdAt: Date;
             lastLoginAt: Date | null;
-            keyId: string;
             hwid: string | null;
+            keyId: string;
             expiresAt: Date;
+            discordId: string | null;
             isBanned: boolean;
             loginCount: number;
         })[];
@@ -72,21 +74,202 @@ export declare const clientRepository: {
         passwordHash: string;
         createdAt: Date;
         lastLoginAt: Date | null;
-        keyId: string;
         hwid: string | null;
+        keyId: string;
         expiresAt: Date;
+        discordId: string | null;
         isBanned: boolean;
         loginCount: number;
     }) | null>;
+    findByUsername(username: string): Promise<({
+        key: {
+            product: {
+                id: string;
+                createdAt: Date;
+                name: string;
+                description: string | null;
+                isActive: boolean;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            value: string;
+            productId: string;
+            createdById: string;
+            customerEmail: string | null;
+            customerName: string | null;
+            status: import("@prisma/client").$Enums.KeyStatus;
+            isPermanent: boolean;
+            activatedAt: Date | null;
+            expiresAt: Date | null;
+        };
+    } & {
+        username: string;
+        id: string;
+        passwordHash: string;
+        createdAt: Date;
+        lastLoginAt: Date | null;
+        hwid: string | null;
+        keyId: string;
+        expiresAt: Date;
+        discordId: string | null;
+        isBanned: boolean;
+        loginCount: number;
+    }) | null>;
+    findByDiscordId(discordId: string): Promise<({
+        key: {
+            product: {
+                id: string;
+                createdAt: Date;
+                name: string;
+                description: string | null;
+                isActive: boolean;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            value: string;
+            productId: string;
+            createdById: string;
+            customerEmail: string | null;
+            customerName: string | null;
+            status: import("@prisma/client").$Enums.KeyStatus;
+            isPermanent: boolean;
+            activatedAt: Date | null;
+            expiresAt: Date | null;
+        };
+    } & {
+        username: string;
+        id: string;
+        passwordHash: string;
+        createdAt: Date;
+        lastLoginAt: Date | null;
+        hwid: string | null;
+        keyId: string;
+        expiresAt: Date;
+        discordId: string | null;
+        isBanned: boolean;
+        loginCount: number;
+    }) | null>;
+    findByKeyValue(keyValue: string): Promise<({
+        key: {
+            product: {
+                id: string;
+                createdAt: Date;
+                name: string;
+                description: string | null;
+                isActive: boolean;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            value: string;
+            productId: string;
+            createdById: string;
+            customerEmail: string | null;
+            customerName: string | null;
+            status: import("@prisma/client").$Enums.KeyStatus;
+            isPermanent: boolean;
+            activatedAt: Date | null;
+            expiresAt: Date | null;
+        };
+    } & {
+        username: string;
+        id: string;
+        passwordHash: string;
+        createdAt: Date;
+        lastLoginAt: Date | null;
+        hwid: string | null;
+        keyId: string;
+        expiresAt: Date;
+        discordId: string | null;
+        isBanned: boolean;
+        loginCount: number;
+    }) | null>;
+    findByKeyId(keyId: string): Promise<({
+        key: {
+            product: {
+                id: string;
+                createdAt: Date;
+                name: string;
+                description: string | null;
+                isActive: boolean;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            value: string;
+            productId: string;
+            createdById: string;
+            customerEmail: string | null;
+            customerName: string | null;
+            status: import("@prisma/client").$Enums.KeyStatus;
+            isPermanent: boolean;
+            activatedAt: Date | null;
+            expiresAt: Date | null;
+        };
+    } & {
+        username: string;
+        id: string;
+        passwordHash: string;
+        createdAt: Date;
+        lastLoginAt: Date | null;
+        hwid: string | null;
+        keyId: string;
+        expiresAt: Date;
+        discordId: string | null;
+        isBanned: boolean;
+        loginCount: number;
+    }) | null>;
+    updatePassword(id: string, passwordHash: string): Promise<{
+        username: string;
+        id: string;
+        passwordHash: string;
+        createdAt: Date;
+        lastLoginAt: Date | null;
+        hwid: string | null;
+        keyId: string;
+        expiresAt: Date;
+        discordId: string | null;
+        isBanned: boolean;
+        loginCount: number;
+    }>;
+    updateDiscordId(id: string, discordId: string | null): Promise<{
+        username: string;
+        id: string;
+        passwordHash: string;
+        createdAt: Date;
+        lastLoginAt: Date | null;
+        hwid: string | null;
+        keyId: string;
+        expiresAt: Date;
+        discordId: string | null;
+        isBanned: boolean;
+        loginCount: number;
+    }>;
+    updateExpiresAt(id: string, expiresAt: Date): Promise<{
+        username: string;
+        id: string;
+        passwordHash: string;
+        createdAt: Date;
+        lastLoginAt: Date | null;
+        hwid: string | null;
+        keyId: string;
+        expiresAt: Date;
+        discordId: string | null;
+        isBanned: boolean;
+        loginCount: number;
+    }>;
     ban(id: string): Promise<{
         username: string;
         id: string;
         passwordHash: string;
         createdAt: Date;
         lastLoginAt: Date | null;
-        keyId: string;
         hwid: string | null;
+        keyId: string;
         expiresAt: Date;
+        discordId: string | null;
         isBanned: boolean;
         loginCount: number;
     }>;
@@ -96,9 +279,10 @@ export declare const clientRepository: {
         passwordHash: string;
         createdAt: Date;
         lastLoginAt: Date | null;
-        keyId: string;
         hwid: string | null;
+        keyId: string;
         expiresAt: Date;
+        discordId: string | null;
         isBanned: boolean;
         loginCount: number;
     }>;
@@ -108,9 +292,10 @@ export declare const clientRepository: {
         passwordHash: string;
         createdAt: Date;
         lastLoginAt: Date | null;
-        keyId: string;
         hwid: string | null;
+        keyId: string;
         expiresAt: Date;
+        discordId: string | null;
         isBanned: boolean;
         loginCount: number;
     }>;
@@ -120,9 +305,10 @@ export declare const clientRepository: {
         passwordHash: string;
         createdAt: Date;
         lastLoginAt: Date | null;
-        keyId: string;
         hwid: string | null;
+        keyId: string;
         expiresAt: Date;
+        discordId: string | null;
         isBanned: boolean;
         loginCount: number;
     }>;

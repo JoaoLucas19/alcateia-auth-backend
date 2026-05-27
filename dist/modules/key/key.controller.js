@@ -33,6 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.cleanupExpired = cleanupExpired;
 exports.generate = generate;
 exports.list = list;
 exports.getById = getById;
@@ -40,6 +41,15 @@ exports.revoke = revoke;
 exports.update = update;
 exports.remove = remove;
 const keyService = __importStar(require("./key.service"));
+async function cleanupExpired(req, res, next) {
+    try {
+        const result = await keyService.runCleanupExpiredKeys();
+        res.status(200).json({ data: result });
+    }
+    catch (err) {
+        next(err);
+    }
+}
 async function generate(req, res, next) {
     try {
         const result = await keyService.generateKeys({ ...req.body, createdById: req.admin.id });

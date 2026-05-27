@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.runCleanupExpiredKeys = runCleanupExpiredKeys;
 exports.generateKeys = generateKeys;
 exports.listKeys = listKeys;
 exports.getKey = getKey;
@@ -8,6 +9,7 @@ exports.updateKey = updateKey;
 exports.deleteKey = deleteKey;
 const key_repository_1 = require("./key.repository");
 const product_repository_1 = require("../products/product.repository");
+const client_repository_1 = require("../clients/client.repository");
 const keyGenerator_1 = require("../../utils/keyGenerator");
 const AppError_1 = require("../../utils/AppError");
 const LIFETIME_EXPIRY = new Date("2099-12-31T23:59:59.999Z");
@@ -32,10 +34,18 @@ function canDeleteKey(key) {
 }
 // Limpeza automática de keys expiradas
 async function cleanupExpiredKeys() {
-    // Marca keys expiradas
     await key_repository_1.keyRepository.markExpiredKeys();
-    // Remove keys expiradas
     await key_repository_1.keyRepository.deleteExpiredKeys();
+}
+/** Limpeza explícita (bot/admin) — retorna contagens */
+async function runCleanupExpiredKeys() {
+    const marked = await key_repository_1.keyRepository.markExpiredKeys();
+    const deleted = await key_repository_1.keyRepository.deleteExpiredKeys();
+    return {
+        markedExpired: marked.count,
+        deleted: deleted.count,
+        message: "Limpeza de keys expiradas concluída",
+    };
 }
 async function generateKeys(data) {
     const product = await product_repository_1.productRepository.findById(data.productId);
@@ -102,7 +112,19 @@ async function updateKey(id, data) {
         patch.isPermanent = true;
         patch.expiresAt = LIFETIME_EXPIRY;
     }
-    return key_repository_1.keyRepository.update(id, patch);
+    const updated = await key_repository_1.keyRepository.update(id, patch);
+    const linkedClient = await client_repository_1.clientRepository.findByKeyId(id);
+    if (linkedClient && (data.expiresAt !== undefined || data.isPermanent === true)) {
+        const clientExpiry = data.isPermanent === true
+            ? LIFETIME_EXPIRY
+            : patch.expiresAt instanceof Date
+                ? patch.expiresAt
+                : patch.expiresAt
+                    ? new Date(patch.expiresAt)
+                    : linkedClient.expiresAt;
+        await client_repository_1.clientRepository.updateExpiresAt(linkedClient.id, clientExpiry);
+    }
+    return updated;
 }
 async function deleteKey(id) {
     const key = await key_repository_1.keyRepository.findById(id);

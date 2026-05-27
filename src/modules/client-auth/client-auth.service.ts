@@ -4,6 +4,7 @@ import { AppError } from "../../utils/AppError";
 import { logger } from "../../utils/logger";
 import { KeyStatus, ValidationResult } from "@prisma/client";
 import { dispatchImmediateAlert } from "../notifications/discord.dispatcher";
+import { isHwidBanned } from "../banned-hwid/banned-hwid.service";
 
 const DEFAULT_SUBSCRIPTION_DAYS = 30;
 const BCRYPT_ROUNDS = 12;
@@ -89,6 +90,24 @@ async function logKeyAttempt(
   });
 }
 
+async function assertHwidNotBanned(
+  hwid: string,
+  ctx: { username: string; ipAddress: string; action: "LOGIN" | "REGISTER" }
+): Promise<void> {
+  if (!hwid?.trim()) return;
+  if (await isHwidBanned(hwid)) {
+    await logClientAccess({
+      username: ctx.username,
+      ipAddress: ctx.ipAddress,
+      hwid,
+      action: ctx.action,
+      success: false,
+      reason: "HWID_BANNED",
+    });
+    throw new AppError("HWID banido", 403, "HWID_BANNED");
+  }
+}
+
 async function logClientAccess(data: {
   clientId?: string | null;
   username: string;
@@ -113,6 +132,8 @@ async function logClientAccess(data: {
 
 export async function registerClientService(input: ClientRegisterInput) {
   const { username, password, license, hwid, ipAddress } = input;
+
+  await assertHwidNotBanned(hwid, { username, ipAddress, action: "REGISTER" });
 
   const key = await prisma.key.findUnique({
     where: { value: license.trim() },
@@ -268,6 +289,8 @@ export async function registerClientService(input: ClientRegisterInput) {
 
 export async function loginClientService(input: ClientAuthInput) {
   const { username, password, hwid, ipAddress } = input;
+
+  await assertHwidNotBanned(hwid, { username, ipAddress, action: "LOGIN" });
 
   const client = await prisma.client.findUnique({
     where: { username },
