@@ -1,5 +1,6 @@
 export type HwidEnrichment = {
     lastAttemptHwid: string | null;
+    lastAttemptHwidDisplay: string | null;
     hwidDisplay: string | null;
     hwidBound: boolean;
     hwidSignal: "normal" | "no_hwid" | "pending_bind" | "mismatch_recent";

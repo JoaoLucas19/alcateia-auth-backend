@@ -5,7 +5,12 @@ import { logger } from "../../utils/logger";
 import { KeyStatus, ValidationResult } from "@prisma/client";
 import { dispatchImmediateAlert } from "../notifications/discord.dispatcher";
 import { isHwidBanned } from "../banned-hwid/banned-hwid.service";
-import { hwidsEqual, isHwidBound, normalizeHwid } from "../../utils/hwid";
+import {
+  hwidsEqual,
+  isHwidBound,
+  normalizeHwid,
+  resolveHwidForBinding,
+} from "../../utils/hwid";
 
 const DEFAULT_SUBSCRIPTION_DAYS = 30;
 const BCRYPT_ROUNDS = 12;
@@ -134,8 +139,8 @@ async function logClientAccess(data: {
 export async function registerClientService(input: ClientRegisterInput) {
   const { username, password, license, hwid, ipAddress } = input;
 
-  const normalizedHwid = normalizeHwid(hwid);
-  await assertHwidNotBanned(normalizedHwid ?? "", { username, ipAddress, action: "REGISTER" });
+  const canonicalHwid = hwid.trim() ? resolveHwidForBinding(hwid) : null;
+  await assertHwidNotBanned(canonicalHwid ?? "", { username, ipAddress, action: "REGISTER" });
 
   const key = await prisma.key.findUnique({
     where: { value: license.trim() },
@@ -241,7 +246,7 @@ export async function registerClientService(input: ClientRegisterInput) {
       data: {
         username,
         passwordHash,
-        hwid: normalizedHwid,
+        hwid: canonicalHwid,
         expiresAt,
         keyId: key.id,
         loginCount: 1,
@@ -292,7 +297,7 @@ export async function registerClientService(input: ClientRegisterInput) {
 export async function loginClientService(input: ClientAuthInput) {
   const { username, password, hwid, ipAddress } = input;
 
-  const incomingHwid = normalizeHwid(hwid);
+  const incomingHwid = hwid.trim() ? resolveHwidForBinding(hwid) : null;
   await assertHwidNotBanned(incomingHwid ?? "", { username, ipAddress, action: "LOGIN" });
 
   const client = await prisma.client.findUnique({

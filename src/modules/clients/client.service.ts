@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import prisma from "../../prisma/client";
 import { clientRepository } from "./client.repository";
 import { AppError } from "../../utils/AppError";
-import { normalizeHwid } from "../../utils/hwid";
+import { normalizeHwid, parseHwid } from "../../utils/hwid";
 import {
   buildHwidEnrichment,
   fetchLatestHwidAttemptsByClientIds,
@@ -54,15 +54,18 @@ function formatClient(
 
   const hwid = normalizeHwid(client.hwid);
   const hwidMeta: HwidEnrichment = buildHwidEnrichment(client.hwid, lastAttempt);
+  const parsedStored = parseHwid(client.hwid);
 
   return {
     id: client.id,
     username: client.username,
     hwid,
+    hwidFormat: parsedStored.kind === "invalid" ? null : parsedStored.kind,
     hwidDisplay: hwidMeta.hwidDisplay,
     hwidBound: hwidMeta.hwidBound,
     hwidSignal: hwidMeta.hwidSignal,
     lastAttemptHwid: hwidMeta.lastAttemptHwid,
+    lastAttemptHwidDisplay: hwidMeta.lastAttemptHwidDisplay,
     discordId: client.discordId ?? null,
     isBanned: client.isBanned,
     loginCount: client.loginCount,
@@ -276,16 +279,24 @@ export async function repairInvalidClientHwids() {
   });
 
   let fixed = 0;
+  let cleared = 0;
   for (const row of clients) {
-    const normalized = normalizeHwid(row.hwid);
-    if (row.hwid !== normalized) {
+    const parsed = parseHwid(row.hwid);
+    const next = parsed.canonical;
+    if (row.hwid !== next) {
       await prisma.client.update({
         where: { id: row.id },
-        data: { hwid: normalized },
+        data: { hwid: next },
       });
       fixed += 1;
+      if (!next) cleared += 1;
     }
   }
 
-  return { message: "HWIDs reparados", fixed, scanned: clients.length };
+  return {
+    message: "HWIDs reparados (formato machine:/MAC: ou removidos se invalidos)",
+    fixed,
+    cleared,
+    scanned: clients.length,
+  };
 }

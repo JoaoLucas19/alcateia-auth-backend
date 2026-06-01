@@ -52,19 +52,17 @@ function buildHwidEnrichment(storedHwid, lastAttempt) {
         !lastAttempt.success &&
         lastAttempt.reason === "HWID_MISMATCH" &&
         lastAttemptHwid &&
-        !hwidsEqualQuiet(bound, lastAttemptHwid)) {
+        !(0, hwid_1.hwidsEqual)(bound, lastAttemptHwid)) {
         hwidSignal = "mismatch_recent";
     }
-    const displaySource = bound ?? lastAttemptHwid;
-    const hwidDisplay = displaySource ? (0, hwid_1.maskHwid)(displaySource) : null;
+    const hwidDisplay = (0, hwid_1.formatHwidDisplay)(storedHwid);
+    const lastAttemptHwidDisplay = lastAttemptHwid ? (0, hwid_1.formatHwidDisplay)(lastAttemptHwid) : null;
     return {
         lastAttemptHwid,
+        lastAttemptHwidDisplay,
         hwidDisplay,
         hwidBound: bound !== null,
         hwidSignal,
     };
-}
-function hwidsEqualQuiet(a, b) {
-    return a.toLowerCase() === b.toLowerCase();
 }
 //# sourceMappingURL=client-hwid.enrichment.js.map

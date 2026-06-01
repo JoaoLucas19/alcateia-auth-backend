@@ -36,14 +36,17 @@ function formatClient(client, lastAttempt) {
         : Math.max(0, Math.ceil((new Date(client.expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
     const hwid = (0, hwid_1.normalizeHwid)(client.hwid);
     const hwidMeta = (0, client_hwid_enrichment_1.buildHwidEnrichment)(client.hwid, lastAttempt);
+    const parsedStored = (0, hwid_1.parseHwid)(client.hwid);
     return {
         id: client.id,
         username: client.username,
         hwid,
+        hwidFormat: parsedStored.kind === "invalid" ? null : parsedStored.kind,
         hwidDisplay: hwidMeta.hwidDisplay,
         hwidBound: hwidMeta.hwidBound,
         hwidSignal: hwidMeta.hwidSignal,
         lastAttemptHwid: hwidMeta.lastAttemptHwid,
+        lastAttemptHwidDisplay: hwidMeta.lastAttemptHwidDisplay,
         discordId: client.discordId ?? null,
         isBanned: client.isBanned,
         loginCount: client.loginCount,
@@ -235,16 +238,25 @@ async function repairInvalidClientHwids() {
         select: { id: true, hwid: true },
     });
     let fixed = 0;
+    let cleared = 0;
     for (const row of clients) {
-        const normalized = (0, hwid_1.normalizeHwid)(row.hwid);
-        if (row.hwid !== normalized) {
+        const parsed = (0, hwid_1.parseHwid)(row.hwid);
+        const next = parsed.canonical;
+        if (row.hwid !== next) {
             await client_1.default.client.update({
                 where: { id: row.id },
-                data: { hwid: normalized },
+                data: { hwid: next },
             });
             fixed += 1;
+            if (!next)
+                cleared += 1;
         }
     }
-    return { message: "HWIDs reparados", fixed, scanned: clients.length };
+    return {
+        message: "HWIDs reparados (formato machine:/MAC: ou removidos se invalidos)",
+        fixed,
+        cleared,
+        scanned: clients.length,
+    };
 }
 //# sourceMappingURL=client.service.js.map

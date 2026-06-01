@@ -98,8 +98,8 @@ async function logClientAccess(data) {
 }
 async function registerClientService(input) {
     const { username, password, license, hwid, ipAddress } = input;
-    const normalizedHwid = (0, hwid_1.normalizeHwid)(hwid);
-    await assertHwidNotBanned(normalizedHwid ?? "", { username, ipAddress, action: "REGISTER" });
+    const canonicalHwid = hwid.trim() ? (0, hwid_1.resolveHwidForBinding)(hwid) : null;
+    await assertHwidNotBanned(canonicalHwid ?? "", { username, ipAddress, action: "REGISTER" });
     const key = await client_1.default.key.findUnique({
         where: { value: license.trim() },
         include: { product: true, client: true },
@@ -195,7 +195,7 @@ async function registerClientService(input) {
             data: {
                 username,
                 passwordHash,
-                hwid: normalizedHwid,
+                hwid: canonicalHwid,
                 expiresAt,
                 keyId: key.id,
                 loginCount: 1,
@@ -238,7 +238,7 @@ async function registerClientService(input) {
 }
 async function loginClientService(input) {
     const { username, password, hwid, ipAddress } = input;
-    const incomingHwid = (0, hwid_1.normalizeHwid)(hwid);
+    const incomingHwid = hwid.trim() ? (0, hwid_1.resolveHwidForBinding)(hwid) : null;
     await assertHwidNotBanned(incomingHwid ?? "", { username, ipAddress, action: "LOGIN" });
     const client = await client_1.default.client.findUnique({
         where: { username },

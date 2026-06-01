@@ -1,8 +1,9 @@
 import prisma from "../../prisma/client";
-import { maskHwid, normalizeHwid } from "../../utils/hwid";
+import { formatHwidDisplay, hwidsEqual, normalizeHwid } from "../../utils/hwid";
 
 export type HwidEnrichment = {
   lastAttemptHwid: string | null;
+  lastAttemptHwidDisplay: string | null;
   hwidDisplay: string | null;
   hwidBound: boolean;
   hwidSignal: "normal" | "no_hwid" | "pending_bind" | "mismatch_recent";
@@ -60,22 +61,19 @@ export function buildHwidEnrichment(
     !lastAttempt.success &&
     lastAttempt.reason === "HWID_MISMATCH" &&
     lastAttemptHwid &&
-    !hwidsEqualQuiet(bound, lastAttemptHwid)
+    !hwidsEqual(bound, lastAttemptHwid)
   ) {
     hwidSignal = "mismatch_recent";
   }
 
-  const displaySource = bound ?? lastAttemptHwid;
-  const hwidDisplay = displaySource ? maskHwid(displaySource) : null;
+  const hwidDisplay = formatHwidDisplay(storedHwid);
+  const lastAttemptHwidDisplay = lastAttemptHwid ? formatHwidDisplay(lastAttemptHwid) : null;
 
   return {
     lastAttemptHwid,
+    lastAttemptHwidDisplay,
     hwidDisplay,
     hwidBound: bound !== null,
     hwidSignal,
   };
-}
-
-function hwidsEqualQuiet(a: string, b: string): boolean {
-  return a.toLowerCase() === b.toLowerCase();
 }
