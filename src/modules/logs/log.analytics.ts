@@ -249,7 +249,7 @@ export function reasonLabel(reason: string | null | undefined): string {
     KEY_REVOKED: "Licença revogada",
     HWID_MISMATCH: "HWID não autorizado",
     HWID_MISSING: "HWID não enviado pelo loader",
-    HWID_INVALID: "HWID em formato inválido (use machine: ou MAC:)",
+    HWID_INVALID: "HWID inválido ou não reconhecido",
     INVALID_KEY: "Key inválida",
     KEY_ALREADY_USED: "Key já utilizada",
     KEY_EXPIRED: "Key expirada",

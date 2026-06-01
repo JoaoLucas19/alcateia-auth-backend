@@ -8,18 +8,19 @@ export interface ParsedHwid {
 }
 export declare function maskHwid(hwid: string): string;
 /**
- * Aceita apenas formatos de hardware reais usados pelo cheat:
- * - machine:<id>  (padrão NeverApi / loader atual do white)
- * - MAC:<endereço> (12 hex, com ou sem : ou -)
- *
- * Rejeita hash cru (32+ hex sem prefixo), UUIDs e lixo genérico.
+ * Normaliza HWID para formato canônico no banco e no painel:
+ * - machine:<id>  (explícito ou hash hex legado do loader)
+ * - MAC:<endereço>
  */
 export declare function parseHwid(raw: string | null | undefined): ParsedHwid;
 export declare function normalizeHwid(raw: string | null | undefined): string | null;
 export declare function formatHwidDisplay(raw: string | null | undefined): string | null;
 export declare function hwidsEqual(a: string | null | undefined, b: string | null | undefined): boolean;
 export declare function isHwidBound(stored: string | null | undefined): boolean;
-/** Exige formato válido quando o loader envia HWID (cadastro ou vínculo). */
+/**
+ * Converte o HWID do loader para formato canônico.
+ * Hash hex legado vira machine:<hex> — compatível com logins antigos.
+ */
 export declare function resolveHwidForBinding(raw: string): string | null;
 /** NeverApi / loaders podem enviar nomes de campo diferentes. */
 export declare function extractHwidFromBody(body: Record<string, unknown>): string;

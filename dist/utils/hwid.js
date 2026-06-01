@@ -56,11 +56,9 @@ function maskHwid(hwid) {
     return `${v.slice(0, 8)}…${v.slice(-4)}`;
 }
 /**
- * Aceita apenas formatos de hardware reais usados pelo cheat:
- * - machine:<id>  (padrão NeverApi / loader atual do white)
- * - MAC:<endereço> (12 hex, com ou sem : ou -)
- *
- * Rejeita hash cru (32+ hex sem prefixo), UUIDs e lixo genérico.
+ * Normaliza HWID para formato canônico no banco e no painel:
+ * - machine:<id>  (explícito ou hash hex legado do loader)
+ * - MAC:<endereço>
  */
 function parseHwid(raw) {
     const v = (raw ?? "").trim();
@@ -77,14 +75,11 @@ function parseHwid(raw) {
     const machineMatch = /^machine:\s*(.+)$/i.exec(v);
     if (machineMatch) {
         const id = machineMatch[1].trim();
-        if (id.length < 4 || id.length > 128) {
-            return { kind: "invalid", canonical: null, display: null };
+        if (id.length >= 4 && id.length <= 128) {
+            const canonical = `machine:${id}`;
+            return { kind: "machine", canonical, display: maskMachineDisplay(id) };
         }
-        if (/^[a-fA-F0-9]{32,64}$/.test(id)) {
-            return { kind: "invalid", canonical: null, display: null };
-        }
-        const canonical = `machine:${id}`;
-        return { kind: "machine", canonical, display: maskMachineDisplay(id) };
+        return { kind: "invalid", canonical: null, display: null };
     }
     const macPrefixed = /^mac:\s*(.+)$/i.exec(v);
     if (macPrefixed) {
@@ -98,8 +93,14 @@ function parseHwid(raw) {
     if (bareMac) {
         return { kind: "mac", canonical: bareMac, display: maskMacDisplay(bareMac) };
     }
-    if (/^[a-fA-F0-9]{32,64}$/.test(v)) {
-        return { kind: "invalid", canonical: null, display: null };
+    /** Loader Alcateia / NeverApi: fingerprint hex sem prefixo → machine:<hex> */
+    if (/^[a-fA-F0-9]{16,64}$/.test(v)) {
+        const id = v.toLowerCase();
+        return { kind: "machine", canonical: `machine:${id}`, display: maskMachineDisplay(id) };
+    }
+    /** Identificador alfanumérico legado sem prefixo */
+    if (/^[a-zA-Z0-9_.-]{4,128}$/.test(v)) {
+        return { kind: "machine", canonical: `machine:${v}`, display: maskMachineDisplay(v) };
     }
     if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v)) {
         return { kind: "invalid", canonical: null, display: null };
@@ -122,16 +123,19 @@ function hwidsEqual(a, b) {
 function isHwidBound(stored) {
     return normalizeHwid(stored) !== null;
 }
-/** Exige formato válido quando o loader envia HWID (cadastro ou vínculo). */
+/**
+ * Converte o HWID do loader para formato canônico.
+ * Hash hex legado vira machine:<hex> — compatível com logins antigos.
+ */
 function resolveHwidForBinding(raw) {
     const trimmed = raw.trim();
     if (!trimmed)
         return null;
-    const parsed = parseHwid(trimmed);
-    if (!parsed.canonical) {
-        throw new AppError_1.AppError("HWID invalido. O loader deve enviar machine:<id> ou MAC:<endereco>.", 403, "HWID_INVALID");
+    const canonical = normalizeHwid(trimmed);
+    if (!canonical) {
+        throw new AppError_1.AppError("HWID invalido ou nao reconhecido.", 403, "HWID_INVALID");
     }
-    return parsed.canonical;
+    return canonical;
 }
 /** NeverApi / loaders podem enviar nomes de campo diferentes. */
 function extractHwidFromBody(body) {
