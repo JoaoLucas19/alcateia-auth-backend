@@ -5,6 +5,7 @@ import { logger } from "../../utils/logger";
 import { KeyStatus, ValidationResult } from "@prisma/client";
 import { dispatchImmediateAlert } from "../notifications/discord.dispatcher";
 import { isHwidBanned } from "../banned-hwid/banned-hwid.service";
+import { hwidsEqual, isHwidBound, normalizeHwid } from "../../utils/hwid";
 
 const DEFAULT_SUBSCRIPTION_DAYS = 30;
 const BCRYPT_ROUNDS = 12;
@@ -112,7 +113,7 @@ async function logClientAccess(data: {
   clientId?: string | null;
   username: string;
   ipAddress: string;
-  hwid?: string;
+  hwid?: string | null;
   action: "LOGIN" | "REGISTER";
   success: boolean;
   reason?: string;
@@ -122,7 +123,7 @@ async function logClientAccess(data: {
       clientId: data.clientId ?? null,
       usernameAttempted: data.username,
       ipAddress: data.ipAddress,
-      hwid: data.hwid || null,
+      hwid: normalizeHwid(data.hwid) ?? null,
       action: data.action,
       success: data.success,
       reason: data.reason ?? null,
@@ -133,7 +134,8 @@ async function logClientAccess(data: {
 export async function registerClientService(input: ClientRegisterInput) {
   const { username, password, license, hwid, ipAddress } = input;
 
-  await assertHwidNotBanned(hwid, { username, ipAddress, action: "REGISTER" });
+  const normalizedHwid = normalizeHwid(hwid);
+  await assertHwidNotBanned(normalizedHwid ?? "", { username, ipAddress, action: "REGISTER" });
 
   const key = await prisma.key.findUnique({
     where: { value: license.trim() },
@@ -239,7 +241,7 @@ export async function registerClientService(input: ClientRegisterInput) {
       data: {
         username,
         passwordHash,
-        hwid,
+        hwid: normalizedHwid,
         expiresAt,
         keyId: key.id,
         loginCount: 1,
@@ -290,7 +292,8 @@ export async function registerClientService(input: ClientRegisterInput) {
 export async function loginClientService(input: ClientAuthInput) {
   const { username, password, hwid, ipAddress } = input;
 
-  await assertHwidNotBanned(hwid, { username, ipAddress, action: "LOGIN" });
+  const incomingHwid = normalizeHwid(hwid);
+  await assertHwidNotBanned(incomingHwid ?? "", { username, ipAddress, action: "LOGIN" });
 
   const client = await prisma.client.findUnique({
     where: { username },
@@ -364,13 +367,15 @@ export async function loginClientService(input: ClientAuthInput) {
     throw new AppError("Licenca revogada", 403, "KEY_REVOKED");
   }
 
-  if (client.hwid && client.hwid !== hwid) {
+  const storedHwid = normalizeHwid(client.hwid);
+
+  if (isHwidBound(storedHwid) && incomingHwid && !hwidsEqual(storedHwid, incomingHwid)) {
     await logKeyAttempt(client.keyId, ipAddress, ValidationResult.INVALID_KEY);
     await logClientAccess({
       clientId: client.id,
       username,
       ipAddress,
-      hwid,
+      hwid: incomingHwid,
       action: "LOGIN",
       success: false,
       reason: "HWID_MISMATCH",
@@ -388,8 +393,30 @@ export async function loginClientService(input: ClientAuthInput) {
     throw new AppError("HWID nao autorizado", 403, "HWID_MISMATCH");
   }
 
-  const clientUpdate: { hwid: string; lastLoginAt: Date; loginCount: { increment: number }; expiresAt?: Date } = {
-    hwid: client.hwid ?? hwid,
+  if (isHwidBound(storedHwid) && !incomingHwid) {
+    await logClientAccess({
+      clientId: client.id,
+      username,
+      ipAddress,
+      hwid: null,
+      action: "LOGIN",
+      success: false,
+      reason: "HWID_MISSING",
+    });
+    throw new AppError(
+      "HWID nao enviado pelo cliente. Atualize o loader ou reinstale o cheat.",
+      403,
+      "HWID_MISSING"
+    );
+  }
+
+  const clientUpdate: {
+    hwid: string | null;
+    lastLoginAt: Date;
+    loginCount: { increment: number };
+    expiresAt?: Date;
+  } = {
+    hwid: storedHwid ?? incomingHwid,
     lastLoginAt: new Date(),
     loginCount: { increment: 1 },
   };

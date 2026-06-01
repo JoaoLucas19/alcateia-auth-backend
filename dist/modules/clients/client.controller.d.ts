@@ -1,4 +1,6 @@
 import { Request, Response, NextFunction } from "express";
+export declare function summary(req: Request, res: Response, next: NextFunction): Promise<void>;
+export declare function repairHwids(req: Request, res: Response, next: NextFunction): Promise<void>;
 export declare function list(req: Request, res: Response, next: NextFunction): Promise<void>;
 export declare function getByDiscord(req: Request, res: Response, next: NextFunction): Promise<void>;
 export declare function getByKey(req: Request, res: Response, next: NextFunction): Promise<void>;

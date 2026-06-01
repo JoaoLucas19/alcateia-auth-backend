@@ -115,5 +115,23 @@ exports.clientRepository = {
             where: { isBanned: false, expiresAt: { gt: new Date() } },
         });
     },
+    async countBanned() {
+        return client_1.default.client.count({ where: { isBanned: true } });
+    },
+    async countExpired() {
+        return client_1.default.client.count({
+            where: { isBanned: false, expiresAt: { lt: new Date() } },
+        });
+    },
+    /** Ativos sem HWID vinculado (null ou vazio). */
+    async countActiveWithoutHwid() {
+        return client_1.default.client.count({
+            where: {
+                isBanned: false,
+                expiresAt: { gt: new Date() },
+                OR: [{ hwid: null }, { hwid: "" }],
+            },
+        });
+    },
 };
 //# sourceMappingURL=client.repository.js.map

@@ -314,4 +314,8 @@ export declare const clientRepository: {
     }>;
     countTotal(): Promise<number>;
     countActive(): Promise<number>;
+    countBanned(): Promise<number>;
+    countExpired(): Promise<number>;
+    /** Ativos sem HWID vinculado (null ou vazio). */
+    countActiveWithoutHwid(): Promise<number>;
 };

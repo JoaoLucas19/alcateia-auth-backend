@@ -50,6 +50,10 @@ export declare function listClients(filters: {
         id: string;
         username: string;
         hwid: string | null;
+        hwidDisplay: string | null;
+        hwidBound: boolean;
+        hwidSignal: "normal" | "no_hwid" | "pending_bind" | "mismatch_recent";
+        lastAttemptHwid: string | null;
         discordId: string | null;
         isBanned: boolean;
         loginCount: number;
@@ -70,15 +74,33 @@ export declare function listClients(filters: {
             name: string;
         };
     }[];
+    summary: {
+        total: number;
+        active: number;
+        banned: number;
+        expired: number;
+        withoutHwid: number;
+    };
     total: number;
     page: number;
     limit: number;
     totalPages: number;
 }>;
+export declare function getClientsSummary(): Promise<{
+    total: number;
+    active: number;
+    banned: number;
+    expired: number;
+    withoutHwid: number;
+}>;
 export declare function getClient(id: string): Promise<{
     id: string;
     username: string;
     hwid: string | null;
+    hwidDisplay: string | null;
+    hwidBound: boolean;
+    hwidSignal: "normal" | "no_hwid" | "pending_bind" | "mismatch_recent";
+    lastAttemptHwid: string | null;
     discordId: string | null;
     isBanned: boolean;
     loginCount: number;
@@ -103,6 +125,10 @@ export declare function getClientByDiscordId(discordId: string): Promise<{
     id: string;
     username: string;
     hwid: string | null;
+    hwidDisplay: string | null;
+    hwidBound: boolean;
+    hwidSignal: "normal" | "no_hwid" | "pending_bind" | "mismatch_recent";
+    lastAttemptHwid: string | null;
     discordId: string | null;
     isBanned: boolean;
     loginCount: number;
@@ -127,6 +153,10 @@ export declare function getClientByKeyValue(keyValue: string): Promise<{
     id: string;
     username: string;
     hwid: string | null;
+    hwidDisplay: string | null;
+    hwidBound: boolean;
+    hwidSignal: "normal" | "no_hwid" | "pending_bind" | "mismatch_recent";
+    lastAttemptHwid: string | null;
     discordId: string | null;
     isBanned: boolean;
     loginCount: number;
@@ -151,6 +181,10 @@ export declare function getClientByUsername(username: string): Promise<{
     id: string;
     username: string;
     hwid: string | null;
+    hwidDisplay: string | null;
+    hwidBound: boolean;
+    hwidSignal: "normal" | "no_hwid" | "pending_bind" | "mismatch_recent";
+    lastAttemptHwid: string | null;
     discordId: string | null;
     isBanned: boolean;
     loginCount: number;
@@ -186,6 +220,10 @@ export declare function resetClientHwidByLookup(lookup: ClientLookup): Promise<{
         id: string;
         username: string;
         hwid: string | null;
+        hwidDisplay: string | null;
+        hwidBound: boolean;
+        hwidSignal: "normal" | "no_hwid" | "pending_bind" | "mismatch_recent";
+        lastAttemptHwid: string | null;
         discordId: string | null;
         isBanned: boolean;
         loginCount: number;
@@ -218,6 +256,10 @@ export declare function changeClientPasswordByLookup(lookup: ClientLookup & {
         id: string;
         username: string;
         hwid: string | null;
+        hwidDisplay: string | null;
+        hwidBound: boolean;
+        hwidSignal: "normal" | "no_hwid" | "pending_bind" | "mismatch_recent";
+        lastAttemptHwid: string | null;
         discordId: string | null;
         isBanned: boolean;
         loginCount: number;
@@ -245,6 +287,10 @@ export declare function linkClientDiscord(id: string, discordId: string): Promis
         id: string;
         username: string;
         hwid: string | null;
+        hwidDisplay: string | null;
+        hwidBound: boolean;
+        hwidSignal: "normal" | "no_hwid" | "pending_bind" | "mismatch_recent";
+        lastAttemptHwid: string | null;
         discordId: string | null;
         isBanned: boolean;
         loginCount: number;
@@ -277,6 +323,10 @@ export declare function linkClientDiscordByLookup(body: {
         id: string;
         username: string;
         hwid: string | null;
+        hwidDisplay: string | null;
+        hwidBound: boolean;
+        hwidSignal: "normal" | "no_hwid" | "pending_bind" | "mismatch_recent";
+        lastAttemptHwid: string | null;
         discordId: string | null;
         isBanned: boolean;
         loginCount: number;
@@ -303,4 +353,10 @@ export declare function unlinkClientDiscord(id: string): Promise<{
 }>;
 export declare function deleteClient(id: string): Promise<{
     message: string;
+}>;
+/** Normaliza HWIDs inválidos/placeholder gravados antes da correção. */
+export declare function repairInvalidClientHwids(): Promise<{
+    message: string;
+    fixed: number;
+    scanned: number;
 }>;

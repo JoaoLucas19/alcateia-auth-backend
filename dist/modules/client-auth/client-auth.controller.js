@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.clientRegister = clientRegister;
 exports.clientLogin = clientLogin;
 const AppError_1 = require("../../utils/AppError");
+const hwid_1 = require("../../utils/hwid");
 const client_auth_service_1 = require("./client-auth.service");
 function clientError(res, err) {
     if (err instanceof AppError_1.AppError) {
@@ -28,7 +29,7 @@ async function clientRegister(req, res, _next) {
             username: req.body.username,
             password: req.body.password,
             license: req.body.license,
-            hwid: req.body.hwid ?? "",
+            hwid: (0, hwid_1.extractHwidFromBody)(req.body),
             ipAddress,
         });
         res.status(201).json({
@@ -49,7 +50,7 @@ async function clientLogin(req, res, _next) {
         const result = await (0, client_auth_service_1.loginClientService)({
             username: req.body.username,
             password: req.body.password,
-            hwid: req.body.hwid ?? "",
+            hwid: (0, hwid_1.extractHwidFromBody)(req.body),
             ipAddress,
         });
         res.status(200).json({

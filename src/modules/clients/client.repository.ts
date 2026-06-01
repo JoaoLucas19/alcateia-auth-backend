@@ -135,4 +135,25 @@ export const clientRepository = {
       where: { isBanned: false, expiresAt: { gt: new Date() } },
     });
   },
+
+  async countBanned() {
+    return prisma.client.count({ where: { isBanned: true } });
+  },
+
+  async countExpired() {
+    return prisma.client.count({
+      where: { isBanned: false, expiresAt: { lt: new Date() } },
+    });
+  },
+
+  /** Ativos sem HWID vinculado (null ou vazio). */
+  async countActiveWithoutHwid() {
+    return prisma.client.count({
+      where: {
+        isBanned: false,
+        expiresAt: { gt: new Date() },
+        OR: [{ hwid: null }, { hwid: "" }],
+      },
+    });
+  },
 };

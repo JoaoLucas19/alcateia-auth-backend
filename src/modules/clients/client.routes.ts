@@ -24,6 +24,8 @@ import {
   linkDiscordLookup,
   unlinkDiscord,
   remove,
+  summary,
+  repairHwids,
 } from "./client.controller";
 
 const router = Router();
@@ -42,6 +44,9 @@ router.post(
   changePasswordLookup
 );
 router.post("/link-discord", validate(linkDiscordLookupSchema), linkDiscordLookup);
+
+router.get("/summary", summary);
+router.post("/repair-hwids", repairHwids);
 
 router.get("/", list);
 router.get("/:id", getOne);

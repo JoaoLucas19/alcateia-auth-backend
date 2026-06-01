@@ -248,6 +248,7 @@ export function reasonLabel(reason: string | null | undefined): string {
     SUBSCRIPTION_EXPIRED: "Assinatura expirada",
     KEY_REVOKED: "Licença revogada",
     HWID_MISMATCH: "HWID não autorizado",
+    HWID_MISSING: "HWID não enviado pelo loader",
     INVALID_KEY: "Key inválida",
     KEY_ALREADY_USED: "Key já utilizada",
     KEY_EXPIRED: "Key expirada",

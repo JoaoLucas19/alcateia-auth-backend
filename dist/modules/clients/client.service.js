@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.resolveClientLookup = resolveClientLookup;
 exports.listClients = listClients;
+exports.getClientsSummary = getClientsSummary;
 exports.getClient = getClient;
 exports.getClientByDiscordId = getClientByDiscordId;
 exports.getClientByKeyValue = getClientByKeyValue;
@@ -19,20 +20,30 @@ exports.linkClientDiscord = linkClientDiscord;
 exports.linkClientDiscordByLookup = linkClientDiscordByLookup;
 exports.unlinkClientDiscord = unlinkClientDiscord;
 exports.deleteClient = deleteClient;
+exports.repairInvalidClientHwids = repairInvalidClientHwids;
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const client_1 = __importDefault(require("../../prisma/client"));
 const client_repository_1 = require("./client.repository");
 const AppError_1 = require("../../utils/AppError");
+const hwid_1 = require("../../utils/hwid");
+const client_hwid_enrichment_1 = require("./client-hwid.enrichment");
 const LIFETIME_EXPIRY = new Date("2099-12-31T23:59:59.999Z");
 const BCRYPT_ROUNDS = 10;
-function formatClient(client) {
+function formatClient(client, lastAttempt) {
     const isLifetime = client.key.isPermanent || !client.expiresAt || client.expiresAt >= LIFETIME_EXPIRY;
     const daysRemaining = isLifetime
         ? 99999
         : Math.max(0, Math.ceil((new Date(client.expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+    const hwid = (0, hwid_1.normalizeHwid)(client.hwid);
+    const hwidMeta = (0, client_hwid_enrichment_1.buildHwidEnrichment)(client.hwid, lastAttempt);
     return {
         id: client.id,
         username: client.username,
-        hwid: client.hwid ?? null,
+        hwid,
+        hwidDisplay: hwidMeta.hwidDisplay,
+        hwidBound: hwidMeta.hwidBound,
+        hwidSignal: hwidMeta.hwidSignal,
+        lastAttemptHwid: hwidMeta.lastAttemptHwid,
         discordId: client.discordId ?? null,
         isBanned: client.isBanned,
         loginCount: client.loginCount,
@@ -81,36 +92,59 @@ async function resolveClientLookup(lookup) {
     }
     throw new AppError_1.AppError("Informe clientId, username, key ou discordId", 400, "VALIDATION_ERROR");
 }
+async function enrichClients(clients) {
+    const lastMap = await (0, client_hwid_enrichment_1.fetchLatestHwidAttemptsByClientIds)(clients.map((c) => c.id));
+    return clients.map((c) => formatClient(c, lastMap.get(c.id)));
+}
 async function listClients(filters) {
     const result = await client_repository_1.clientRepository.findPaginated(filters);
+    const [clients, summary] = await Promise.all([
+        enrichClients(result.clients),
+        getClientsSummary(),
+    ]);
     return {
         ...result,
-        clients: result.clients.map(formatClient),
+        clients,
+        summary,
     };
+}
+async function getClientsSummary() {
+    const [total, active, banned, expired, withoutHwid] = await Promise.all([
+        client_repository_1.clientRepository.countTotal(),
+        client_repository_1.clientRepository.countActive(),
+        client_repository_1.clientRepository.countBanned(),
+        client_repository_1.clientRepository.countExpired(),
+        client_repository_1.clientRepository.countActiveWithoutHwid(),
+    ]);
+    return { total, active, banned, expired, withoutHwid };
+}
+async function formatClientEnriched(client) {
+    const lastMap = await (0, client_hwid_enrichment_1.fetchLatestHwidAttemptsByClientIds)([client.id]);
+    return formatClient(client, lastMap.get(client.id));
 }
 async function getClient(id) {
     const client = await client_repository_1.clientRepository.findById(id);
     if (!client)
         throw new AppError_1.AppError("Cliente não encontrado", 404, "CLIENT_NOT_FOUND");
-    return formatClient(client);
+    return formatClientEnriched(client);
 }
 async function getClientByDiscordId(discordId) {
     const client = await client_repository_1.clientRepository.findByDiscordId(discordId.trim());
     if (!client)
         throw new AppError_1.AppError("Cliente não encontrado", 404, "CLIENT_NOT_FOUND");
-    return formatClient(client);
+    return formatClientEnriched(client);
 }
 async function getClientByKeyValue(keyValue) {
     const client = await client_repository_1.clientRepository.findByKeyValue(keyValue);
     if (!client)
         throw new AppError_1.AppError("Cliente não encontrado", 404, "CLIENT_NOT_FOUND");
-    return formatClient(client);
+    return formatClientEnriched(client);
 }
 async function getClientByUsername(username) {
     const client = await client_repository_1.clientRepository.findByUsername(username.trim());
     if (!client)
         throw new AppError_1.AppError("Cliente não encontrado", 404, "CLIENT_NOT_FOUND");
-    return formatClient(client);
+    return formatClientEnriched(client);
 }
 async function banClient(id) {
     const client = await client_repository_1.clientRepository.findById(id);
@@ -140,7 +174,10 @@ async function resetClientHwid(id) {
 async function resetClientHwidByLookup(lookup) {
     const client = await resolveClientLookup(lookup);
     await client_repository_1.clientRepository.resetHwid(client.id);
-    return { message: "HWID resetado com sucesso", data: formatClient({ ...client, hwid: null }) };
+    return {
+        message: "HWID resetado com sucesso",
+        data: formatClient({ ...client, hwid: null }, null),
+    };
 }
 async function changeClientPassword(id, password) {
     const client = await client_repository_1.clientRepository.findById(id);
@@ -155,7 +192,7 @@ async function changeClientPasswordByLookup(lookup) {
     const client = await resolveClientLookup(rest);
     const passwordHash = await bcrypt_1.default.hash(password, BCRYPT_ROUNDS);
     await client_repository_1.clientRepository.updatePassword(client.id, passwordHash);
-    return { message: "Senha alterada com sucesso", data: formatClient(client) };
+    return { message: "Senha alterada com sucesso", data: await formatClientEnriched(client) };
 }
 async function linkClientDiscord(id, discordId) {
     const client = await client_repository_1.clientRepository.findById(id);
@@ -169,7 +206,7 @@ async function linkClientDiscord(id, discordId) {
     const full = await client_repository_1.clientRepository.findById(updated.id);
     return {
         message: "Discord vinculado com sucesso",
-        data: formatClient(full),
+        data: await formatClientEnriched(full),
     };
 }
 async function linkClientDiscordByLookup(body) {
@@ -190,5 +227,24 @@ async function deleteClient(id) {
         throw new AppError_1.AppError("Cliente não encontrado", 404, "CLIENT_NOT_FOUND");
     await client_repository_1.clientRepository.delete(id);
     return { message: "Cliente deletado com sucesso" };
+}
+/** Normaliza HWIDs inválidos/placeholder gravados antes da correção. */
+async function repairInvalidClientHwids() {
+    const clients = await client_1.default.client.findMany({
+        where: { hwid: { not: null } },
+        select: { id: true, hwid: true },
+    });
+    let fixed = 0;
+    for (const row of clients) {
+        const normalized = (0, hwid_1.normalizeHwid)(row.hwid);
+        if (row.hwid !== normalized) {
+            await client_1.default.client.update({
+                where: { id: row.id },
+                data: { hwid: normalized },
+            });
+            fixed += 1;
+        }
+    }
+    return { message: "HWIDs reparados", fixed, scanned: clients.length };
 }
 //# sourceMappingURL=client.service.js.map

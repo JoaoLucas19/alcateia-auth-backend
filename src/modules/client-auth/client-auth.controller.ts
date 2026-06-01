@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { AppError } from "../../utils/AppError";
+import { extractHwidFromBody } from "../../utils/hwid";
 import { loginClientService, registerClientService } from "./client-auth.service";
 
 function clientError(res: Response, err: unknown): void {
@@ -30,7 +31,7 @@ export async function clientRegister(req: Request, res: Response, _next: NextFun
       username: req.body.username,
       password: req.body.password,
       license: req.body.license,
-      hwid: req.body.hwid ?? "",
+      hwid: extractHwidFromBody(req.body as Record<string, unknown>),
       ipAddress,
     });
 
@@ -54,7 +55,7 @@ export async function clientLogin(req: Request, res: Response, _next: NextFuncti
     const result = await loginClientService({
       username: req.body.username,
       password: req.body.password,
-      hwid: req.body.hwid ?? "",
+      hwid: extractHwidFromBody(req.body as Record<string, unknown>),
       ipAddress,
     });
 

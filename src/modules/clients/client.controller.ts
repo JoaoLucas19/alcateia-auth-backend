@@ -15,7 +15,27 @@ import {
   linkClientDiscordByLookup,
   unlinkClientDiscord,
   deleteClient,
+  getClientsSummary,
+  repairInvalidClientHwids,
 } from "./client.service";
+
+export async function summary(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await getClientsSummary();
+    res.status(200).json({ data });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function repairHwids(req: Request, res: Response, next: NextFunction) {
+  try {
+    const result = await repairInvalidClientHwids();
+    res.status(200).json(result);
+  } catch (err) {
+    next(err);
+  }
+}
 
 export async function list(req: Request, res: Response, next: NextFunction) {
   try {

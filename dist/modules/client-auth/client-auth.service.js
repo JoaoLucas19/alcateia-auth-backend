@@ -12,6 +12,7 @@ const logger_1 = require("../../utils/logger");
 const client_2 = require("@prisma/client");
 const discord_dispatcher_1 = require("../notifications/discord.dispatcher");
 const banned_hwid_service_1 = require("../banned-hwid/banned-hwid.service");
+const hwid_1 = require("../../utils/hwid");
 const DEFAULT_SUBSCRIPTION_DAYS = 30;
 const BCRYPT_ROUNDS = 12;
 /** Data sentinela para keys permanentes (expiresAt null no painel). */
@@ -88,7 +89,7 @@ async function logClientAccess(data) {
             clientId: data.clientId ?? null,
             usernameAttempted: data.username,
             ipAddress: data.ipAddress,
-            hwid: data.hwid || null,
+            hwid: (0, hwid_1.normalizeHwid)(data.hwid) ?? null,
             action: data.action,
             success: data.success,
             reason: data.reason ?? null,
@@ -97,7 +98,8 @@ async function logClientAccess(data) {
 }
 async function registerClientService(input) {
     const { username, password, license, hwid, ipAddress } = input;
-    await assertHwidNotBanned(hwid, { username, ipAddress, action: "REGISTER" });
+    const normalizedHwid = (0, hwid_1.normalizeHwid)(hwid);
+    await assertHwidNotBanned(normalizedHwid ?? "", { username, ipAddress, action: "REGISTER" });
     const key = await client_1.default.key.findUnique({
         where: { value: license.trim() },
         include: { product: true, client: true },
@@ -193,7 +195,7 @@ async function registerClientService(input) {
             data: {
                 username,
                 passwordHash,
-                hwid,
+                hwid: normalizedHwid,
                 expiresAt,
                 keyId: key.id,
                 loginCount: 1,
@@ -236,7 +238,8 @@ async function registerClientService(input) {
 }
 async function loginClientService(input) {
     const { username, password, hwid, ipAddress } = input;
-    await assertHwidNotBanned(hwid, { username, ipAddress, action: "LOGIN" });
+    const incomingHwid = (0, hwid_1.normalizeHwid)(hwid);
+    await assertHwidNotBanned(incomingHwid ?? "", { username, ipAddress, action: "LOGIN" });
     const client = await client_1.default.client.findUnique({
         where: { username },
         include: { key: { include: { product: true } } },
@@ -302,13 +305,14 @@ async function loginClientService(input) {
         });
         throw new AppError_1.AppError("Licenca revogada", 403, "KEY_REVOKED");
     }
-    if (client.hwid && client.hwid !== hwid) {
+    const storedHwid = (0, hwid_1.normalizeHwid)(client.hwid);
+    if ((0, hwid_1.isHwidBound)(storedHwid) && incomingHwid && !(0, hwid_1.hwidsEqual)(storedHwid, incomingHwid)) {
         await logKeyAttempt(client.keyId, ipAddress, client_2.ValidationResult.INVALID_KEY);
         await logClientAccess({
             clientId: client.id,
             username,
             ipAddress,
-            hwid,
+            hwid: incomingHwid,
             action: "LOGIN",
             success: false,
             reason: "HWID_MISMATCH",
@@ -323,8 +327,20 @@ async function loginClientService(input) {
         });
         throw new AppError_1.AppError("HWID nao autorizado", 403, "HWID_MISMATCH");
     }
+    if ((0, hwid_1.isHwidBound)(storedHwid) && !incomingHwid) {
+        await logClientAccess({
+            clientId: client.id,
+            username,
+            ipAddress,
+            hwid: null,
+            action: "LOGIN",
+            success: false,
+            reason: "HWID_MISSING",
+        });
+        throw new AppError_1.AppError("HWID nao enviado pelo cliente. Atualize o loader ou reinstale o cheat.", 403, "HWID_MISSING");
+    }
     const clientUpdate = {
-        hwid: client.hwid ?? hwid,
+        hwid: storedHwid ?? incomingHwid,
         lastLoginAt: new Date(),
         loginCount: { increment: 1 },
     };

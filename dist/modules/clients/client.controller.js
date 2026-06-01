@@ -1,5 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.summary = summary;
+exports.repairHwids = repairHwids;
 exports.list = list;
 exports.getByDiscord = getByDiscord;
 exports.getByKey = getByKey;
@@ -16,6 +18,24 @@ exports.linkDiscordLookup = linkDiscordLookup;
 exports.unlinkDiscord = unlinkDiscord;
 exports.remove = remove;
 const client_service_1 = require("./client.service");
+async function summary(req, res, next) {
+    try {
+        const data = await (0, client_service_1.getClientsSummary)();
+        res.status(200).json({ data });
+    }
+    catch (err) {
+        next(err);
+    }
+}
+async function repairHwids(req, res, next) {
+    try {
+        const result = await (0, client_service_1.repairInvalidClientHwids)();
+        res.status(200).json(result);
+    }
+    catch (err) {
+        next(err);
+    }
+}
 async function list(req, res, next) {
     try {
         const page = Math.max(1, parseInt(req.query.page) || 1);

@@ -14,6 +14,8 @@ router.get("/by-username/:username", client_controller_1.getByUsername);
 router.post("/reset-hwid", (0, validate_middleware_1.validate)(client_schemas_1.clientLookupSchema), client_controller_1.resetHwidLookup);
 router.post("/change-password", (0, validate_middleware_1.validate)(client_schemas_1.changePasswordSchema), client_controller_1.changePasswordLookup);
 router.post("/link-discord", (0, validate_middleware_1.validate)(client_schemas_1.linkDiscordLookupSchema), client_controller_1.linkDiscordLookup);
+router.get("/summary", client_controller_1.summary);
+router.post("/repair-hwids", client_controller_1.repairHwids);
 router.get("/", client_controller_1.list);
 router.get("/:id", client_controller_1.getOne);
 router.patch("/:id/password", (0, validate_middleware_1.validate)(client_schemas_1.patchPasswordSchema), client_controller_1.changePassword);
