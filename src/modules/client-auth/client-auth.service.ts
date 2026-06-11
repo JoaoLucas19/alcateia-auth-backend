@@ -262,6 +262,8 @@ export async function registerClientService(input: ClientRegisterInput) {
         activatedAt: new Date(),
         expiresAt,
         isPermanent: key.isPermanent,
+        // Vincula o nome do cliente que registrou a key (visível na listagem de usuários)
+        customerName: key.customerName ?? username,
       },
     });
 

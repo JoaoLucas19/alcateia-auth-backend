@@ -49,6 +49,8 @@ export const keyRepository = {
         OR: [
           { value: { contains: search } },
           { customerEmail: { contains: search } },
+          { customerName: { contains: search } },
+          { client: { username: { contains: search } } },
         ],
       }),
     };
@@ -61,6 +63,7 @@ export const keyRepository = {
         include: {
           product: { select: { name: true } },
           createdBy: { select: { username: true } },
+          client: { select: { username: true } },
         },
         orderBy: { createdAt: "desc" },
       }),
@@ -87,6 +90,7 @@ export const keyRepository = {
             username: true,
           },
         },
+        client: { select: { username: true } },
         usageLogs: {
           orderBy: {
             attemptedAt: "desc",

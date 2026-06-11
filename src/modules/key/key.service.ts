@@ -133,6 +133,9 @@ export async function listKeys(filters: {
     ...result,
     data: result.data.map((key) => ({
       ...key,
+      // Nome do cliente que registrou a key (fallback p/ keys antigas sem customerName)
+      customerName: key.customerName ?? key.client?.username ?? null,
+      registeredUsername: key.client?.username ?? null,
       canDelete: canDeleteKey(key),
     })),
   };
@@ -145,7 +148,12 @@ export async function getKey(id: string) {
   if (!key)
     throw new AppError("Key não encontrada", 404, "KEY_NOT_FOUND");
 
-  return { ...key, canDelete: canDeleteKey(key) };
+  return {
+    ...key,
+    customerName: key.customerName ?? key.client?.username ?? null,
+    registeredUsername: key.client?.username ?? null,
+    canDelete: canDeleteKey(key),
+  };
 }
 
 export async function revokeKey(id: string) {
