@@ -7,6 +7,10 @@ import {
 } from "./log.analytics";
 import { logRepository } from "./log.repository";
 import type { LoginStatsBlock, UnifiedFailedLogin } from "./log.types";
+import { logger } from "../../utils/logger";
+
+const FAILED_LOGIN_RETENTION_HOURS = 24;
+let cleanupInFlight = false;
 
 function mapLoginStats(
   rows: { success: boolean; _count: number }[],
@@ -109,13 +113,46 @@ async function evaluateSecurityFromRaw(raw: Awaited<ReturnType<typeof logReposit
   return { alerts, threatLevel, threatScore, suspiciousIps, adminLogins, clientLogins };
 }
 
+function retentionCutoff(hours = FAILED_LOGIN_RETENTION_HOURS): Date {
+  return new Date(Date.now() - hours * 60 * 60 * 1000);
+}
+
+async function cleanupOldFailedLogins(): Promise<void> {
+  if (cleanupInFlight) return;
+  cleanupInFlight = true;
+  try {
+    const result = await logRepository.deleteOldFailedLogins(retentionCutoff());
+    if (result.total > 0) {
+      logger.info("Logins falhos antigos removidos", result);
+    }
+  } catch (err) {
+    logger.error("Falha ao limpar logins falhos antigos", {
+      error: err instanceof Error ? err.message : String(err),
+    });
+  } finally {
+    cleanupInFlight = false;
+  }
+}
+
+/** Limpeza explícita (admin/bot) — retorna contagens */
+export async function runCleanupFailedLogins(hours = FAILED_LOGIN_RETENTION_HOURS) {
+  const result = await logRepository.deleteOldFailedLogins(retentionCutoff(hours));
+  return {
+    ...result,
+    retentionHours: hours,
+    message: "Limpeza de logins falhos concluída",
+  };
+}
+
 export const logService = {
+  cleanupOldFailedLogins,
   async evaluateSecurity() {
     const raw = await logRepository.getDashboardStats();
     return evaluateSecurityFromRaw(raw);
   },
 
   async getDashboard() {
+    await cleanupOldFailedLogins();
     const raw = await logRepository.getDashboardStats();
     const { alerts, threatLevel, threatScore, suspiciousIps, adminLogins, clientLogins } =
       await evaluateSecurityFromRaw(raw);
@@ -227,9 +264,8 @@ export const logService = {
     ip?: string;
     hours?: number;
   }) {
-    const since = params.hours
-      ? new Date(Date.now() - params.hours * 60 * 60 * 1000)
-      : undefined;
+    const hours = params.hours ?? FAILED_LOGIN_RETENTION_HOURS;
+    const since = new Date(Date.now() - hours * 60 * 60 * 1000);
 
     const result = await logRepository.findUnifiedFailedLogins({
       page: params.page,

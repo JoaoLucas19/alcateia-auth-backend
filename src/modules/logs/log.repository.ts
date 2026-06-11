@@ -310,12 +310,12 @@ export const logRepository = {
         take: 15,
       }),
       prisma.accessLog.findMany({
-        where: { success: false },
+        where: { success: false, createdAt: { gte: since24h } },
         orderBy: { createdAt: "desc" },
         take: 25,
       }),
       prisma.clientAccessLog.findMany({
-        where: { success: false },
+        where: { success: false, createdAt: { gte: since24h } },
         orderBy: { createdAt: "desc" },
         take: 25,
       }),
@@ -351,6 +351,24 @@ export const logRepository = {
       recentAdminFailed,
       recentClientFailed,
       keysSummary: parseKeysSummary(keysByStatus),
+    };
+  },
+
+  /** Remove tentativas de login falhas mais antigas que o limite informado. */
+  deleteOldFailedLogins: async (olderThan: Date) => {
+    const [adminDeleted, clientDeleted] = await Promise.all([
+      prisma.accessLog.deleteMany({
+        where: { success: false, createdAt: { lt: olderThan } },
+      }),
+      prisma.clientAccessLog.deleteMany({
+        where: { success: false, createdAt: { lt: olderThan } },
+      }),
+    ]);
+
+    return {
+      adminDeleted: adminDeleted.count,
+      clientDeleted: clientDeleted.count,
+      total: adminDeleted.count + clientDeleted.count,
     };
   },
 

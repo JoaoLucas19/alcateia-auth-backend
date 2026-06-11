@@ -17,6 +17,7 @@ import clientRoutes from "./modules/clients/client.routes"; // Nova rota adicion
 import notificationRoutes from "./modules/notifications/notification.routes";
 import bannedHwidRoutes from "./modules/banned-hwid/banned-hwid.routes";
 import { startDiscordAlertPoller } from "./modules/notifications/discord.poller";
+import { startFailedLoginCleanup } from "./modules/logs/failed-login-cleanup";
 
 const app = express();
 
@@ -164,6 +165,7 @@ app.use(errorHandler);
  */
 app.listen(env.PORT, () => {
   startDiscordAlertPoller();
+  startFailedLoginCleanup();
 
   console.log(`
 ========================================
