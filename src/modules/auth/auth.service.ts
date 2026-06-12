@@ -5,7 +5,7 @@ import { AppError } from "../../utils/AppError";
 import { logger } from "../../utils/logger";
 import { env } from "../../config/env";
 import { evaluateAutoBlock } from "../security/ip-block.service";
-import { notifyAdminLoginFailed } from "../logs/log-alerts.service";
+import { notifyAdminLoginFailed, notifyAdminLoginSuccess } from "../logs/log-alerts.service";
 import { logRepository } from "../logs/log.repository";
 
 interface LoginInput {
@@ -56,6 +56,8 @@ export async function loginService({ username, password, ip }: LoginInput) {
 
   logger.info("Login bem-sucedido", { adminId: admin.id, ip });
 
+  void notifyAdminLoginSuccess({ username: admin.username, ip });
+
   const token = jwt.sign(
     { id: admin.id, username: admin.username },
     env.JWT_SECRET,
@@ -63,4 +65,22 @@ export async function loginService({ username, password, ip }: LoginInput) {
   );
 
   return { token, expiresIn: env.JWT_EXPIRES_IN, admin: { id: admin.id, username: admin.username } };
+}
+
+export async function logoutService(params: {
+  adminId: string;
+  username: string;
+  ip: string;
+}): Promise<void> {
+  await prisma.accessLog.create({
+    data: {
+      adminId: params.adminId,
+      usernameAttempted: params.username,
+      ipAddress: params.ip,
+      success: true,
+      reason: "LOGOUT",
+    },
+  });
+
+  logger.info("Logout registrado", { adminId: params.adminId, ip: params.ip });
 }

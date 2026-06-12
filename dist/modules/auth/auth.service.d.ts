@@ -11,4 +11,9 @@ export declare function loginService({ username, password, ip }: LoginInput): Pr
         username: string;
     };
 }>;
+export declare function logoutService(params: {
+    adminId: string;
+    username: string;
+    ip: string;
+}): Promise<void>;
 export {};

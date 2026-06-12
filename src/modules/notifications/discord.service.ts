@@ -116,3 +116,35 @@ export async function sendDiscordTest(): Promise<boolean> {
     ],
   });
 }
+
+/** Login/logout do painel admin — canal separado dos alertas de ameaça */
+export async function sendAuthSessionNotification(params: {
+  event: "LOGIN" | "LOGOUT";
+  username: string;
+  ip: string;
+}): Promise<boolean> {
+  const cfg = await resolveNotificationDeliveryConfig();
+  if (!cfg.configured) return false;
+
+  const isLogin = params.event === "LOGIN";
+
+  return sendDiscordMessage({
+    content: isLogin
+      ? "✅ **Alcateia Auth** — Login no painel"
+      : "👋 **Alcateia Auth** — Logout do painel",
+    embeds: [
+      {
+        title: isLogin ? "Admin autenticado" : "Sessão encerrada",
+        description: isLogin
+          ? `**${params.username}** entrou no painel admin.`
+          : `**${params.username}** saiu do painel admin.`,
+        color: isLogin ? 0x34c759 : 0x636366,
+        fields: [
+          { name: "Usuário", value: params.username, inline: true },
+          { name: "IP", value: params.ip, inline: true },
+        ],
+        timestamp: new Date().toISOString(),
+      },
+    ],
+  });
+}

@@ -21,3 +21,11 @@ export declare function notifyKeyScanning(params: {
     ip: string;
     invalidAttempts: number;
 }): Promise<void>;
+export declare function notifyAdminLoginSuccess(params: {
+    username: string;
+    ip: string;
+}): Promise<void>;
+export declare function notifyAdminLogout(params: {
+    username: string;
+    ip: string;
+}): Promise<void>;

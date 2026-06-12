@@ -1,5 +1,5 @@
 export type ThreatLevel = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
-export type SecurityAlertType = "BRUTE_FORCE_IP" | "BRUTE_FORCE_USERNAME" | "HIGH_FAILURE_RATE" | "KEY_SCANNING" | "MULTI_IP_USERNAME" | "SPIKE_FAILURES" | "HWID_MISMATCH" | "CLIENT_LOGIN_FAILED" | "ADMIN_LOGIN_FAILED" | "IP_BLOCKED";
+export type SecurityAlertType = "BRUTE_FORCE_IP" | "BRUTE_FORCE_USERNAME" | "HIGH_FAILURE_RATE" | "KEY_SCANNING" | "MULTI_IP_USERNAME" | "SPIKE_FAILURES" | "HWID_MISMATCH" | "CLIENT_LOGIN_FAILED" | "ADMIN_LOGIN_FAILED" | "IP_BLOCKED" | "ADMIN_LOGIN_SUCCESS" | "ADMIN_LOGOUT";
 export interface SecurityAlert {
     type: SecurityAlertType;
     severity: ThreatLevel;

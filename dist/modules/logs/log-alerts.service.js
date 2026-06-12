@@ -4,7 +4,11 @@ exports.notifyAdminLoginFailed = notifyAdminLoginFailed;
 exports.notifyClientLoginFailed = notifyClientLoginFailed;
 exports.notifyIpBlocked = notifyIpBlocked;
 exports.notifyKeyScanning = notifyKeyScanning;
+exports.notifyAdminLoginSuccess = notifyAdminLoginSuccess;
+exports.notifyAdminLogout = notifyAdminLogout;
 const discord_dispatcher_1 = require("../notifications/discord.dispatcher");
+const discord_service_1 = require("../notifications/discord.service");
+const env_1 = require("../../config/env");
 const log_formatters_1 = require("./log.formatters");
 const cooldownUntil = new Map();
 const IMMEDIATE_COOLDOWN_MS = 5 * 60 * 1000;
@@ -85,5 +89,42 @@ async function notifyKeyScanning(params) {
         count: params.invalidAttempts,
         detectedAt: new Date().toISOString(),
     }, 10 * 60 * 1000);
+}
+const authSessionCooldown = new Map();
+const AUTH_SESSION_COOLDOWN_MS = 60000;
+function authSessionKey(event, username) {
+    return `${event}|${username}`;
+}
+async function notifyAdminLoginSuccess(params) {
+    if (!env_1.env.DISCORD_NOTIFY_AUTH_SESSIONS)
+        return;
+    const key = authSessionKey("LOGIN", params.username);
+    const until = authSessionCooldown.get(key);
+    if (until && Date.now() < until)
+        return;
+    const sent = await (0, discord_service_1.sendAuthSessionNotification)({
+        event: "LOGIN",
+        username: params.username,
+        ip: params.ip,
+    });
+    if (sent) {
+        authSessionCooldown.set(key, Date.now() + AUTH_SESSION_COOLDOWN_MS);
+    }
+}
+async function notifyAdminLogout(params) {
+    if (!env_1.env.DISCORD_NOTIFY_AUTH_SESSIONS)
+        return;
+    const key = authSessionKey("LOGOUT", params.username);
+    const until = authSessionCooldown.get(key);
+    if (until && Date.now() < until)
+        return;
+    const sent = await (0, discord_service_1.sendAuthSessionNotification)({
+        event: "LOGOUT",
+        username: params.username,
+        ip: params.ip,
+    });
+    if (sent) {
+        authSessionCooldown.set(key, Date.now() + AUTH_SESSION_COOLDOWN_MS);
+    }
 }
 //# sourceMappingURL=log-alerts.service.js.map

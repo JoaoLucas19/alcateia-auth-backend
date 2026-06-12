@@ -17,6 +17,8 @@ export declare const env: {
     DISCORD_NOTIFY_BRUTE_FORCE: boolean;
     DISCORD_NOTIFY_KEY_SCANNING: boolean;
     DISCORD_NOTIFY_HIGH_THREAT: boolean;
+    /** Notificar login/logout de admin no Discord */
+    DISCORD_NOTIFY_AUTH_SESSIONS: boolean;
     /** Limite do body JSON (kb) */
     BODY_LIMIT_KB: number;
     /** Janela de análise de tentativas suspeitas (ms) — padrão 15 min */

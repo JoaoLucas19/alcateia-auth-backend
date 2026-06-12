@@ -8,6 +8,8 @@ const auth_service_1 = require("./auth.service");
 const logger_1 = require("../../utils/logger");
 const client_ip_1 = require("../../utils/client-ip");
 const security_middleware_1 = require("../../middlewares/security.middleware");
+const auth_notifications_1 = require("./auth-notifications");
+const log_alerts_service_1 = require("../logs/log-alerts.service");
 async function login(req, res, next) {
     try {
         const ip = (0, client_ip_1.getClientIp)(req);
@@ -18,6 +20,7 @@ async function login(req, res, next) {
             token: result.token,
             admin: result.admin,
             expiresIn: result.expiresIn,
+            notification: (0, auth_notifications_1.buildLoginNotification)(result.admin.username),
         });
     }
     catch (err) {
@@ -26,8 +29,19 @@ async function login(req, res, next) {
     }
 }
 async function logout(req, res) {
-    logger_1.logger.info("Logout", { adminId: req.admin?.id });
-    res.status(200).json({ success: true, message: "Logout realizado com sucesso" });
+    const ip = (0, client_ip_1.getClientIp)(req);
+    const admin = req.admin;
+    const username = admin?.username ?? "Admin";
+    if (admin) {
+        await (0, auth_service_1.logoutService)({ adminId: admin.id, username: admin.username, ip });
+        void (0, log_alerts_service_1.notifyAdminLogout)({ username: admin.username, ip });
+    }
+    logger_1.logger.info("Logout", { adminId: admin?.id, ip });
+    res.status(200).json({
+        success: true,
+        message: "Logout realizado com sucesso",
+        notification: (0, auth_notifications_1.buildLogoutNotification)(username),
+    });
 }
 async function me(req, res) {
     res.status(200).json({

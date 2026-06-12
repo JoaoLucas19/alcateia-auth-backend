@@ -48,6 +48,9 @@ export const env = {
     DISCORD_NOTIFY_KEY_SCANNING: process.env.DISCORD_NOTIFY_KEY_SCANNING !== "false",
     DISCORD_NOTIFY_HIGH_THREAT: process.env.DISCORD_NOTIFY_HIGH_THREAT !== "false",
 
+    /** Notificar login/logout de admin no Discord */
+    DISCORD_NOTIFY_AUTH_SESSIONS: process.env.DISCORD_NOTIFY_AUTH_SESSIONS !== "false",
+
     /** Limite do body JSON (kb) */
     BODY_LIMIT_KB: Number(process.env.BODY_LIMIT_KB || 32),
 

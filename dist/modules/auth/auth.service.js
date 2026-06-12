@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loginService = loginService;
+exports.logoutService = logoutService;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const client_1 = __importDefault(require("../../prisma/client"));
@@ -47,7 +48,20 @@ async function loginService({ username, password, ip }) {
         data: { adminId: admin.id, usernameAttempted: username, ipAddress: ip, success: true },
     });
     logger_1.logger.info("Login bem-sucedido", { adminId: admin.id, ip });
+    void (0, log_alerts_service_1.notifyAdminLoginSuccess)({ username: admin.username, ip });
     const token = jsonwebtoken_1.default.sign({ id: admin.id, username: admin.username }, env_1.env.JWT_SECRET, { expiresIn: env_1.env.JWT_EXPIRES_IN });
     return { token, expiresIn: env_1.env.JWT_EXPIRES_IN, admin: { id: admin.id, username: admin.username } };
+}
+async function logoutService(params) {
+    await client_1.default.accessLog.create({
+        data: {
+            adminId: params.adminId,
+            usernameAttempted: params.username,
+            ipAddress: params.ip,
+            success: true,
+            reason: "LOGOUT",
+        },
+    });
+    logger_1.logger.info("Logout registrado", { adminId: params.adminId, ip: params.ip });
 }
 //# sourceMappingURL=auth.service.js.map

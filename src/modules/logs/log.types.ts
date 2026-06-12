@@ -10,7 +10,9 @@ export type SecurityAlertType =
   | "HWID_MISMATCH"
   | "CLIENT_LOGIN_FAILED"
   | "ADMIN_LOGIN_FAILED"
-  | "IP_BLOCKED";
+  | "IP_BLOCKED"
+  | "ADMIN_LOGIN_SUCCESS"
+  | "ADMIN_LOGOUT";
 
 export interface SecurityAlert {
   type: SecurityAlertType;

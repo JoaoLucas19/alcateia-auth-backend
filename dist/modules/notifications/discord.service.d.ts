@@ -22,3 +22,9 @@ export declare function sendSecuritySummary(payload: {
     topAlerts: SecurityAlert[];
 }): Promise<boolean>;
 export declare function sendDiscordTest(): Promise<boolean>;
+/** Login/logout do painel admin — canal separado dos alertas de ameaça */
+export declare function sendAuthSessionNotification(params: {
+    event: "LOGIN" | "LOGOUT";
+    username: string;
+    ip: string;
+}): Promise<boolean>;

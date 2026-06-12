@@ -5,6 +5,7 @@ exports.sendDiscordMessage = sendDiscordMessage;
 exports.sendSecurityAlert = sendSecurityAlert;
 exports.sendSecuritySummary = sendSecuritySummary;
 exports.sendDiscordTest = sendDiscordTest;
+exports.sendAuthSessionNotification = sendAuthSessionNotification;
 const logger_1 = require("../../utils/logger");
 const notification_config_service_1 = require("./notification-config.service");
 function severityColor(severity) {
@@ -95,6 +96,32 @@ async function sendDiscordTest() {
                 title: "Conexão OK",
                 description: "Notificações Discord configuradas com sucesso.",
                 color: 0x34c759,
+                timestamp: new Date().toISOString(),
+            },
+        ],
+    });
+}
+/** Login/logout do painel admin — canal separado dos alertas de ameaça */
+async function sendAuthSessionNotification(params) {
+    const cfg = await (0, notification_config_service_1.resolveNotificationDeliveryConfig)();
+    if (!cfg.configured)
+        return false;
+    const isLogin = params.event === "LOGIN";
+    return sendDiscordMessage({
+        content: isLogin
+            ? "✅ **Alcateia Auth** — Login no painel"
+            : "👋 **Alcateia Auth** — Logout do painel",
+        embeds: [
+            {
+                title: isLogin ? "Admin autenticado" : "Sessão encerrada",
+                description: isLogin
+                    ? `**${params.username}** entrou no painel admin.`
+                    : `**${params.username}** saiu do painel admin.`,
+                color: isLogin ? 0x34c759 : 0x636366,
+                fields: [
+                    { name: "Usuário", value: params.username, inline: true },
+                    { name: "IP", value: params.ip, inline: true },
+                ],
                 timestamp: new Date().toISOString(),
             },
         ],

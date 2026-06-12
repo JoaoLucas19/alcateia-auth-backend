@@ -1,4 +1,6 @@
 import { dispatchImmediateAlert } from "../notifications/discord.dispatcher";
+import { sendAuthSessionNotification } from "../notifications/discord.service";
+import { env } from "../../config/env";
 import type { SecurityAlert, ThreatLevel } from "./log.types";
 import { reasonLabel } from "./log.formatters";
 
@@ -115,4 +117,53 @@ export async function notifyKeyScanning(params: { ip: string; invalidAttempts: n
     },
     10 * 60 * 1000
   );
+}
+
+const authSessionCooldown = new Map<string, number>();
+const AUTH_SESSION_COOLDOWN_MS = 60_000;
+
+function authSessionKey(event: "LOGIN" | "LOGOUT", username: string): string {
+  return `${event}|${username}`;
+}
+
+export async function notifyAdminLoginSuccess(params: {
+  username: string;
+  ip: string;
+}): Promise<void> {
+  if (!env.DISCORD_NOTIFY_AUTH_SESSIONS) return;
+
+  const key = authSessionKey("LOGIN", params.username);
+  const until = authSessionCooldown.get(key);
+  if (until && Date.now() < until) return;
+
+  const sent = await sendAuthSessionNotification({
+    event: "LOGIN",
+    username: params.username,
+    ip: params.ip,
+  });
+
+  if (sent) {
+    authSessionCooldown.set(key, Date.now() + AUTH_SESSION_COOLDOWN_MS);
+  }
+}
+
+export async function notifyAdminLogout(params: {
+  username: string;
+  ip: string;
+}): Promise<void> {
+  if (!env.DISCORD_NOTIFY_AUTH_SESSIONS) return;
+
+  const key = authSessionKey("LOGOUT", params.username);
+  const until = authSessionCooldown.get(key);
+  if (until && Date.now() < until) return;
+
+  const sent = await sendAuthSessionNotification({
+    event: "LOGOUT",
+    username: params.username,
+    ip: params.ip,
+  });
+
+  if (sent) {
+    authSessionCooldown.set(key, Date.now() + AUTH_SESSION_COOLDOWN_MS);
+  }
 }

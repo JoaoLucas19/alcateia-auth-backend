@@ -16,6 +16,7 @@ const REASON_LABELS: Record<string, string> = {
   USERNAME_TAKEN: "Usuário já cadastrado",
   PRODUCT_INACTIVE: "Produto inativo",
   IP_BLOCKED: "IP bloqueado",
+  LOGOUT: "Logout",
   UNKNOWN: "Desconhecido",
 };
 

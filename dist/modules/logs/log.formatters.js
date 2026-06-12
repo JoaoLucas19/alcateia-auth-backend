@@ -25,6 +25,7 @@ const REASON_LABELS = {
     USERNAME_TAKEN: "Usuário já cadastrado",
     PRODUCT_INACTIVE: "Produto inativo",
     IP_BLOCKED: "IP bloqueado",
+    LOGOUT: "Logout",
     UNKNOWN: "Desconhecido",
 };
 const KEY_RESULT_LABELS = {
