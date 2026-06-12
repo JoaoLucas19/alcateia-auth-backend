@@ -176,6 +176,20 @@ model AccessLog {
 }
 
 /// Config singleton (painel Alcateia) — sobrescreve variáveis de ambiente quando preenchido
+/// UIDs liberados para UID Bypass Free Fire (painel TOXIC)
+model WhitelistedUid {
+  id           String    @id @default(uuid())
+  uid          String    @unique
+  validityDays Int       @default(30)
+  expiresAt    DateTime?
+  isActive     Boolean   @default(true)
+  note         String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("whitelisted_uids")
+}
+
 model NotificationSettings {
   id String @id
 

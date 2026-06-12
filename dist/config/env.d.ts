@@ -42,4 +42,6 @@ export declare const env: {
     /** Rate limit rotas autenticadas do painel */
     AUTH_API_RATE_WINDOW_MS: number;
     AUTH_API_RATE_MAX: number;
+    /** Chave para /uid/add|remove|check do painel UID Bypass */
+    UID_BYPASS_API_KEY: string;
 };

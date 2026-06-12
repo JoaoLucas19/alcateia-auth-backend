@@ -9,16 +9,8 @@ export declare const logRepository: {
         since?: Date;
         until?: Date;
     }) => Promise<{
-        data: {
-            success: boolean;
-            id: string;
-            ipAddress: string;
-            reason: string | null;
-            adminId: string | null;
-            usernameAttempted: string;
-            createdAt: Date;
-        }[];
-        total: number;
+        data: any;
+        total: any;
         page: number;
         totalPages: number;
     }>;
@@ -27,19 +19,8 @@ export declare const logRepository: {
         limit: number;
         result?: string;
     }) => Promise<{
-        data: ({
-            key: {
-                value: string;
-            };
-        } & {
-            id: string;
-            result: import("../../prisma/enums").ValidationResult;
-            ipAddress: string;
-            keyId: string;
-            userAgent: string | null;
-            attemptedAt: Date;
-        })[];
-        total: number;
+        data: any;
+        total: any;
         page: number;
         totalPages: number;
     }>;
@@ -50,138 +31,60 @@ export declare const logRepository: {
         ip?: string;
         since?: Date;
     }) => Promise<{
-        data: ({
-            id: string;
-            source: "admin";
-            username: string;
-            ip: string;
-            reason: string;
-            createdAt: Date;
-        } | {
-            id: string;
-            source: "client";
-            username: string;
-            ip: string;
-            reason: string;
-            action: string;
-            createdAt: Date;
-        })[];
+        data: any[];
         total: number;
         page: number;
         totalPages: number;
     }>;
     getDashboardStats: () => Promise<{
-        keysByStatus: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").KeyGroupByOutputType, "status"[]> & {
-            _count: number;
-        })[];
-        logins24h: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").AccessLogGroupByOutputType, "success"[]> & {
-            _count: number;
-        })[];
-        validations24h: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").KeyUsageLogGroupByOutputType, "result"[]> & {
-            _count: number;
-        })[];
-        topInvalidIps: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").KeyUsageLogGroupByOutputType, "ipAddress"[]> & {
-            _count: number;
-        })[];
-        clientLogins24h: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").ClientAccessLogGroupByOutputType, "success"[]> & {
-            _count: number;
-        })[];
-        adminFailed7d: number;
-        clientFailed7d: number;
-        adminUniqueFailedIps24h: number;
-        clientUniqueFailedIps24h: number;
-        clientsTotal: number;
-        clientsBanned: number;
-        clientsExpired: number;
-        adminFailuresByIp: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").AccessLogGroupByOutputType, "ipAddress"[]> & {
-            _count: number;
-        })[];
-        adminFailuresByUsername: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").AccessLogGroupByOutputType, "usernameAttempted"[]> & {
-            _count: number;
-        })[];
-        adminFailuresByReason: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").AccessLogGroupByOutputType, "reason"[]> & {
-            _count: number;
-        })[];
-        clientFailuresByReason: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").ClientAccessLogGroupByOutputType, "reason"[]> & {
-            _count: number;
-        })[];
-        adminFailuresLastHour: number;
-        adminTimelineRaw: {
-            success: boolean;
-            createdAt: Date;
-        }[];
-        clientTimelineRaw: {
-            success: boolean;
-            createdAt: Date;
-        }[];
-        keyTimelineRaw: {
-            attemptedAt: Date;
-            result: import("../../prisma/enums").ValidationResult;
-        }[];
-        adminFailures24hList: {
-            ipAddress: string;
-            createdAt: Date;
-        }[];
-        clientFailures24hList: {
-            ipAddress: string;
-            createdAt: Date;
-        }[];
-        invalidKeyByIpFull: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").KeyUsageLogGroupByOutputType, "ipAddress"[]> & {
-            _count: number;
-        })[];
-        recentAdminFailed: {
-            success: boolean;
-            id: string;
-            ipAddress: string;
-            reason: string | null;
-            adminId: string | null;
-            usernameAttempted: string;
-            createdAt: Date;
-        }[];
-        recentClientFailed: {
-            success: boolean;
-            id: string;
-            ipAddress: string;
-            reason: string | null;
-            usernameAttempted: string;
-            createdAt: Date;
-            clientId: string | null;
-            hwid: string | null;
-            action: string;
-        }[];
+        keysByStatus: any;
+        logins24h: any;
+        validations24h: any;
+        topInvalidIps: any;
+        clientLogins24h: any;
+        adminFailed7d: any;
+        clientFailed7d: any;
+        adminUniqueFailedIps24h: any;
+        clientUniqueFailedIps24h: any;
+        clientsTotal: any;
+        clientsBanned: any;
+        clientsExpired: any;
+        adminFailuresByIp: any;
+        adminFailuresByUsername: any;
+        adminFailuresByReason: any;
+        clientFailuresByReason: any;
+        adminFailuresLastHour: any;
+        adminTimelineRaw: any;
+        clientTimelineRaw: any;
+        keyTimelineRaw: any;
+        adminFailures24hList: any;
+        clientFailures24hList: any;
+        invalidKeyByIpFull: any;
+        recentAdminFailed: any;
+        recentClientFailed: any;
         keysSummary: KeysSummary;
     }>;
     /** Remove tentativas de login falhas mais antigas que o limite informado. */
     deleteOldFailedLogins: (olderThan: Date) => Promise<{
-        adminDeleted: number;
-        clientDeleted: number;
-        total: number;
+        adminDeleted: any;
+        clientDeleted: any;
+        total: any;
     }>;
     getSecurityDetail: (days?: number) => Promise<{
         periodDays: number;
-        adminByDay: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").AccessLogGroupByOutputType, "success"[]> & {
-            _count: number;
-        })[];
-        clientByDay: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").ClientAccessLogGroupByOutputType, "success"[]> & {
-            _count: number;
-        })[];
-        keyResults: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").KeyUsageLogGroupByOutputType, "result"[]> & {
-            _count: number;
-        })[];
-        topAdminIps: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").AccessLogGroupByOutputType, "ipAddress"[]> & {
-            _count: number;
-        })[];
-        topClientIps: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").ClientAccessLogGroupByOutputType, "ipAddress"[]> & {
-            _count: number;
-        })[];
-        hwidMismatches: number;
+        adminByDay: any;
+        clientByDay: any;
+        keyResults: any;
+        topAdminIps: any;
+        topClientIps: any;
+        hwidMismatches: any;
     }>;
     countAccessLogsInWindow: (since: Date) => Promise<{
-        admin: number;
-        client: number;
-        keys: number;
-        blocks: number;
-        total: number;
+        admin: any;
+        client: any;
+        keys: any;
+        blocks: any;
+        total: any;
     }>;
     findUnifiedLogFeed: (params: {
         since: Date;
@@ -200,128 +103,26 @@ export declare const logRepository: {
         username?: string;
         action?: string;
     }) => Promise<{
-        data: UnifiedLogEntry[];
-        total: number;
+        data: any;
+        total: any;
         page: number;
         totalPages: number;
     }>;
     investigateIp: (ip: string, since: Date) => Promise<{
-        block: {
-            id: string;
-            ipAddress: string;
-            reason: string | null;
-            source: string | null;
-            blockedAt: Date;
-            expiresAt: Date | null;
-        } | null;
-        adminLogs: {
-            success: boolean;
-            id: string;
-            ipAddress: string;
-            reason: string | null;
-            adminId: string | null;
-            usernameAttempted: string;
-            createdAt: Date;
-        }[];
-        clientLogs: {
-            success: boolean;
-            id: string;
-            ipAddress: string;
-            reason: string | null;
-            usernameAttempted: string;
-            createdAt: Date;
-            clientId: string | null;
-            hwid: string | null;
-            action: string;
-        }[];
-        keyLogs: ({
-            key: {
-                value: string;
-            };
-        } & {
-            id: string;
-            result: import("../../prisma/enums").ValidationResult;
-            ipAddress: string;
-            keyId: string;
-            userAgent: string | null;
-            attemptedAt: Date;
-        })[];
+        block: any;
+        adminLogs: any;
+        clientLogs: any;
+        keyLogs: any;
     }>;
     getClientAuditData: (username: string, since: Date, page: number, limit: number) => Promise<{
-        client: ({
-            key: {
-                product: {
-                    id: string;
-                    name: string;
-                    createdAt: Date;
-                    description: string | null;
-                    isActive: boolean;
-                };
-            } & {
-                id: string;
-                expiresAt: Date | null;
-                createdAt: Date;
-                value: string;
-                productId: string;
-                createdById: string;
-                customerEmail: string | null;
-                customerName: string | null;
-                status: import("../../prisma/enums").KeyStatus;
-                isPermanent: boolean;
-                activatedAt: Date | null;
-            };
-        } & {
-            id: string;
-            expiresAt: Date;
-            createdAt: Date;
-            keyId: string;
-            hwid: string | null;
-            isBanned: boolean;
-            username: string;
-            passwordHash: string;
-            discordId: string | null;
-            loginCount: number;
-            lastLoginAt: Date | null;
-        }) | null;
-        logs: {
-            success: boolean;
-            id: string;
-            ipAddress: string;
-            reason: string | null;
-            usernameAttempted: string;
-            createdAt: Date;
-            clientId: string | null;
-            hwid: string | null;
-            action: string;
-        }[];
-        total: number;
-        statsRows: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").ClientAccessLogGroupByOutputType, "success"[]> & {
-            _count: number;
-        })[];
-        uniqueIpCount: number;
-        lastFailure: {
-            success: boolean;
-            id: string;
-            ipAddress: string;
-            reason: string | null;
-            usernameAttempted: string;
-            createdAt: Date;
-            clientId: string | null;
-            hwid: string | null;
-            action: string;
-        } | null;
-        lastSuccess: {
-            success: boolean;
-            id: string;
-            ipAddress: string;
-            reason: string | null;
-            usernameAttempted: string;
-            createdAt: Date;
-            clientId: string | null;
-            hwid: string | null;
-            action: string;
-        } | null;
+        client: any;
+        logs: any;
+        total: any;
+        statsRows: any;
+        uniqueIpCount: any;
+        lastFailure: any;
+        lastSuccess: any;
     }>;
-    countRecentFailuresByIp: (ip: string, since: Date, source: "admin" | "client") => Promise<number>;
-    countRecentInvalidKeysByIp: (ip: string, since: Date) => Promise<number>;
+    countRecentFailuresByIp: (ip: string, since: Date, source: "admin" | "client") => Promise<any>;
+    countRecentInvalidKeysByIp: (ip: string, since: Date) => Promise<any>;
 };

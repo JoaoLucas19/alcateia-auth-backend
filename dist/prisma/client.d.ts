@@ -1,3 +1,2 @@
-import { PrismaClient } from "../generated/prisma/client";
-declare const prisma: PrismaClient;
+declare const prisma: any;
 export default prisma;

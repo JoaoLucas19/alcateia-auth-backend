@@ -57,5 +57,7 @@ exports.env = {
     /** Rate limit rotas autenticadas do painel */
     AUTH_API_RATE_WINDOW_MS: Number(process.env.AUTH_API_RATE_WINDOW_MS || 60 * 1000),
     AUTH_API_RATE_MAX: Number(process.env.AUTH_API_RATE_MAX || 120),
+    /** Chave para /uid/add|remove|check do painel UID Bypass */
+    UID_BYPASS_API_KEY: process.env.UID_BYPASS_API_KEY || "alcateia",
 };
 //# sourceMappingURL=env.js.map

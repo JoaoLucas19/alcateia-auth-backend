@@ -16,6 +16,7 @@ import logRoutes from "./modules/logs/log.routes";
 import clientRoutes from "./modules/clients/client.routes";
 import notificationRoutes from "./modules/notifications/notification.routes";
 import bannedHwidRoutes from "./modules/banned-hwid/banned-hwid.routes";
+import uidBypassRoutes from "./modules/uid-bypass/uid-bypass.routes";
 import { startDiscordAlertPoller } from "./modules/notifications/discord.poller";
 import { startFailedLoginCleanup } from "./modules/logs/failed-login-cleanup";
 
@@ -99,6 +100,9 @@ app.use("/api/auth", authRoutes);
 
 /** Login/cadastro do cliente no cheat (NeverApi C++) */
 app.use("/auth", clientAuthRoutes);
+
+/** Whitelist UID Free Fire — painel TOXIC UID BYPASS */
+app.use("/uid", uidBypassRoutes);
 
 app.use("/api/products", authenticatedApiLimiter, productRoutes);
 app.use("/api/keys", authenticatedApiLimiter, keyRoutes);

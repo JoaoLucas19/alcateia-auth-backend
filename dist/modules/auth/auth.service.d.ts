@@ -7,8 +7,8 @@ export declare function loginService({ username, password, ip }: LoginInput): Pr
     token: string;
     expiresIn: string;
     admin: {
-        id: string;
-        username: string;
+        id: any;
+        username: any;
     };
 }>;
 export declare function logoutService(params: {
