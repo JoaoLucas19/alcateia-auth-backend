@@ -14,6 +14,16 @@ function assertApiKey(key) {
         throw new AppError_1.AppError("Chave invalida", 403, "INVALID_KEY");
     }
 }
+function assertApiKeyForCheck(key) {
+    const k = String(key ?? "").trim();
+    if (!k) {
+        return;
+    }
+    assertApiKey(k);
+}
+function denyText(uid) {
+    return ("ACCESS DENIED. Your UID " + uid + " is NOT whitelisted for UID Bypass. Please contact Owner for assistance.");
+}
 function sendError(res, err) {
     if (err instanceof AppError_1.AppError) {
         res.status(err.statusCode).json({
@@ -54,10 +64,17 @@ async function uidRemove(req, res) {
 }
 async function uidCheck(req, res) {
     try {
-        assertApiKey(String(req.query.key ?? ""));
+        assertApiKeyForCheck(String(req.query.key ?? ""));
         const uid = String(req.query.uid ?? "");
         const result = await (0, uid_bypass_service_1.checkWhitelistedUid)(uid);
         if (!result.whitelisted) {
+            const plain = denyText(uid);
+            const wantsPlain = !String(req.query.key ?? "").trim() ||
+                String(req.headers.accept ?? "").includes("text/plain");
+            if (wantsPlain) {
+                res.status(403).type("text/plain; charset=utf-8").send(plain);
+                return;
+            }
             res.status(403).json({
                 success: false,
                 message: "NOT whitelisted",

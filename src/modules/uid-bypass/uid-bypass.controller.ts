@@ -16,6 +16,23 @@ function assertApiKey(key: string | undefined): void {
   }
 }
 
+/** ToxicUidBypass.dll pode chamar /uid/check sem key. */
+function assertApiKeyForCheck(key: string | undefined): void {
+  const k = String(key ?? "").trim();
+  if (!k) {
+    return;
+  }
+  assertApiKey(k);
+}
+
+function denyText(uid: string): string {
+  return (
+    "ACCESS DENIED. Your UID " +
+    uid +
+    " is NOT whitelisted for UID Bypass. Please contact Owner for assistance."
+  );
+}
+
 function sendError(res: Response, err: unknown): void {
   if (err instanceof AppError) {
     res.status(err.statusCode).json({
@@ -58,10 +75,18 @@ export async function uidRemove(req: Request, res: Response): Promise<void> {
 
 export async function uidCheck(req: Request, res: Response): Promise<void> {
   try {
-    assertApiKey(String(req.query.key ?? ""));
+    assertApiKeyForCheck(String(req.query.key ?? ""));
     const uid = String(req.query.uid ?? "");
     const result = await checkWhitelistedUid(uid);
     if (!result.whitelisted) {
+      const plain = denyText(uid);
+      const wantsPlain =
+        !String(req.query.key ?? "").trim() ||
+        String(req.headers.accept ?? "").includes("text/plain");
+      if (wantsPlain) {
+        res.status(403).type("text/plain; charset=utf-8").send(plain);
+        return;
+      }
       res.status(403).json({
         success: false,
         message: "NOT whitelisted",
