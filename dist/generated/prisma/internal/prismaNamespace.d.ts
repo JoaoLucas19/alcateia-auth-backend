@@ -240,6 +240,7 @@ export declare const ModelName: {
     readonly ClientAccessLog: "ClientAccessLog";
     readonly KeyUsageLog: "KeyUsageLog";
     readonly AccessLog: "AccessLog";
+    readonly WhitelistedUid: "WhitelistedUid";
     readonly NotificationSettings: "NotificationSettings";
 };
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
@@ -253,7 +254,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         omit: GlobalOmitOptions;
     };
     meta: {
-        modelProps: "admin" | "product" | "key" | "client" | "blockedIp" | "bannedHwid" | "clientAccessLog" | "keyUsageLog" | "accessLog" | "notificationSettings";
+        modelProps: "admin" | "product" | "key" | "client" | "blockedIp" | "bannedHwid" | "clientAccessLog" | "keyUsageLog" | "accessLog" | "whitelistedUid" | "notificationSettings";
         txIsolationLevel: TransactionIsolationLevel;
     };
     model: {
@@ -851,6 +852,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
                 };
             };
         };
+        WhitelistedUid: {
+            payload: Prisma.$WhitelistedUidPayload<ExtArgs>;
+            fields: Prisma.WhitelistedUidFieldRefs;
+            operations: {
+                findUnique: {
+                    args: Prisma.WhitelistedUidFindUniqueArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$WhitelistedUidPayload> | null;
+                };
+                findUniqueOrThrow: {
+                    args: Prisma.WhitelistedUidFindUniqueOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$WhitelistedUidPayload>;
+                };
+                findFirst: {
+                    args: Prisma.WhitelistedUidFindFirstArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$WhitelistedUidPayload> | null;
+                };
+                findFirstOrThrow: {
+                    args: Prisma.WhitelistedUidFindFirstOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$WhitelistedUidPayload>;
+                };
+                findMany: {
+                    args: Prisma.WhitelistedUidFindManyArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$WhitelistedUidPayload>[];
+                };
+                create: {
+                    args: Prisma.WhitelistedUidCreateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$WhitelistedUidPayload>;
+                };
+                createMany: {
+                    args: Prisma.WhitelistedUidCreateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                delete: {
+                    args: Prisma.WhitelistedUidDeleteArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$WhitelistedUidPayload>;
+                };
+                update: {
+                    args: Prisma.WhitelistedUidUpdateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$WhitelistedUidPayload>;
+                };
+                deleteMany: {
+                    args: Prisma.WhitelistedUidDeleteManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateMany: {
+                    args: Prisma.WhitelistedUidUpdateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                upsert: {
+                    args: Prisma.WhitelistedUidUpsertArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$WhitelistedUidPayload>;
+                };
+                aggregate: {
+                    args: Prisma.WhitelistedUidAggregateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.AggregateWhitelistedUid>;
+                };
+                groupBy: {
+                    args: Prisma.WhitelistedUidGroupByArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.WhitelistedUidGroupByOutputType>[];
+                };
+                count: {
+                    args: Prisma.WhitelistedUidCountArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.WhitelistedUidCountAggregateOutputType> | number;
+                };
+            };
+        };
         NotificationSettings: {
             payload: Prisma.$NotificationSettingsPayload<ExtArgs>;
             fields: Prisma.NotificationSettingsFieldRefs;
@@ -1042,6 +1109,17 @@ export declare const AccessLogScalarFieldEnum: {
     readonly createdAt: "createdAt";
 };
 export type AccessLogScalarFieldEnum = (typeof AccessLogScalarFieldEnum)[keyof typeof AccessLogScalarFieldEnum];
+export declare const WhitelistedUidScalarFieldEnum: {
+    readonly id: "id";
+    readonly uid: "uid";
+    readonly validityDays: "validityDays";
+    readonly expiresAt: "expiresAt";
+    readonly isActive: "isActive";
+    readonly note: "note";
+    readonly createdAt: "createdAt";
+    readonly updatedAt: "updatedAt";
+};
+export type WhitelistedUidScalarFieldEnum = (typeof WhitelistedUidScalarFieldEnum)[keyof typeof WhitelistedUidScalarFieldEnum];
 export declare const NotificationSettingsScalarFieldEnum: {
     readonly id: "id";
     readonly discordWebhookUrl: "discordWebhookUrl";
@@ -1131,6 +1209,12 @@ export declare const AccessLogOrderByRelevanceFieldEnum: {
     readonly reason: "reason";
 };
 export type AccessLogOrderByRelevanceFieldEnum = (typeof AccessLogOrderByRelevanceFieldEnum)[keyof typeof AccessLogOrderByRelevanceFieldEnum];
+export declare const WhitelistedUidOrderByRelevanceFieldEnum: {
+    readonly id: "id";
+    readonly uid: "uid";
+    readonly note: "note";
+};
+export type WhitelistedUidOrderByRelevanceFieldEnum = (typeof WhitelistedUidOrderByRelevanceFieldEnum)[keyof typeof WhitelistedUidOrderByRelevanceFieldEnum];
 export declare const NotificationSettingsOrderByRelevanceFieldEnum: {
     readonly id: "id";
     readonly discordWebhookUrl: "discordWebhookUrl";
@@ -1285,6 +1369,7 @@ export type GlobalOmitConfig = {
     clientAccessLog?: Prisma.ClientAccessLogOmit;
     keyUsageLog?: Prisma.KeyUsageLogOmit;
     accessLog?: Prisma.AccessLogOmit;
+    whitelistedUid?: Prisma.WhitelistedUidOmit;
     notificationSettings?: Prisma.NotificationSettingsOmit;
 };
 export type LogLevel = 'info' | 'query' | 'warn' | 'error';

@@ -7,5 +7,6 @@ export type * from './models/BannedHwid';
 export type * from './models/ClientAccessLog';
 export type * from './models/KeyUsageLog';
 export type * from './models/AccessLog';
+export type * from './models/WhitelistedUid';
 export type * from './models/NotificationSettings';
 export type * from './commonInputTypes';

@@ -217,6 +217,17 @@ export interface PrismaClient<in LogOpts extends Prisma.LogLevel = never, in out
         omit: OmitOpts;
     }>;
     /**
+     * `prisma.whitelistedUid`: Exposes CRUD operations for the **WhitelistedUid** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more WhitelistedUids
+      * const whitelistedUids = await prisma.whitelistedUid.findMany()
+      * ```
+      */
+    get whitelistedUid(): Prisma.WhitelistedUidDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
      * `prisma.notificationSettings`: Exposes CRUD operations for the **NotificationSettings** model.
       * Example usage:
       * ```ts

@@ -48,7 +48,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.NotificationSettingsOrderByRelevanceFieldEnum = exports.AccessLogOrderByRelevanceFieldEnum = exports.KeyUsageLogOrderByRelevanceFieldEnum = exports.ClientAccessLogOrderByRelevanceFieldEnum = exports.BannedHwidOrderByRelevanceFieldEnum = exports.BlockedIpOrderByRelevanceFieldEnum = exports.ClientOrderByRelevanceFieldEnum = exports.KeyOrderByRelevanceFieldEnum = exports.ProductOrderByRelevanceFieldEnum = exports.AdminOrderByRelevanceFieldEnum = exports.NullsOrder = exports.SortOrder = exports.NotificationSettingsScalarFieldEnum = exports.AccessLogScalarFieldEnum = exports.KeyUsageLogScalarFieldEnum = exports.ClientAccessLogScalarFieldEnum = exports.BannedHwidScalarFieldEnum = exports.BlockedIpScalarFieldEnum = exports.ClientScalarFieldEnum = exports.KeyScalarFieldEnum = exports.ProductScalarFieldEnum = exports.AdminScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
+exports.NotificationSettingsOrderByRelevanceFieldEnum = exports.WhitelistedUidOrderByRelevanceFieldEnum = exports.AccessLogOrderByRelevanceFieldEnum = exports.KeyUsageLogOrderByRelevanceFieldEnum = exports.ClientAccessLogOrderByRelevanceFieldEnum = exports.BannedHwidOrderByRelevanceFieldEnum = exports.BlockedIpOrderByRelevanceFieldEnum = exports.ClientOrderByRelevanceFieldEnum = exports.KeyOrderByRelevanceFieldEnum = exports.ProductOrderByRelevanceFieldEnum = exports.AdminOrderByRelevanceFieldEnum = exports.NullsOrder = exports.SortOrder = exports.NotificationSettingsScalarFieldEnum = exports.WhitelistedUidScalarFieldEnum = exports.AccessLogScalarFieldEnum = exports.KeyUsageLogScalarFieldEnum = exports.ClientAccessLogScalarFieldEnum = exports.BannedHwidScalarFieldEnum = exports.BlockedIpScalarFieldEnum = exports.ClientScalarFieldEnum = exports.KeyScalarFieldEnum = exports.ProductScalarFieldEnum = exports.AdminScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
 const runtime = __importStar(require("@prisma/client/runtime/index-browser"));
 exports.Decimal = runtime.Decimal;
 exports.NullTypes = {
@@ -84,6 +84,7 @@ exports.ModelName = {
     ClientAccessLog: 'ClientAccessLog',
     KeyUsageLog: 'KeyUsageLog',
     AccessLog: 'AccessLog',
+    WhitelistedUid: 'WhitelistedUid',
     NotificationSettings: 'NotificationSettings'
 };
 /*
@@ -177,6 +178,16 @@ exports.AccessLogScalarFieldEnum = {
     reason: 'reason',
     createdAt: 'createdAt'
 };
+exports.WhitelistedUidScalarFieldEnum = {
+    id: 'id',
+    uid: 'uid',
+    validityDays: 'validityDays',
+    expiresAt: 'expiresAt',
+    isActive: 'isActive',
+    note: 'note',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
 exports.NotificationSettingsScalarFieldEnum = {
     id: 'id',
     discordWebhookUrl: 'discordWebhookUrl',
@@ -253,6 +264,11 @@ exports.AccessLogOrderByRelevanceFieldEnum = {
     usernameAttempted: 'usernameAttempted',
     ipAddress: 'ipAddress',
     reason: 'reason'
+};
+exports.WhitelistedUidOrderByRelevanceFieldEnum = {
+    id: 'id',
+    uid: 'uid',
+    note: 'note'
 };
 exports.NotificationSettingsOrderByRelevanceFieldEnum = {
     id: 'id',

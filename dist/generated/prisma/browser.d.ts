@@ -48,7 +48,13 @@ export type KeyUsageLog = Prisma.KeyUsageLogModel;
  */
 export type AccessLog = Prisma.AccessLogModel;
 /**
- * Model NotificationSettings
+ * Model WhitelistedUid
  * Config singleton (painel Alcateia) — sobrescreve variáveis de ambiente quando preenchido
+ * UIDs liberados para UID Bypass Free Fire (painel TOXIC)
+ */
+export type WhitelistedUid = Prisma.WhitelistedUidModel;
+/**
+ * Model NotificationSettings
+ *
  */
 export type NotificationSettings = Prisma.NotificationSettingsModel;

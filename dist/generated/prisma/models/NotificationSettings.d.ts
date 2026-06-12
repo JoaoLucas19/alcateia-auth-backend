@@ -2,7 +2,7 @@ import type * as runtime from "@prisma/client/runtime/client";
 import type * as Prisma from "../internal/prismaNamespace";
 /**
  * Model NotificationSettings
- * Config singleton (painel Alcateia) — sobrescreve variáveis de ambiente quando preenchido
+ *
  */
 export type NotificationSettingsModel = runtime.Types.Result.DefaultSelection<Prisma.$NotificationSettingsPayload>;
 export type AggregateNotificationSettings = {

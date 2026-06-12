@@ -35,6 +35,7 @@ export declare const ModelName: {
     readonly ClientAccessLog: "ClientAccessLog";
     readonly KeyUsageLog: "KeyUsageLog";
     readonly AccessLog: "AccessLog";
+    readonly WhitelistedUid: "WhitelistedUid";
     readonly NotificationSettings: "NotificationSettings";
 };
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
@@ -136,6 +137,17 @@ export declare const AccessLogScalarFieldEnum: {
     readonly createdAt: "createdAt";
 };
 export type AccessLogScalarFieldEnum = (typeof AccessLogScalarFieldEnum)[keyof typeof AccessLogScalarFieldEnum];
+export declare const WhitelistedUidScalarFieldEnum: {
+    readonly id: "id";
+    readonly uid: "uid";
+    readonly validityDays: "validityDays";
+    readonly expiresAt: "expiresAt";
+    readonly isActive: "isActive";
+    readonly note: "note";
+    readonly createdAt: "createdAt";
+    readonly updatedAt: "updatedAt";
+};
+export type WhitelistedUidScalarFieldEnum = (typeof WhitelistedUidScalarFieldEnum)[keyof typeof WhitelistedUidScalarFieldEnum];
 export declare const NotificationSettingsScalarFieldEnum: {
     readonly id: "id";
     readonly discordWebhookUrl: "discordWebhookUrl";
@@ -225,6 +237,12 @@ export declare const AccessLogOrderByRelevanceFieldEnum: {
     readonly reason: "reason";
 };
 export type AccessLogOrderByRelevanceFieldEnum = (typeof AccessLogOrderByRelevanceFieldEnum)[keyof typeof AccessLogOrderByRelevanceFieldEnum];
+export declare const WhitelistedUidOrderByRelevanceFieldEnum: {
+    readonly id: "id";
+    readonly uid: "uid";
+    readonly note: "note";
+};
+export type WhitelistedUidOrderByRelevanceFieldEnum = (typeof WhitelistedUidOrderByRelevanceFieldEnum)[keyof typeof WhitelistedUidOrderByRelevanceFieldEnum];
 export declare const NotificationSettingsOrderByRelevanceFieldEnum: {
     readonly id: "id";
     readonly discordWebhookUrl: "discordWebhookUrl";
