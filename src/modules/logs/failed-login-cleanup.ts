@@ -1,5 +1,6 @@
 import { logger } from "../../utils/logger";
 import { logService } from "./log.service";
+import { cleanupExpiredIpBlocks } from "../security/ip-block.service";
 
 const CLEANUP_INTERVAL_MS = 60 * 60 * 1000; // 1 hora
 
@@ -16,9 +17,11 @@ export function startFailedLoginCleanup(): void {
 
   setTimeout(() => {
     logService.cleanupOldFailedLogins().catch(() => undefined);
+    cleanupExpiredIpBlocks().catch(() => undefined);
   }, 30_000);
 
   setInterval(() => {
     logService.cleanupOldFailedLogins().catch(() => undefined);
+    cleanupExpiredIpBlocks().catch(() => undefined);
   }, CLEANUP_INTERVAL_MS);
 }

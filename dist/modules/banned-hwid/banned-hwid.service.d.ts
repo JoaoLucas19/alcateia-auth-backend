@@ -7,8 +7,8 @@ export declare function listBannedHwids(filters: {
     total: number;
     items: {
         id: string;
-        createdAt: Date;
         reason: string | null;
+        createdAt: Date;
         hwid: string;
     }[];
     page: number;
@@ -19,8 +19,8 @@ export declare function banHwid(hwid: string, reason?: string): Promise<{
     message: string;
     data: {
         id: string;
-        createdAt: Date;
         reason: string | null;
+        createdAt: Date;
         hwid: string;
     };
 }>;

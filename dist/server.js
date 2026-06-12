@@ -6,19 +6,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const helmet_1 = __importDefault(require("helmet"));
 const cors_1 = __importDefault(require("cors"));
-const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const env_1 = require("./config/env");
 const cors_2 = require("./config/cors");
+const rate_limit_1 = require("./config/rate-limit");
 const error_middleware_1 = require("./middlewares/error.middleware");
 const auth_routes_1 = __importDefault(require("./modules/auth/auth.routes"));
 const client_auth_routes_1 = __importDefault(require("./modules/client-auth/client-auth.routes"));
 const product_routes_1 = __importDefault(require("./modules/products/product.routes"));
 const key_routes_1 = __importDefault(require("./modules/key/key.routes"));
 const log_routes_1 = __importDefault(require("./modules/logs/log.routes"));
-const client_routes_1 = __importDefault(require("./modules/clients/client.routes")); // Nova rota adicionada para clientes
+const client_routes_1 = __importDefault(require("./modules/clients/client.routes"));
 const notification_routes_1 = __importDefault(require("./modules/notifications/notification.routes"));
 const banned_hwid_routes_1 = __importDefault(require("./modules/banned-hwid/banned-hwid.routes"));
 const discord_poller_1 = require("./modules/notifications/discord.poller");
+const failed_login_cleanup_1 = require("./modules/logs/failed-login-cleanup");
 const app = (0, express_1.default)();
 /**
  * Obrigatório para Railway (proxy reverso)
@@ -30,19 +31,13 @@ app.set("trust proxy", 1);
  */
 app.use((0, helmet_1.default)({
     crossOriginResourcePolicy: false,
+    contentSecurityPolicy: env_1.env.NODE_ENV === "production" ? undefined : false,
 }));
 /**
  * Configuração do CORS
  */
 const corsOptions = {
     origin: (origin, callback) => {
-        /**
-         * Permite:
-         * - Postman
-         * - Curl
-         * - Railway Health Check
-         * - Requests server-to-server
-         */
         if (!origin) {
             return callback(null, true);
         }
@@ -53,14 +48,7 @@ const corsOptions = {
         return callback(null, false);
     },
     credentials: true,
-    methods: [
-        "GET",
-        "POST",
-        "PUT",
-        "PATCH",
-        "DELETE",
-        "OPTIONS",
-    ],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: [
         "Content-Type",
         "Authorization",
@@ -69,31 +57,16 @@ const corsOptions = {
         "Origin",
     ],
 };
-/**
- * Aplica CORS globalmente (inclui resposta automatica a preflight OPTIONS).
- * Nao usar app.options("*") — Express 5 + path-to-regexp nao aceita "*" solto.
- */
 app.use((0, cors_1.default)(corsOptions));
 /**
- * Body parser
+ * Body parser com limite de tamanho (anti DoS)
  */
-app.use(express_1.default.json());
+app.use(express_1.default.json({ limit: `${env_1.env.BODY_LIMIT_KB}kb` }));
+app.use(express_1.default.urlencoded({ extended: false, limit: `${env_1.env.BODY_LIMIT_KB}kb` }));
 /**
- * Rate Limiter global
+ * Rate Limiter global por IP
  */
-app.use((0, express_rate_limit_1.default)({
-    windowMs: env_1.env.RATE_LIMIT_WINDOW_MS,
-    max: env_1.env.RATE_LIMIT_MAX,
-    standardHeaders: true,
-    legacyHeaders: false,
-    handler: (_req, res) => {
-        res.status(429).json({
-            success: false,
-            code: "RATE_LIMIT",
-            message: "Muitas requisições. Aguarde e tente novamente.",
-        });
-    },
-}));
+app.use((0, rate_limit_1.createGlobalRateLimiter)());
 /**
  * Health Check
  */
@@ -103,19 +76,19 @@ app.get("/", (_req, res) => {
         message: "API AlcateiaAuth Online!",
     });
 });
+const authenticatedApiLimiter = (0, rate_limit_1.createAuthenticatedApiLimiter)();
 /**
  * Rotas da API
  */
 app.use("/api/auth", auth_routes_1.default);
 /** Login/cadastro do cliente no cheat (NeverApi C++) */
 app.use("/auth", client_auth_routes_1.default);
-app.use("/api/products", product_routes_1.default);
-app.use("/api/keys", key_routes_1.default);
-app.use("/api/logs", log_routes_1.default);
-app.use("/api/notifications", notification_routes_1.default);
-app.use("/api/admin/banned-hwids", banned_hwid_routes_1.default);
-// Rota para clientes
-app.use("/api/admin/clients", client_routes_1.default);
+app.use("/api/products", authenticatedApiLimiter, product_routes_1.default);
+app.use("/api/keys", authenticatedApiLimiter, key_routes_1.default);
+app.use("/api/logs", authenticatedApiLimiter, log_routes_1.default);
+app.use("/api/notifications", authenticatedApiLimiter, notification_routes_1.default);
+app.use("/api/admin/banned-hwids", authenticatedApiLimiter, banned_hwid_routes_1.default);
+app.use("/api/admin/clients", authenticatedApiLimiter, client_routes_1.default);
 /**
  * 404 em rotas /api — sempre JSON (evita "Resposta inválida" no frontend)
  */
@@ -136,11 +109,13 @@ app.use(error_middleware_1.errorHandler);
  */
 app.listen(env_1.env.PORT, () => {
     (0, discord_poller_1.startDiscordAlertPoller)();
+    (0, failed_login_cleanup_1.startFailedLoginCleanup)();
     console.log(`
 ========================================
 🚀 API AlcateiaAuth ONLINE
 🌐 Porta: ${env_1.env.PORT}
 🛡️ CORS: ATIVO
+🔒 Segurança: rate limit + bloqueio IP + validação
 🔥 Ambiente: ${env_1.env.NODE_ENV}
 ========================================
   `);

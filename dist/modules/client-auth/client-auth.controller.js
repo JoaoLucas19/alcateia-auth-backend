@@ -4,6 +4,8 @@ exports.clientRegister = clientRegister;
 exports.clientLogin = clientLogin;
 const AppError_1 = require("../../utils/AppError");
 const hwid_1 = require("../../utils/hwid");
+const client_ip_1 = require("../../utils/client-ip");
+const security_middleware_1 = require("../../middlewares/security.middleware");
 const client_auth_service_1 = require("./client-auth.service");
 function clientError(res, err) {
     if (err instanceof AppError_1.AppError) {
@@ -22,9 +24,7 @@ function clientError(res, err) {
 }
 async function clientRegister(req, res, _next) {
     try {
-        const ipAddress = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
-            req.ip ||
-            "unknown";
+        const ipAddress = (0, client_ip_1.getClientIp)(req);
         const result = await (0, client_auth_service_1.registerClientService)({
             username: req.body.username,
             password: req.body.password,
@@ -39,14 +39,13 @@ async function clientRegister(req, res, _next) {
         });
     }
     catch (err) {
+        await (0, security_middleware_1.applyAuthFailureDelay)();
         clientError(res, err);
     }
 }
 async function clientLogin(req, res, _next) {
     try {
-        const ipAddress = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
-            req.ip ||
-            "unknown";
+        const ipAddress = (0, client_ip_1.getClientIp)(req);
         const result = await (0, client_auth_service_1.loginClientService)({
             username: req.body.username,
             password: req.body.password,
@@ -60,6 +59,7 @@ async function clientLogin(req, res, _next) {
         });
     }
     catch (err) {
+        await (0, security_middleware_1.applyAuthFailureDelay)();
         clientError(res, err);
     }
 }

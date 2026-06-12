@@ -8,13 +8,14 @@ export declare function resolveClientLookup(lookup: ClientLookup): Promise<{
     key: {
         product: {
             id: string;
-            createdAt: Date;
             name: string;
+            createdAt: Date;
             description: string | null;
             isActive: boolean;
         };
     } & {
         id: string;
+        expiresAt: Date | null;
         createdAt: Date;
         value: string;
         productId: string;
@@ -24,17 +25,16 @@ export declare function resolveClientLookup(lookup: ClientLookup): Promise<{
         status: import("@prisma/client").$Enums.KeyStatus;
         isPermanent: boolean;
         activatedAt: Date | null;
-        expiresAt: Date | null;
     };
 } & {
-    username: string;
     id: string;
+    expiresAt: Date;
+    username: string;
     passwordHash: string;
     createdAt: Date;
     lastLoginAt: Date | null;
     hwid: string | null;
     keyId: string;
-    expiresAt: Date;
     discordId: string | null;
     isBanned: boolean;
     loginCount: number;

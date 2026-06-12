@@ -1,5 +1,15 @@
 import type { LoginStatsBlock, UnifiedFailedLogin } from "./log.types";
+declare function cleanupOldFailedLogins(): Promise<void>;
+/** Limpeza explícita (admin/bot) — retorna contagens */
+export declare function runCleanupFailedLogins(hours?: number): Promise<{
+    retentionHours: number;
+    message: string;
+    adminDeleted: number;
+    clientDeleted: number;
+    total: number;
+}>;
 export declare const logService: {
+    cleanupOldFailedLogins: typeof cleanupOldFailedLogins;
     evaluateSecurity(): Promise<{
         alerts: import("./log.types").SecurityAlert[];
         threatLevel: import("./log.types").ThreatLevel;
@@ -160,3 +170,4 @@ export declare const logService: {
         totalPages: number;
     }>;
 };
+export {};

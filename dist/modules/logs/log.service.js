@@ -1,8 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.logService = void 0;
+exports.runCleanupFailedLogins = runCleanupFailedLogins;
 const log_analytics_1 = require("./log.analytics");
 const log_repository_1 = require("./log.repository");
+const logger_1 = require("../../utils/logger");
+const FAILED_LOGIN_RETENTION_HOURS = 24;
+let cleanupInFlight = false;
 function mapLoginStats(rows, failed7d, uniqueFailedIps24h) {
     return loginStatsFromGroup(rows, failed7d, uniqueFailedIps24h);
 }
@@ -62,12 +66,45 @@ async function evaluateSecurityFromRaw(raw) {
     const { level: threatLevel, score: threatScore } = (0, log_analytics_1.computeThreatLevel)(alerts, suspiciousIps);
     return { alerts, threatLevel, threatScore, suspiciousIps, adminLogins, clientLogins };
 }
+function retentionCutoff(hours = FAILED_LOGIN_RETENTION_HOURS) {
+    return new Date(Date.now() - hours * 60 * 60 * 1000);
+}
+async function cleanupOldFailedLogins() {
+    if (cleanupInFlight)
+        return;
+    cleanupInFlight = true;
+    try {
+        const result = await log_repository_1.logRepository.deleteOldFailedLogins(retentionCutoff());
+        if (result.total > 0) {
+            logger_1.logger.info("Logins falhos antigos removidos", result);
+        }
+    }
+    catch (err) {
+        logger_1.logger.error("Falha ao limpar logins falhos antigos", {
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
+    finally {
+        cleanupInFlight = false;
+    }
+}
+/** Limpeza explícita (admin/bot) — retorna contagens */
+async function runCleanupFailedLogins(hours = FAILED_LOGIN_RETENTION_HOURS) {
+    const result = await log_repository_1.logRepository.deleteOldFailedLogins(retentionCutoff(hours));
+    return {
+        ...result,
+        retentionHours: hours,
+        message: "Limpeza de logins falhos concluída",
+    };
+}
 exports.logService = {
+    cleanupOldFailedLogins,
     async evaluateSecurity() {
         const raw = await log_repository_1.logRepository.getDashboardStats();
         return evaluateSecurityFromRaw(raw);
     },
     async getDashboard() {
+        await cleanupOldFailedLogins();
         const raw = await log_repository_1.logRepository.getDashboardStats();
         const { alerts, threatLevel, threatScore, suspiciousIps, adminLogins, clientLogins } = await evaluateSecurityFromRaw(raw);
         const validationsMap = Object.fromEntries(raw.validations24h.map((v) => [v.result, v._count]));
@@ -154,9 +191,8 @@ exports.logService = {
         };
     },
     async getFailedLogins(params) {
-        const since = params.hours
-            ? new Date(Date.now() - params.hours * 60 * 60 * 1000)
-            : undefined;
+        const hours = params.hours ?? FAILED_LOGIN_RETENTION_HOURS;
+        const since = new Date(Date.now() - hours * 60 * 60 * 1000);
         const result = await log_repository_1.logRepository.findUnifiedFailedLogins({
             page: params.page,
             limit: params.limit,

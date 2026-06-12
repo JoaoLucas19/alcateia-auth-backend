@@ -234,12 +234,12 @@ exports.logRepository = {
                 take: 15,
             }),
             client_1.default.accessLog.findMany({
-                where: { success: false },
+                where: { success: false, createdAt: { gte: since24h } },
                 orderBy: { createdAt: "desc" },
                 take: 25,
             }),
             client_1.default.clientAccessLog.findMany({
-                where: { success: false },
+                where: { success: false, createdAt: { gte: since24h } },
                 orderBy: { createdAt: "desc" },
                 take: 25,
             }),
@@ -274,6 +274,22 @@ exports.logRepository = {
             recentAdminFailed,
             recentClientFailed,
             keysSummary: parseKeysSummary(keysByStatus),
+        };
+    },
+    /** Remove tentativas de login falhas mais antigas que o limite informado. */
+    deleteOldFailedLogins: async (olderThan) => {
+        const [adminDeleted, clientDeleted] = await Promise.all([
+            client_1.default.accessLog.deleteMany({
+                where: { success: false, createdAt: { lt: olderThan } },
+            }),
+            client_1.default.clientAccessLog.deleteMany({
+                where: { success: false, createdAt: { lt: olderThan } },
+            }),
+        ]);
+        return {
+            adminDeleted: adminDeleted.count,
+            clientDeleted: clientDeleted.count,
+            total: adminDeleted.count + clientDeleted.count,
         };
     },
     getSecurityDetail: async (days = 7) => {

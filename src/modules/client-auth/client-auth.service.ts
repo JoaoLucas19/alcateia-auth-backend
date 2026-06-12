@@ -4,6 +4,7 @@ import { AppError } from "../../utils/AppError";
 import { logger } from "../../utils/logger";
 import { KeyStatus, ValidationResult } from "@prisma/client";
 import { dispatchImmediateAlert } from "../notifications/discord.dispatcher";
+import { evaluateAutoBlock } from "../security/ip-block.service";
 import { isHwidBanned } from "../banned-hwid/banned-hwid.service";
 import {
   hwidsEqual,
@@ -156,6 +157,7 @@ export async function registerClientService(input: ClientRegisterInput) {
       success: false,
       reason: "INVALID_KEY",
     });
+    await evaluateAutoBlock(ipAddress, "KEY_SCANNING");
     throw new AppError("Key invalida", 400, "INVALID_KEY");
   }
 
@@ -316,6 +318,7 @@ export async function loginClientService(input: ClientAuthInput) {
       success: false,
       reason: "USER_NOT_FOUND",
     });
+    await evaluateAutoBlock(ipAddress, "CLIENT_LOGIN");
     throw new AppError("Credenciais invalidas", 401, "INVALID_CREDENTIALS");
   }
 
@@ -343,6 +346,7 @@ export async function loginClientService(input: ClientAuthInput) {
       success: false,
       reason: "WRONG_PASSWORD",
     });
+    await evaluateAutoBlock(ipAddress, "CLIENT_LOGIN");
     throw new AppError("Credenciais invalidas", 401, "INVALID_CREDENTIALS");
   }
 

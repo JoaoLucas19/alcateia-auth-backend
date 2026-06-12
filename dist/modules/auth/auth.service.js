@@ -10,15 +10,18 @@ const client_1 = __importDefault(require("../../prisma/client"));
 const AppError_1 = require("../../utils/AppError");
 const logger_1 = require("../../utils/logger");
 const env_1 = require("../../config/env");
+const ip_block_service_1 = require("../security/ip-block.service");
+/** Hash fictício para equalizar tempo quando usuário não existe (anti enumeração). */
+const DUMMY_PASSWORD_HASH = "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW";
 async function loginService({ username, password, ip }) {
     const admin = await client_1.default.admin.findUnique({ where: { username } });
-    // Sempre registra tentativa — sucesso ou falha
     if (!admin) {
+        await bcrypt_1.default.compare(password, DUMMY_PASSWORD_HASH);
         await client_1.default.accessLog.create({
             data: { usernameAttempted: username, ipAddress: ip, success: false, reason: "USER_NOT_FOUND" },
         });
         logger_1.logger.warn("Login falhou: usuário não encontrado", { username, ip });
-        // Mensagem genérica — nunca revela qual campo errou
+        await (0, ip_block_service_1.evaluateAutoBlock)(ip, "ADMIN_LOGIN");
         throw new AppError_1.AppError("Credenciais inválidas", 401, "INVALID_CREDENTIALS");
     }
     const passwordMatch = await bcrypt_1.default.compare(password, admin.passwordHash);
@@ -27,6 +30,7 @@ async function loginService({ username, password, ip }) {
             data: { adminId: admin.id, usernameAttempted: username, ipAddress: ip, success: false, reason: "WRONG_PASSWORD" },
         });
         logger_1.logger.warn("Login falhou: senha incorreta", { username, ip });
+        await (0, ip_block_service_1.evaluateAutoBlock)(ip, "ADMIN_LOGIN");
         throw new AppError_1.AppError("Credenciais inválidas", 401, "INVALID_CREDENTIALS");
     }
     // Login bem-sucedido: atualiza lastLoginAt e registra log

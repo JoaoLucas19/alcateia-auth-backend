@@ -67,7 +67,7 @@ async function getFailedLogins(req, res, next) {
         const limit = Math.min(Number(req.query.limit) || 25, 100);
         const source = req.query.source ?? "all";
         const ip = req.query.ip;
-        const hours = req.query.hours ? Number(req.query.hours) : undefined;
+        const hours = req.query.hours !== undefined ? Number(req.query.hours) : 24;
         const result = await log_service_1.logService.getFailedLogins({ page, limit, source, ip, hours });
         res.status(200).json(result);
     }

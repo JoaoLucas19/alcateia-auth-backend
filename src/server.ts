@@ -1,10 +1,10 @@
 import express from "express";
 import helmet from "helmet";
 import cors, { CorsOptions } from "cors";
-import rateLimit from "express-rate-limit";
 
 import { env } from "./config/env";
 import { isOriginAllowed } from "./config/cors";
+import { createAuthenticatedApiLimiter, createGlobalRateLimiter } from "./config/rate-limit";
 
 import { errorHandler } from "./middlewares/error.middleware";
 
@@ -13,7 +13,7 @@ import clientAuthRoutes from "./modules/client-auth/client-auth.routes";
 import productRoutes from "./modules/products/product.routes";
 import keyRoutes from "./modules/key/key.routes";
 import logRoutes from "./modules/logs/log.routes";
-import clientRoutes from "./modules/clients/client.routes"; // Nova rota adicionada para clientes
+import clientRoutes from "./modules/clients/client.routes";
 import notificationRoutes from "./modules/notifications/notification.routes";
 import bannedHwidRoutes from "./modules/banned-hwid/banned-hwid.routes";
 import { startDiscordAlertPoller } from "./modules/notifications/discord.poller";
@@ -33,6 +33,7 @@ app.set("trust proxy", 1);
 app.use(
   helmet({
     crossOriginResourcePolicy: false,
+    contentSecurityPolicy: env.NODE_ENV === "production" ? undefined : false,
   })
 );
 
@@ -41,13 +42,6 @@ app.use(
  */
 const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
-    /**
-     * Permite:
-     * - Postman
-     * - Curl
-     * - Railway Health Check
-     * - Requests server-to-server
-     */
     if (!origin) {
       return callback(null, true);
     }
@@ -62,14 +56,7 @@ const corsOptions: CorsOptions = {
 
   credentials: true,
 
-  methods: [
-    "GET",
-    "POST",
-    "PUT",
-    "PATCH",
-    "DELETE",
-    "OPTIONS",
-  ],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 
   allowedHeaders: [
     "Content-Type",
@@ -80,37 +67,18 @@ const corsOptions: CorsOptions = {
   ],
 };
 
-/**
- * Aplica CORS globalmente (inclui resposta automatica a preflight OPTIONS).
- * Nao usar app.options("*") — Express 5 + path-to-regexp nao aceita "*" solto.
- */
 app.use(cors(corsOptions));
 
 /**
- * Body parser
+ * Body parser com limite de tamanho (anti DoS)
  */
-app.use(express.json());
+app.use(express.json({ limit: `${env.BODY_LIMIT_KB}kb` }));
+app.use(express.urlencoded({ extended: false, limit: `${env.BODY_LIMIT_KB}kb` }));
 
 /**
- * Rate Limiter global
+ * Rate Limiter global por IP
  */
-app.use(
-  rateLimit({
-    windowMs: env.RATE_LIMIT_WINDOW_MS,
-    max: env.RATE_LIMIT_MAX,
-
-    standardHeaders: true,
-    legacyHeaders: false,
-
-    handler: (_req, res) => {
-      res.status(429).json({
-        success: false,
-        code: "RATE_LIMIT",
-        message: "Muitas requisições. Aguarde e tente novamente.",
-      });
-    },
-  })
-);
+app.use(createGlobalRateLimiter());
 
 /**
  * Health Check
@@ -122,6 +90,8 @@ app.get("/", (_req, res) => {
   });
 });
 
+const authenticatedApiLimiter = createAuthenticatedApiLimiter();
+
 /**
  * Rotas da API
  */
@@ -130,18 +100,12 @@ app.use("/api/auth", authRoutes);
 /** Login/cadastro do cliente no cheat (NeverApi C++) */
 app.use("/auth", clientAuthRoutes);
 
-app.use("/api/products", productRoutes);
-
-app.use("/api/keys", keyRoutes);
-
-app.use("/api/logs", logRoutes);
-
-app.use("/api/notifications", notificationRoutes);
-
-app.use("/api/admin/banned-hwids", bannedHwidRoutes);
-
-// Rota para clientes
-app.use("/api/admin/clients", clientRoutes);
+app.use("/api/products", authenticatedApiLimiter, productRoutes);
+app.use("/api/keys", authenticatedApiLimiter, keyRoutes);
+app.use("/api/logs", authenticatedApiLimiter, logRoutes);
+app.use("/api/notifications", authenticatedApiLimiter, notificationRoutes);
+app.use("/api/admin/banned-hwids", authenticatedApiLimiter, bannedHwidRoutes);
+app.use("/api/admin/clients", authenticatedApiLimiter, clientRoutes);
 
 /**
  * 404 em rotas /api — sempre JSON (evita "Resposta inválida" no frontend)
@@ -172,6 +136,7 @@ app.listen(env.PORT, () => {
 🚀 API AlcateiaAuth ONLINE
 🌐 Porta: ${env.PORT}
 🛡️ CORS: ATIVO
+🔒 Segurança: rate limit + bloqueio IP + validação
 🔥 Ambiente: ${env.NODE_ENV}
 ========================================
   `);

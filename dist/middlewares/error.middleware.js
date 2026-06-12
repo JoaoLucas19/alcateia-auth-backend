@@ -6,7 +6,11 @@ const logger_1 = require("../utils/logger");
 const env_1 = require("../config/env");
 function errorHandler(err, _req, res, _next) {
     if (err instanceof AppError_1.AppError) {
-        res.status(err.statusCode).json({ code: err.code, message: err.message });
+        res.status(err.statusCode).json({
+            success: false,
+            code: err.code,
+            message: err.message,
+        });
         return;
     }
     // Erros inesperados: loga stack e nunca expõe detalhes em produção

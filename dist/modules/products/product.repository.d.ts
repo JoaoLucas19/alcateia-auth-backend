@@ -4,8 +4,8 @@ export declare const productRepository: {
         description?: string;
     }) => import("@prisma/client").Prisma.Prisma__ProductClient<{
         id: string;
-        createdAt: Date;
         name: string;
+        createdAt: Date;
         description: string | null;
         isActive: boolean;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
@@ -15,8 +15,8 @@ export declare const productRepository: {
         };
     } & {
         id: string;
-        createdAt: Date;
         name: string;
+        createdAt: Date;
         description: string | null;
         isActive: boolean;
     })[]>;
@@ -29,8 +29,8 @@ export declare const productRepository: {
         };
     } & {
         id: string;
-        createdAt: Date;
         name: string;
+        createdAt: Date;
         description: string | null;
         isActive: boolean;
     }) | null, null, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
@@ -40,15 +40,15 @@ export declare const productRepository: {
         isActive?: boolean;
     }) => import("@prisma/client").Prisma.Prisma__ProductClient<{
         id: string;
-        createdAt: Date;
         name: string;
+        createdAt: Date;
         description: string | null;
         isActive: boolean;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     delete: (id: string) => import("@prisma/client").Prisma.Prisma__ProductClient<{
         id: string;
-        createdAt: Date;
         name: string;
+        createdAt: Date;
         description: string | null;
         isActive: boolean;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;

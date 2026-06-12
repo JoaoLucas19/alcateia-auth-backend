@@ -91,6 +91,19 @@ model Client {
   @@index([discordId])
 }
 
+/// IPs bloqueados por tentativas suspeitas ou bloqueio manual
+model BlockedIp {
+  id        String    @id @default(uuid())
+  ipAddress String    @unique
+  reason    String?
+  source    String?   @default("AUTO")
+  blockedAt DateTime  @default(now())
+  expiresAt DateTime?
+
+  @@index([expiresAt])
+  @@map("blocked_ips")
+}
+
 /// HWIDs bloqueados globalmente (login/cadastro do cheat)
 model BannedHwid {
   id        String   @id @default(uuid())

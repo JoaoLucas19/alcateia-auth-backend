@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { AppError } from "../../utils/AppError";
 import { extractHwidFromBody } from "../../utils/hwid";
+import { getClientIp } from "../../utils/client-ip";
+import { applyAuthFailureDelay } from "../../middlewares/security.middleware";
 import { loginClientService, registerClientService } from "./client-auth.service";
 
 function clientError(res: Response, err: unknown): void {
@@ -22,10 +24,7 @@ function clientError(res: Response, err: unknown): void {
 
 export async function clientRegister(req: Request, res: Response, _next: NextFunction): Promise<void> {
   try {
-    const ipAddress =
-      (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
-      req.ip ||
-      "unknown";
+    const ipAddress = getClientIp(req);
 
     const result = await registerClientService({
       username: req.body.username,
@@ -41,16 +40,14 @@ export async function clientRegister(req: Request, res: Response, _next: NextFun
       user: result.user,
     });
   } catch (err) {
+    await applyAuthFailureDelay();
     clientError(res, err);
   }
 }
 
 export async function clientLogin(req: Request, res: Response, _next: NextFunction): Promise<void> {
   try {
-    const ipAddress =
-      (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
-      req.ip ||
-      "unknown";
+    const ipAddress = getClientIp(req);
 
     const result = await loginClientService({
       username: req.body.username,
@@ -65,6 +62,7 @@ export async function clientLogin(req: Request, res: Response, _next: NextFuncti
       user: result.user,
     });
   } catch (err) {
+    await applyAuthFailureDelay();
     clientError(res, err);
   }
 }

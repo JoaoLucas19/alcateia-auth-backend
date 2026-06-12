@@ -1,8 +1,8 @@
 export declare const bannedHwidRepository: {
     findByHwid(hwid: string): Promise<{
         id: string;
-        createdAt: Date;
         reason: string | null;
+        createdAt: Date;
         hwid: string;
     } | null>;
     findPaginated(filters: {
@@ -13,8 +13,8 @@ export declare const bannedHwidRepository: {
         total: number;
         items: {
             id: string;
-            createdAt: Date;
             reason: string | null;
+            createdAt: Date;
             hwid: string;
         }[];
         page: number;
@@ -23,20 +23,20 @@ export declare const bannedHwidRepository: {
     }>;
     create(hwid: string, reason?: string): Promise<{
         id: string;
-        createdAt: Date;
         reason: string | null;
+        createdAt: Date;
         hwid: string;
     }>;
     deleteById(id: string): Promise<{
         id: string;
-        createdAt: Date;
         reason: string | null;
+        createdAt: Date;
         hwid: string;
     }>;
     deleteByHwid(hwid: string): Promise<{
         id: string;
-        createdAt: Date;
         reason: string | null;
+        createdAt: Date;
         hwid: string;
     }>;
 };

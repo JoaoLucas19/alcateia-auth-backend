@@ -11,6 +11,7 @@ const AppError_1 = require("../../utils/AppError");
 const logger_1 = require("../../utils/logger");
 const client_2 = require("@prisma/client");
 const discord_dispatcher_1 = require("../notifications/discord.dispatcher");
+const ip_block_service_1 = require("../security/ip-block.service");
 const banned_hwid_service_1 = require("../banned-hwid/banned-hwid.service");
 const hwid_1 = require("../../utils/hwid");
 const DEFAULT_SUBSCRIPTION_DAYS = 30;
@@ -113,6 +114,7 @@ async function registerClientService(input) {
             success: false,
             reason: "INVALID_KEY",
         });
+        await (0, ip_block_service_1.evaluateAutoBlock)(ipAddress, "KEY_SCANNING");
         throw new AppError_1.AppError("Key invalida", 400, "INVALID_KEY");
     }
     if (key.status === client_2.KeyStatus.REVOKED) {
@@ -210,6 +212,8 @@ async function registerClientService(input) {
                 activatedAt: new Date(),
                 expiresAt,
                 isPermanent: key.isPermanent,
+                // Vincula o nome do cliente que registrou a key (visível na listagem de usuários)
+                customerName: key.customerName ?? username,
             },
         });
         await tx.keyUsageLog.create({
@@ -253,6 +257,7 @@ async function loginClientService(input) {
             success: false,
             reason: "USER_NOT_FOUND",
         });
+        await (0, ip_block_service_1.evaluateAutoBlock)(ipAddress, "CLIENT_LOGIN");
         throw new AppError_1.AppError("Credenciais invalidas", 401, "INVALID_CREDENTIALS");
     }
     if (client.isBanned) {
@@ -278,6 +283,7 @@ async function loginClientService(input) {
             success: false,
             reason: "WRONG_PASSWORD",
         });
+        await (0, ip_block_service_1.evaluateAutoBlock)(ipAddress, "CLIENT_LOGIN");
         throw new AppError_1.AppError("Credenciais invalidas", 401, "INVALID_CREDENTIALS");
     }
     const lifetime = isLifetimeKey(client.key) || isLifetimeExpiry(client.expiresAt);

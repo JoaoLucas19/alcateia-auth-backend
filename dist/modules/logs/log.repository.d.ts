@@ -11,11 +11,11 @@ export declare const logRepository: {
     }) => Promise<{
         data: {
             id: string;
+            ipAddress: string;
+            reason: string | null;
+            success: boolean;
             createdAt: Date;
             usernameAttempted: string;
-            ipAddress: string;
-            success: boolean;
-            reason: string | null;
             adminId: string | null;
         }[];
         total: number;
@@ -107,49 +107,55 @@ export declare const logRepository: {
         })[];
         adminFailuresLastHour: number;
         adminTimelineRaw: {
-            createdAt: Date;
             success: boolean;
+            createdAt: Date;
         }[];
         clientTimelineRaw: {
-            createdAt: Date;
             success: boolean;
+            createdAt: Date;
         }[];
         keyTimelineRaw: {
             attemptedAt: Date;
             result: import("@prisma/client").$Enums.ValidationResult;
         }[];
         adminFailures24hList: {
-            createdAt: Date;
             ipAddress: string;
+            createdAt: Date;
         }[];
         clientFailures24hList: {
-            createdAt: Date;
             ipAddress: string;
+            createdAt: Date;
         }[];
         invalidKeyByIpFull: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.KeyUsageLogGroupByOutputType, "ipAddress"[]> & {
             _count: number;
         })[];
         recentAdminFailed: {
             id: string;
+            ipAddress: string;
+            reason: string | null;
+            success: boolean;
             createdAt: Date;
             usernameAttempted: string;
-            ipAddress: string;
-            success: boolean;
-            reason: string | null;
             adminId: string | null;
         }[];
         recentClientFailed: {
             id: string;
+            ipAddress: string;
+            reason: string | null;
+            success: boolean;
             createdAt: Date;
             usernameAttempted: string;
-            ipAddress: string;
-            success: boolean;
-            reason: string | null;
             hwid: string | null;
             action: string;
             clientId: string | null;
         }[];
         keysSummary: KeysSummary;
+    }>;
+    /** Remove tentativas de login falhas mais antigas que o limite informado. */
+    deleteOldFailedLogins: (olderThan: Date) => Promise<{
+        adminDeleted: number;
+        clientDeleted: number;
+        total: number;
     }>;
     getSecurityDetail: (days?: number) => Promise<{
         periodDays: number;

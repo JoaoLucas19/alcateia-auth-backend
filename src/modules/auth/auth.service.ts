@@ -4,6 +4,7 @@ import prisma from "../../prisma/client";
 import { AppError } from "../../utils/AppError";
 import { logger } from "../../utils/logger";
 import { env } from "../../config/env";
+import { evaluateAutoBlock } from "../security/ip-block.service";
 
 interface LoginInput {
   username: string;
@@ -11,16 +12,19 @@ interface LoginInput {
   ip: string;
 }
 
+/** Hash fictício para equalizar tempo quando usuário não existe (anti enumeração). */
+const DUMMY_PASSWORD_HASH = "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW";
+
 export async function loginService({ username, password, ip }: LoginInput) {
   const admin = await prisma.admin.findUnique({ where: { username } });
 
-  // Sempre registra tentativa — sucesso ou falha
   if (!admin) {
+    await bcrypt.compare(password, DUMMY_PASSWORD_HASH);
     await prisma.accessLog.create({
       data: { usernameAttempted: username, ipAddress: ip, success: false, reason: "USER_NOT_FOUND" },
     });
     logger.warn("Login falhou: usuário não encontrado", { username, ip });
-    // Mensagem genérica — nunca revela qual campo errou
+    await evaluateAutoBlock(ip, "ADMIN_LOGIN");
     throw new AppError("Credenciais inválidas", 401, "INVALID_CREDENTIALS");
   }
 
@@ -31,6 +35,7 @@ export async function loginService({ username, password, ip }: LoginInput) {
       data: { adminId: admin.id, usernameAttempted: username, ipAddress: ip, success: false, reason: "WRONG_PASSWORD" },
     });
     logger.warn("Login falhou: senha incorreta", { username, ip });
+    await evaluateAutoBlock(ip, "ADMIN_LOGIN");
     throw new AppError("Credenciais inválidas", 401, "INVALID_CREDENTIALS");
   }
 

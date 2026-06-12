@@ -3,8 +3,8 @@ export declare function createProduct(data: {
     description?: string;
 }): Promise<{
     id: string;
-    createdAt: Date;
     name: string;
+    createdAt: Date;
     description: string | null;
     isActive: boolean;
 }>;
@@ -14,8 +14,8 @@ export declare function listProducts(): Promise<({
     };
 } & {
     id: string;
-    createdAt: Date;
     name: string;
+    createdAt: Date;
     description: string | null;
     isActive: boolean;
 })[]>;
@@ -26,8 +26,8 @@ export declare function getProduct(id: string): Promise<{
         keys: number;
     };
     id: string;
-    createdAt: Date;
     name: string;
+    createdAt: Date;
     description: string | null;
     isActive: boolean;
 }>;
@@ -37,15 +37,15 @@ export declare function updateProduct(id: string, data: {
     isActive?: boolean;
 }): Promise<{
     id: string;
-    createdAt: Date;
     name: string;
+    createdAt: Date;
     description: string | null;
     isActive: boolean;
 }>;
 export declare function deleteProduct(id: string): Promise<{
     id: string;
-    createdAt: Date;
     name: string;
+    createdAt: Date;
     description: string | null;
     isActive: boolean;
 }>;

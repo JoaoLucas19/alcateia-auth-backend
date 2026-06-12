@@ -47,4 +47,37 @@ export const env = {
     DISCORD_NOTIFY_BRUTE_FORCE: process.env.DISCORD_NOTIFY_BRUTE_FORCE !== "false",
     DISCORD_NOTIFY_KEY_SCANNING: process.env.DISCORD_NOTIFY_KEY_SCANNING !== "false",
     DISCORD_NOTIFY_HIGH_THREAT: process.env.DISCORD_NOTIFY_HIGH_THREAT !== "false",
+
+    /** Limite do body JSON (kb) */
+    BODY_LIMIT_KB: Number(process.env.BODY_LIMIT_KB || 32),
+
+    /** Janela de análise de tentativas suspeitas (ms) — padrão 15 min */
+    SECURITY_WINDOW_MS: Number(process.env.SECURITY_WINDOW_MS || 15 * 60 * 1000),
+
+    /** Bloqueio automático após N falhas de login admin na janela */
+    ADMIN_LOGIN_BLOCK_THRESHOLD: Number(process.env.ADMIN_LOGIN_BLOCK_THRESHOLD || 5),
+
+    /** Bloqueio automático após N falhas de login cliente na janela */
+    CLIENT_LOGIN_BLOCK_THRESHOLD: Number(process.env.CLIENT_LOGIN_BLOCK_THRESHOLD || 10),
+
+    /** Bloqueio após N keys inválidas testadas na janela */
+    KEY_SCAN_BLOCK_THRESHOLD: Number(process.env.KEY_SCAN_BLOCK_THRESHOLD || 15),
+
+    /** Duração do bloqueio por login (ms) — padrão 1h */
+    IP_BLOCK_DURATION_MS: Number(process.env.IP_BLOCK_DURATION_MS || 60 * 60 * 1000),
+
+    /** Duração do bloqueio por key scanning (ms) — padrão 2h */
+    KEY_SCAN_BLOCK_DURATION_MS: Number(process.env.KEY_SCAN_BLOCK_DURATION_MS || 2 * 60 * 60 * 1000),
+
+    /** Rate limit login admin */
+    ADMIN_LOGIN_RATE_WINDOW_MS: Number(process.env.ADMIN_LOGIN_RATE_WINDOW_MS || 15 * 60 * 1000),
+    ADMIN_LOGIN_RATE_MAX: Number(process.env.ADMIN_LOGIN_RATE_MAX || 5),
+
+    /** Rate limit auth cliente */
+    CLIENT_AUTH_RATE_WINDOW_MS: Number(process.env.CLIENT_AUTH_RATE_WINDOW_MS || 15 * 60 * 1000),
+    CLIENT_AUTH_RATE_MAX: Number(process.env.CLIENT_AUTH_RATE_MAX || 15),
+
+    /** Rate limit rotas autenticadas do painel */
+    AUTH_API_RATE_WINDOW_MS: Number(process.env.AUTH_API_RATE_WINDOW_MS || 60 * 1000),
+    AUTH_API_RATE_MAX: Number(process.env.AUTH_API_RATE_MAX || 120),
 };
