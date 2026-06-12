@@ -4,3 +4,9 @@ export declare function getKeyLogs(req: Request, res: Response, next: NextFuncti
 export declare function getDashboard(req: Request, res: Response, next: NextFunction): Promise<void>;
 export declare function getSecurity(req: Request, res: Response, next: NextFunction): Promise<void>;
 export declare function getFailedLogins(req: Request, res: Response, next: NextFunction): Promise<void>;
+export declare function getLogOverview(req: Request, res: Response, next: NextFunction): Promise<void>;
+export declare function getLogFeed(req: Request, res: Response, next: NextFunction): Promise<void>;
+export declare function investigateIp(req: Request, res: Response, next: NextFunction): Promise<void>;
+export declare function getClientAudit(req: Request, res: Response, next: NextFunction): Promise<void>;
+export declare function getClientAccessLogs(req: Request, res: Response, next: NextFunction): Promise<void>;
+export declare function exportLogsJson(req: Request, res: Response, next: NextFunction): Promise<void>;

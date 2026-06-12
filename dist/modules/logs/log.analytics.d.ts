@@ -1,4 +1,6 @@
 import type { SecurityAlert, SuspiciousIpEntry, ThreatLevel, TimelineHourBucket } from "./log.types";
+import { reasonLabel } from "./log.formatters";
+export { reasonLabel };
 export declare function buildTimeline24h(adminLogs: {
     createdAt: Date;
     success: boolean;
@@ -39,9 +41,13 @@ export declare function detectSecurityAlerts(input: {
         _count: number;
     }[];
     adminFailuresLastHour: number;
+    clientFailed24h?: number;
+    clientFailuresByIp?: {
+        ipAddress: string;
+        _count: number;
+    }[];
 }): SecurityAlert[];
 export declare function computeThreatLevel(alerts: SecurityAlert[], suspiciousIps: SuspiciousIpEntry[]): {
     level: ThreatLevel;
     score: number;
 };
-export declare function reasonLabel(reason: string | null | undefined): string;

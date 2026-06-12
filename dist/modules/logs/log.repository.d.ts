@@ -1,4 +1,4 @@
-import type { KeysSummary } from "./log.types";
+import type { KeysSummary, LogFeedCategory, LogFeedStatus, UnifiedLogEntry } from "./log.types";
 export declare const logRepository: {
     findAccessLogs: ({ page, limit, success, ip, reason, since, until, }: {
         page: number;
@@ -10,13 +10,13 @@ export declare const logRepository: {
         until?: Date;
     }) => Promise<{
         data: {
+            success: boolean;
             id: string;
             ipAddress: string;
             reason: string | null;
-            success: boolean;
-            createdAt: Date;
-            usernameAttempted: string;
             adminId: string | null;
+            usernameAttempted: string;
+            createdAt: Date;
         }[];
         total: number;
         page: number;
@@ -35,9 +35,9 @@ export declare const logRepository: {
             id: string;
             result: import("../../prisma/enums").ValidationResult;
             ipAddress: string;
+            keyId: string;
             userAgent: string | null;
             attemptedAt: Date;
-            keyId: string;
         })[];
         total: number;
         page: number;
@@ -130,24 +130,24 @@ export declare const logRepository: {
             _count: number;
         })[];
         recentAdminFailed: {
+            success: boolean;
             id: string;
             ipAddress: string;
             reason: string | null;
-            success: boolean;
-            createdAt: Date;
-            usernameAttempted: string;
             adminId: string | null;
+            usernameAttempted: string;
+            createdAt: Date;
         }[];
         recentClientFailed: {
+            success: boolean;
             id: string;
             ipAddress: string;
             reason: string | null;
-            success: boolean;
-            createdAt: Date;
             usernameAttempted: string;
+            createdAt: Date;
+            clientId: string | null;
             hwid: string | null;
             action: string;
-            clientId: string | null;
         }[];
         keysSummary: KeysSummary;
     }>;
@@ -176,4 +176,152 @@ export declare const logRepository: {
         })[];
         hwidMismatches: number;
     }>;
+    countAccessLogsInWindow: (since: Date) => Promise<{
+        admin: number;
+        client: number;
+        keys: number;
+        blocks: number;
+        total: number;
+    }>;
+    findUnifiedLogFeed: (params: {
+        since: Date;
+        takePerSource: number;
+        category?: LogFeedCategory;
+        status?: LogFeedStatus;
+        ip?: string;
+        username?: string;
+    }) => Promise<UnifiedLogEntry[]>;
+    findClientAccessLogs: (params: {
+        page: number;
+        limit: number;
+        since?: Date;
+        success?: boolean;
+        ip?: string;
+        username?: string;
+        action?: string;
+    }) => Promise<{
+        data: UnifiedLogEntry[];
+        total: number;
+        page: number;
+        totalPages: number;
+    }>;
+    investigateIp: (ip: string, since: Date) => Promise<{
+        block: {
+            id: string;
+            ipAddress: string;
+            reason: string | null;
+            source: string | null;
+            blockedAt: Date;
+            expiresAt: Date | null;
+        } | null;
+        adminLogs: {
+            success: boolean;
+            id: string;
+            ipAddress: string;
+            reason: string | null;
+            adminId: string | null;
+            usernameAttempted: string;
+            createdAt: Date;
+        }[];
+        clientLogs: {
+            success: boolean;
+            id: string;
+            ipAddress: string;
+            reason: string | null;
+            usernameAttempted: string;
+            createdAt: Date;
+            clientId: string | null;
+            hwid: string | null;
+            action: string;
+        }[];
+        keyLogs: ({
+            key: {
+                value: string;
+            };
+        } & {
+            id: string;
+            result: import("../../prisma/enums").ValidationResult;
+            ipAddress: string;
+            keyId: string;
+            userAgent: string | null;
+            attemptedAt: Date;
+        })[];
+    }>;
+    getClientAuditData: (username: string, since: Date, page: number, limit: number) => Promise<{
+        client: ({
+            key: {
+                product: {
+                    id: string;
+                    name: string;
+                    createdAt: Date;
+                    description: string | null;
+                    isActive: boolean;
+                };
+            } & {
+                id: string;
+                expiresAt: Date | null;
+                createdAt: Date;
+                value: string;
+                productId: string;
+                createdById: string;
+                customerEmail: string | null;
+                customerName: string | null;
+                status: import("../../prisma/enums").KeyStatus;
+                isPermanent: boolean;
+                activatedAt: Date | null;
+            };
+        } & {
+            id: string;
+            expiresAt: Date;
+            createdAt: Date;
+            keyId: string;
+            hwid: string | null;
+            isBanned: boolean;
+            username: string;
+            passwordHash: string;
+            discordId: string | null;
+            loginCount: number;
+            lastLoginAt: Date | null;
+        }) | null;
+        logs: {
+            success: boolean;
+            id: string;
+            ipAddress: string;
+            reason: string | null;
+            usernameAttempted: string;
+            createdAt: Date;
+            clientId: string | null;
+            hwid: string | null;
+            action: string;
+        }[];
+        total: number;
+        statsRows: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").ClientAccessLogGroupByOutputType, "success"[]> & {
+            _count: number;
+        })[];
+        uniqueIpCount: number;
+        lastFailure: {
+            success: boolean;
+            id: string;
+            ipAddress: string;
+            reason: string | null;
+            usernameAttempted: string;
+            createdAt: Date;
+            clientId: string | null;
+            hwid: string | null;
+            action: string;
+        } | null;
+        lastSuccess: {
+            success: boolean;
+            id: string;
+            ipAddress: string;
+            reason: string | null;
+            usernameAttempted: string;
+            createdAt: Date;
+            clientId: string | null;
+            hwid: string | null;
+            action: string;
+        } | null;
+    }>;
+    countRecentFailuresByIp: (ip: string, since: Date, source: "admin" | "client") => Promise<number>;
+    countRecentInvalidKeysByIp: (ip: string, since: Date) => Promise<number>;
 };

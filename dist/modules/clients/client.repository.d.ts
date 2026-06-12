@@ -32,15 +32,15 @@ export declare const clientRepository: {
         } & {
             id: string;
             expiresAt: Date;
+            createdAt: Date;
+            keyId: string;
+            hwid: string | null;
+            isBanned: boolean;
             username: string;
             passwordHash: string;
-            createdAt: Date;
-            lastLoginAt: Date | null;
-            hwid: string | null;
-            keyId: string;
             discordId: string | null;
-            isBanned: boolean;
             loginCount: number;
+            lastLoginAt: Date | null;
         })[];
         page: number;
         limit: number;
@@ -71,15 +71,15 @@ export declare const clientRepository: {
     } & {
         id: string;
         expiresAt: Date;
+        createdAt: Date;
+        keyId: string;
+        hwid: string | null;
+        isBanned: boolean;
         username: string;
         passwordHash: string;
-        createdAt: Date;
-        lastLoginAt: Date | null;
-        hwid: string | null;
-        keyId: string;
         discordId: string | null;
-        isBanned: boolean;
         loginCount: number;
+        lastLoginAt: Date | null;
     }) | null>;
     findByUsername(username: string): Promise<({
         key: {
@@ -106,15 +106,15 @@ export declare const clientRepository: {
     } & {
         id: string;
         expiresAt: Date;
+        createdAt: Date;
+        keyId: string;
+        hwid: string | null;
+        isBanned: boolean;
         username: string;
         passwordHash: string;
-        createdAt: Date;
-        lastLoginAt: Date | null;
-        hwid: string | null;
-        keyId: string;
         discordId: string | null;
-        isBanned: boolean;
         loginCount: number;
+        lastLoginAt: Date | null;
     }) | null>;
     findByDiscordId(discordId: string): Promise<({
         key: {
@@ -141,15 +141,15 @@ export declare const clientRepository: {
     } & {
         id: string;
         expiresAt: Date;
+        createdAt: Date;
+        keyId: string;
+        hwid: string | null;
+        isBanned: boolean;
         username: string;
         passwordHash: string;
-        createdAt: Date;
-        lastLoginAt: Date | null;
-        hwid: string | null;
-        keyId: string;
         discordId: string | null;
-        isBanned: boolean;
         loginCount: number;
+        lastLoginAt: Date | null;
     }) | null>;
     findByKeyValue(keyValue: string): Promise<({
         key: {
@@ -176,15 +176,15 @@ export declare const clientRepository: {
     } & {
         id: string;
         expiresAt: Date;
+        createdAt: Date;
+        keyId: string;
+        hwid: string | null;
+        isBanned: boolean;
         username: string;
         passwordHash: string;
-        createdAt: Date;
-        lastLoginAt: Date | null;
-        hwid: string | null;
-        keyId: string;
         discordId: string | null;
-        isBanned: boolean;
         loginCount: number;
+        lastLoginAt: Date | null;
     }) | null>;
     findByKeyId(keyId: string): Promise<({
         key: {
@@ -211,106 +211,106 @@ export declare const clientRepository: {
     } & {
         id: string;
         expiresAt: Date;
+        createdAt: Date;
+        keyId: string;
+        hwid: string | null;
+        isBanned: boolean;
         username: string;
         passwordHash: string;
-        createdAt: Date;
-        lastLoginAt: Date | null;
-        hwid: string | null;
-        keyId: string;
         discordId: string | null;
-        isBanned: boolean;
         loginCount: number;
+        lastLoginAt: Date | null;
     }) | null>;
     updatePassword(id: string, passwordHash: string): Promise<{
         id: string;
         expiresAt: Date;
+        createdAt: Date;
+        keyId: string;
+        hwid: string | null;
+        isBanned: boolean;
         username: string;
         passwordHash: string;
-        createdAt: Date;
-        lastLoginAt: Date | null;
-        hwid: string | null;
-        keyId: string;
         discordId: string | null;
-        isBanned: boolean;
         loginCount: number;
+        lastLoginAt: Date | null;
     }>;
     updateDiscordId(id: string, discordId: string | null): Promise<{
         id: string;
         expiresAt: Date;
+        createdAt: Date;
+        keyId: string;
+        hwid: string | null;
+        isBanned: boolean;
         username: string;
         passwordHash: string;
-        createdAt: Date;
-        lastLoginAt: Date | null;
-        hwid: string | null;
-        keyId: string;
         discordId: string | null;
-        isBanned: boolean;
         loginCount: number;
+        lastLoginAt: Date | null;
     }>;
     updateExpiresAt(id: string, expiresAt: Date): Promise<{
         id: string;
         expiresAt: Date;
+        createdAt: Date;
+        keyId: string;
+        hwid: string | null;
+        isBanned: boolean;
         username: string;
         passwordHash: string;
-        createdAt: Date;
-        lastLoginAt: Date | null;
-        hwid: string | null;
-        keyId: string;
         discordId: string | null;
-        isBanned: boolean;
         loginCount: number;
+        lastLoginAt: Date | null;
     }>;
     ban(id: string): Promise<{
         id: string;
         expiresAt: Date;
+        createdAt: Date;
+        keyId: string;
+        hwid: string | null;
+        isBanned: boolean;
         username: string;
         passwordHash: string;
-        createdAt: Date;
-        lastLoginAt: Date | null;
-        hwid: string | null;
-        keyId: string;
         discordId: string | null;
-        isBanned: boolean;
         loginCount: number;
+        lastLoginAt: Date | null;
     }>;
     unban(id: string): Promise<{
         id: string;
         expiresAt: Date;
+        createdAt: Date;
+        keyId: string;
+        hwid: string | null;
+        isBanned: boolean;
         username: string;
         passwordHash: string;
-        createdAt: Date;
-        lastLoginAt: Date | null;
-        hwid: string | null;
-        keyId: string;
         discordId: string | null;
-        isBanned: boolean;
         loginCount: number;
+        lastLoginAt: Date | null;
     }>;
     resetHwid(id: string): Promise<{
         id: string;
         expiresAt: Date;
+        createdAt: Date;
+        keyId: string;
+        hwid: string | null;
+        isBanned: boolean;
         username: string;
         passwordHash: string;
-        createdAt: Date;
-        lastLoginAt: Date | null;
-        hwid: string | null;
-        keyId: string;
         discordId: string | null;
-        isBanned: boolean;
         loginCount: number;
+        lastLoginAt: Date | null;
     }>;
     delete(id: string): Promise<{
         id: string;
         expiresAt: Date;
+        createdAt: Date;
+        keyId: string;
+        hwid: string | null;
+        isBanned: boolean;
         username: string;
         passwordHash: string;
-        createdAt: Date;
-        lastLoginAt: Date | null;
-        hwid: string | null;
-        keyId: string;
         discordId: string | null;
-        isBanned: boolean;
         loginCount: number;
+        lastLoginAt: Date | null;
     }>;
     countTotal(): Promise<number>;
     countActive(): Promise<number>;

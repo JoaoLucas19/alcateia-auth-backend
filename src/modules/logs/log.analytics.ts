@@ -4,6 +4,9 @@ import type {
   ThreatLevel,
   TimelineHourBucket,
 } from "./log.types";
+import { reasonLabel } from "./log.formatters";
+
+export { reasonLabel };
 
 const BRUTE_FORCE_IP_THRESHOLD = 8;
 const BRUTE_FORCE_USERNAME_THRESHOLD = 10;
@@ -133,6 +136,8 @@ export function detectSecurityAlerts(input: {
   adminFailuresByUsername: { usernameAttempted: string; _count: number }[];
   invalidKeyByIp: { ipAddress: string; _count: number }[];
   adminFailuresLastHour: number;
+  clientFailed24h?: number;
+  clientFailuresByIp?: { ipAddress: string; _count: number }[];
 }): SecurityAlert[] {
   const alerts: SecurityAlert[] = [];
   const now = new Date().toISOString();
@@ -199,6 +204,29 @@ export function detectSecurityAlerts(input: {
     });
   }
 
+  for (const row of input.clientFailuresByIp ?? []) {
+    if (row._count >= BRUTE_FORCE_IP_THRESHOLD) {
+      alerts.push({
+        type: "CLIENT_LOGIN_FAILED",
+        severity: row._count >= BRUTE_FORCE_IP_THRESHOLD * 2 ? "HIGH" : "MEDIUM",
+        message: `IP ${row.ipAddress} com ${row._count} falhas de login cliente em 24h`,
+        ip: row.ipAddress,
+        count: row._count,
+        detectedAt: now,
+      });
+    }
+  }
+
+  if ((input.clientFailed24h ?? 0) >= 20) {
+    alerts.push({
+      type: "CLIENT_LOGIN_FAILED",
+      severity: "MEDIUM",
+      message: `${input.clientFailed24h} falhas de login cliente nas últimas 24h`,
+      count: input.clientFailed24h,
+      detectedAt: now,
+    });
+  }
+
   return alerts.sort((a, b) => severityWeight(b.severity) - severityWeight(a.severity));
 }
 
@@ -240,22 +268,4 @@ export function computeThreatLevel(alerts: SecurityAlert[], suspiciousIps: Suspi
   return { level, score };
 }
 
-export function reasonLabel(reason: string | null | undefined): string {
-  const labels: Record<string, string> = {
-    USER_NOT_FOUND: "Usuário não encontrado",
-    WRONG_PASSWORD: "Senha incorreta",
-    USER_BANNED: "Conta banida",
-    SUBSCRIPTION_EXPIRED: "Assinatura expirada",
-    KEY_REVOKED: "Licença revogada",
-    HWID_MISMATCH: "HWID não autorizado",
-    HWID_MISSING: "HWID não enviado pelo loader",
-    HWID_INVALID: "HWID inválido ou não reconhecido",
-    INVALID_KEY: "Key inválida",
-    KEY_ALREADY_USED: "Key já utilizada",
-    KEY_EXPIRED: "Key expirada",
-    USERNAME_TAKEN: "Usuário já cadastrado",
-    PRODUCT_INACTIVE: "Produto inativo",
-  };
-  if (!reason) return "Desconhecido";
-  return labels[reason] ?? reason;
-}
+// reasonLabel re-exported from log.formatters above

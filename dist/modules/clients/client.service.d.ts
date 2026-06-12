@@ -29,15 +29,15 @@ export declare function resolveClientLookup(lookup: ClientLookup): Promise<{
 } & {
     id: string;
     expiresAt: Date;
+    createdAt: Date;
+    keyId: string;
+    hwid: string | null;
+    isBanned: boolean;
     username: string;
     passwordHash: string;
-    createdAt: Date;
-    lastLoginAt: Date | null;
-    hwid: string | null;
-    keyId: string;
     discordId: string | null;
-    isBanned: boolean;
     loginCount: number;
+    lastLoginAt: Date | null;
 }>;
 export declare function listClients(filters: {
     page: number;

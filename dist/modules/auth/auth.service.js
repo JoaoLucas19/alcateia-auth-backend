@@ -11,8 +11,16 @@ const AppError_1 = require("../../utils/AppError");
 const logger_1 = require("../../utils/logger");
 const env_1 = require("../../config/env");
 const ip_block_service_1 = require("../security/ip-block.service");
+const log_alerts_service_1 = require("../logs/log-alerts.service");
+const log_repository_1 = require("../logs/log.repository");
 /** Hash fictício para equalizar tempo quando usuário não existe (anti enumeração). */
 const DUMMY_PASSWORD_HASH = "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW";
+async function afterAdminLoginFailure(ip, username, reason) {
+    await (0, ip_block_service_1.evaluateAutoBlock)(ip, "ADMIN_LOGIN");
+    const since = new Date(Date.now() - 15 * 60 * 1000);
+    const attemptsFromIp = await log_repository_1.logRepository.countRecentFailuresByIp(ip, since, "admin");
+    void (0, log_alerts_service_1.notifyAdminLoginFailed)({ username, ip, reason, attemptsFromIp });
+}
 async function loginService({ username, password, ip }) {
     const admin = await client_1.default.admin.findUnique({ where: { username } });
     if (!admin) {
@@ -21,7 +29,7 @@ async function loginService({ username, password, ip }) {
             data: { usernameAttempted: username, ipAddress: ip, success: false, reason: "USER_NOT_FOUND" },
         });
         logger_1.logger.warn("Login falhou: usuário não encontrado", { username, ip });
-        await (0, ip_block_service_1.evaluateAutoBlock)(ip, "ADMIN_LOGIN");
+        await afterAdminLoginFailure(ip, username, "USER_NOT_FOUND");
         throw new AppError_1.AppError("Credenciais inválidas", 401, "INVALID_CREDENTIALS");
     }
     const passwordMatch = await bcrypt_1.default.compare(password, admin.passwordHash);
@@ -30,7 +38,7 @@ async function loginService({ username, password, ip }) {
             data: { adminId: admin.id, usernameAttempted: username, ipAddress: ip, success: false, reason: "WRONG_PASSWORD" },
         });
         logger_1.logger.warn("Login falhou: senha incorreta", { username, ip });
-        await (0, ip_block_service_1.evaluateAutoBlock)(ip, "ADMIN_LOGIN");
+        await afterAdminLoginFailure(ip, username, "WRONG_PASSWORD");
         throw new AppError_1.AppError("Credenciais inválidas", 401, "INVALID_CREDENTIALS");
     }
     // Login bem-sucedido: atualiza lastLoginAt e registra log

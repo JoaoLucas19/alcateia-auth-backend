@@ -1,4 +1,4 @@
-import type { LoginStatsBlock, UnifiedFailedLogin } from "./log.types";
+import type { ClientAuditTrail, IpInvestigation, LogFeedFilters, LogOverview, UnifiedFailedLogin } from "./log.types";
 declare function cleanupOldFailedLogins(): Promise<void>;
 /** Limpeza explícita (admin/bot) — retorna contagens */
 export declare function runCleanupFailedLogins(hours?: number): Promise<{
@@ -15,8 +15,22 @@ export declare const logService: {
         threatLevel: import("./log.types").ThreatLevel;
         threatScore: number;
         suspiciousIps: import("./log.types").SuspiciousIpEntry[];
-        adminLogins: LoginStatsBlock;
-        clientLogins: LoginStatsBlock;
+        adminLogins: {
+            success24h: number;
+            failed24h: number;
+            total24h: number;
+            failureRate: number;
+            failed7d: number;
+            uniqueFailedIps24h: number;
+        };
+        clientLogins: {
+            success24h: number;
+            failed24h: number;
+            total24h: number;
+            failureRate: number;
+            failed7d: number;
+            uniqueFailedIps24h: number;
+        };
     }>;
     getDashboard(): Promise<{
         keysByStatus: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").KeyGroupByOutputType, "status"[]> & {
@@ -49,8 +63,22 @@ export declare const logService: {
             threatLevel: import("./log.types").ThreatLevel;
             threatScore: number;
             alerts: import("./log.types").SecurityAlert[];
-            adminLogins: LoginStatsBlock;
-            clientLogins: LoginStatsBlock;
+            adminLogins: {
+                success24h: number;
+                failed24h: number;
+                total24h: number;
+                failureRate: number;
+                failed7d: number;
+                uniqueFailedIps24h: number;
+            };
+            clientLogins: {
+                success24h: number;
+                failed24h: number;
+                total24h: number;
+                failureRate: number;
+                failed7d: number;
+                uniqueFailedIps24h: number;
+            };
             suspiciousIps: import("./log.types").SuspiciousIpEntry[];
             topFailedUsernames: {
                 username: string;
@@ -83,8 +111,22 @@ export declare const logService: {
             threatLevel: import("./log.types").ThreatLevel;
             threatScore: number;
             alerts: import("./log.types").SecurityAlert[];
-            adminLogins: LoginStatsBlock;
-            clientLogins: LoginStatsBlock;
+            adminLogins: {
+                success24h: number;
+                failed24h: number;
+                total24h: number;
+                failureRate: number;
+                failed7d: number;
+                uniqueFailedIps24h: number;
+            };
+            clientLogins: {
+                success24h: number;
+                failed24h: number;
+                total24h: number;
+                failureRate: number;
+                failed7d: number;
+                uniqueFailedIps24h: number;
+            };
             suspiciousIps: import("./log.types").SuspiciousIpEntry[];
             topFailedUsernames: {
                 username: string;
@@ -148,7 +190,11 @@ export declare const logService: {
         hours?: number;
     }): Promise<{
         data: ({
+            reasonCode: string;
             reasonLabel: string;
+            event: string;
+            detail: string;
+            status: "failed";
             createdAt: string;
             id: string;
             source: "admin";
@@ -156,7 +202,11 @@ export declare const logService: {
             ip: string;
             reason: string;
         } | {
+            reasonCode: string;
             reasonLabel: string;
+            event: string;
+            detail: string;
+            status: "failed";
             createdAt: string;
             id: string;
             source: "client";
@@ -165,6 +215,38 @@ export declare const logService: {
             reason: string;
             action: string;
         })[];
+        total: number;
+        page: number;
+        totalPages: number;
+    }>;
+    getLogOverview(hours?: number): Promise<LogOverview>;
+    getLogFeed(filters: LogFeedFilters): Promise<{
+        data: import("./log.types").UnifiedLogEntry[];
+        total: number;
+        page: number;
+        totalPages: number;
+        filters: {
+            hours: number;
+            category: import("./log.types").LogFeedCategory;
+            status: import("./log.types").LogFeedStatus;
+        };
+    }>;
+    investigateIpAddress(ip: string, hours?: number): Promise<IpInvestigation>;
+    getClientAudit(username: string, params: {
+        page: number;
+        limit: number;
+        hours?: number;
+    }): Promise<ClientAuditTrail>;
+    getClientAccessLogs(params: {
+        page: number;
+        limit: number;
+        hours?: number;
+        success?: boolean;
+        ip?: string;
+        username?: string;
+        action?: string;
+    }): Promise<{
+        data: import("./log.types").UnifiedLogEntry[];
         total: number;
         page: number;
         totalPages: number;

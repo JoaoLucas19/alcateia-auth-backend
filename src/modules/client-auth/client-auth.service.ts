@@ -3,7 +3,8 @@ import prisma from "../../prisma/client";
 import { AppError } from "../../utils/AppError";
 import { logger } from "../../utils/logger";
 import { KeyStatus, ValidationResult } from "../../prisma/enums";
-import { dispatchImmediateAlert } from "../notifications/discord.dispatcher";
+import { notifyClientLoginFailed, notifyKeyScanning } from "../logs/log-alerts.service";
+import { logRepository } from "../logs/log.repository";
 import { evaluateAutoBlock } from "../security/ip-block.service";
 import { isHwidBanned } from "../banned-hwid/banned-hwid.service";
 import {
@@ -80,6 +81,33 @@ function formatUserPayload(client: {
   };
 }
 
+async function afterClientFailure(params: {
+  ipAddress: string;
+  username: string;
+  reason: string;
+  action: "LOGIN" | "REGISTER";
+  hwid?: string | null;
+}): Promise<void> {
+  await evaluateAutoBlock(params.ipAddress, params.action === "REGISTER" && params.reason === "INVALID_KEY" ? "KEY_SCANNING" : "CLIENT_LOGIN");
+
+  const since = new Date(Date.now() - 15 * 60 * 1000);
+  const attemptsFromIp = await logRepository.countRecentFailuresByIp(params.ipAddress, since, "client");
+
+  if (params.reason === "INVALID_KEY") {
+    const invalidKeys = await logRepository.countRecentInvalidKeysByIp(params.ipAddress, since);
+    void notifyKeyScanning({ ip: params.ipAddress, invalidAttempts: invalidKeys });
+  }
+
+  void notifyClientLoginFailed({
+    username: params.username,
+    ip: params.ipAddress,
+    reason: params.reason,
+    action: params.action,
+    hwid: params.hwid,
+    attemptsFromIp,
+  });
+}
+
 async function logKeyAttempt(
   keyId: string | null,
   ipAddress: string,
@@ -110,6 +138,13 @@ async function assertHwidNotBanned(
       action: ctx.action,
       success: false,
       reason: "HWID_BANNED",
+    });
+    await afterClientFailure({
+      ipAddress: ctx.ipAddress,
+      username: ctx.username,
+      reason: "HWID_BANNED",
+      action: ctx.action,
+      hwid,
     });
     throw new AppError("HWID banido", 403, "HWID_BANNED");
   }
@@ -157,7 +192,7 @@ export async function registerClientService(input: ClientRegisterInput) {
       success: false,
       reason: "INVALID_KEY",
     });
-    await evaluateAutoBlock(ipAddress, "KEY_SCANNING");
+    await afterClientFailure({ ipAddress, username, reason: "INVALID_KEY", action: "REGISTER", hwid });
     throw new AppError("Key invalida", 400, "INVALID_KEY");
   }
 
@@ -318,7 +353,7 @@ export async function loginClientService(input: ClientAuthInput) {
       success: false,
       reason: "USER_NOT_FOUND",
     });
-    await evaluateAutoBlock(ipAddress, "CLIENT_LOGIN");
+    await afterClientFailure({ ipAddress, username, reason: "USER_NOT_FOUND", action: "LOGIN", hwid });
     throw new AppError("Credenciais invalidas", 401, "INVALID_CREDENTIALS");
   }
 
@@ -332,6 +367,7 @@ export async function loginClientService(input: ClientAuthInput) {
       success: false,
       reason: "USER_BANNED",
     });
+    await afterClientFailure({ ipAddress, username, reason: "USER_BANNED", action: "LOGIN", hwid });
     throw new AppError("Conta banida", 403, "USER_BANNED");
   }
 
@@ -346,7 +382,7 @@ export async function loginClientService(input: ClientAuthInput) {
       success: false,
       reason: "WRONG_PASSWORD",
     });
-    await evaluateAutoBlock(ipAddress, "CLIENT_LOGIN");
+    await afterClientFailure({ ipAddress, username, reason: "WRONG_PASSWORD", action: "LOGIN", hwid });
     throw new AppError("Credenciais invalidas", 401, "INVALID_CREDENTIALS");
   }
 
@@ -392,15 +428,7 @@ export async function loginClientService(input: ClientAuthInput) {
       reason: "HWID_MISMATCH",
     });
 
-    void dispatchImmediateAlert({
-      type: "HWID_MISMATCH",
-      severity: "HIGH",
-      message: `HWID não autorizado no login do cliente "${username}"`,
-      ip: ipAddress,
-      username,
-      detectedAt: new Date().toISOString(),
-    });
-
+    await afterClientFailure({ ipAddress, username, reason: "HWID_MISMATCH", action: "LOGIN", hwid: incomingHwid });
     throw new AppError("HWID nao autorizado", 403, "HWID_MISMATCH");
   }
 

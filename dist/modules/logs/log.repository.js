@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.logRepository = void 0;
 const client_1 = __importDefault(require("../../prisma/client"));
+const log_formatters_1 = require("./log.formatters");
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
 function sinceHours(hours) {
@@ -337,6 +338,194 @@ exports.logRepository = {
             topClientIps,
             hwidMismatches,
         };
+    },
+    countAccessLogsInWindow: async (since) => {
+        const [admin, client, keys, blocks] = await Promise.all([
+            client_1.default.accessLog.count({ where: { createdAt: { gte: since } } }),
+            client_1.default.clientAccessLog.count({ where: { createdAt: { gte: since } } }),
+            client_1.default.keyUsageLog.count({ where: { attemptedAt: { gte: since } } }),
+            client_1.default.blockedIp.count({ where: { blockedAt: { gte: since } } }),
+        ]);
+        return { admin, client, keys, blocks, total: admin + client + keys + blocks };
+    },
+    findUnifiedLogFeed: async (params) => {
+        const { since, takePerSource, category = "all", status = "all", ip, username } = params;
+        const ipFilter = ip ? { contains: ip } : undefined;
+        const successFilter = status === "all" ? undefined : status === "success" ? true : false;
+        const tasks = [];
+        if (category === "all" || category === "admin_access") {
+            tasks.push(client_1.default.accessLog
+                .findMany({
+                where: {
+                    createdAt: { gte: since },
+                    ...(successFilter !== undefined ? { success: successFilter } : {}),
+                    ...(ipFilter ? { ipAddress: ipFilter } : {}),
+                    ...(username ? { usernameAttempted: { contains: username } } : {}),
+                },
+                orderBy: { createdAt: "desc" },
+                take: takePerSource,
+            })
+                .then((rows) => rows.map(log_formatters_1.buildAdminAccessEntry)));
+        }
+        if (category === "all" || category === "client_access") {
+            tasks.push(client_1.default.clientAccessLog
+                .findMany({
+                where: {
+                    createdAt: { gte: since },
+                    ...(successFilter !== undefined ? { success: successFilter } : {}),
+                    ...(ipFilter ? { ipAddress: ipFilter } : {}),
+                    ...(username ? { usernameAttempted: { contains: username } } : {}),
+                },
+                orderBy: { createdAt: "desc" },
+                take: takePerSource,
+            })
+                .then((rows) => rows.map(log_formatters_1.buildClientAccessEntry))
+                .catch(() => []));
+        }
+        if (category === "all" || category === "key_validation") {
+            tasks.push(client_1.default.keyUsageLog
+                .findMany({
+                where: {
+                    attemptedAt: { gte: since },
+                    ...(successFilter === true ? { result: "SUCCESS" } : {}),
+                    ...(successFilter === false ? { result: { not: "SUCCESS" } } : {}),
+                    ...(ipFilter ? { ipAddress: ipFilter } : {}),
+                },
+                include: { key: { select: { value: true } } },
+                orderBy: { attemptedAt: "desc" },
+                take: takePerSource,
+            })
+                .then((rows) => rows.map(log_formatters_1.buildKeyUsageEntry)));
+        }
+        if (category === "all" || category === "ip_block") {
+            tasks.push(client_1.default.blockedIp
+                .findMany({
+                where: {
+                    blockedAt: { gte: since },
+                    ...(ipFilter ? { ipAddress: ipFilter } : {}),
+                },
+                orderBy: { blockedAt: "desc" },
+                take: takePerSource,
+            })
+                .then((rows) => rows.map(log_formatters_1.buildIpBlockEntry))
+                .catch(() => []));
+        }
+        const chunks = await Promise.all(tasks);
+        return chunks.flat().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    },
+    findClientAccessLogs: async (params) => {
+        const where = {};
+        if (params.success !== undefined)
+            where.success = params.success;
+        if (params.ip)
+            where.ipAddress = { contains: params.ip };
+        if (params.username)
+            where.usernameAttempted = { contains: params.username };
+        if (params.action)
+            where.action = params.action;
+        if (params.since)
+            where.createdAt = { gte: params.since };
+        const [data, total] = await Promise.all([
+            client_1.default.clientAccessLog.findMany({
+                where,
+                skip: (params.page - 1) * params.limit,
+                take: params.limit,
+                orderBy: { createdAt: "desc" },
+            }),
+            client_1.default.clientAccessLog.count({ where }),
+        ]);
+        return {
+            data: data.map(log_formatters_1.buildClientAccessEntry),
+            total,
+            page: params.page,
+            totalPages: Math.ceil(total / params.limit),
+        };
+    },
+    investigateIp: async (ip, since) => {
+        const normalized = ip.trim();
+        const [block, adminLogs, clientLogs, keyLogs] = await Promise.all([
+            client_1.default.blockedIp.findFirst({
+                where: {
+                    ipAddress: normalized,
+                    OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+                },
+            }),
+            client_1.default.accessLog.findMany({
+                where: { ipAddress: { contains: normalized }, createdAt: { gte: since } },
+                orderBy: { createdAt: "desc" },
+                take: 100,
+            }),
+            client_1.default.clientAccessLog.findMany({
+                where: { ipAddress: { contains: normalized }, createdAt: { gte: since } },
+                orderBy: { createdAt: "desc" },
+                take: 100,
+            }),
+            client_1.default.keyUsageLog.findMany({
+                where: { ipAddress: { contains: normalized }, attemptedAt: { gte: since } },
+                include: { key: { select: { value: true } } },
+                orderBy: { attemptedAt: "desc" },
+                take: 100,
+            }),
+        ]);
+        return { block, adminLogs, clientLogs, keyLogs };
+    },
+    getClientAuditData: async (username, since, page, limit) => {
+        const client = await client_1.default.client.findUnique({
+            where: { username },
+            include: { key: { include: { product: true } } },
+        });
+        const where = { usernameAttempted: username, createdAt: { gte: since } };
+        const [logs, total, statsRows, uniqueIps] = await Promise.all([
+            client_1.default.clientAccessLog.findMany({
+                where,
+                skip: (page - 1) * limit,
+                take: limit,
+                orderBy: { createdAt: "desc" },
+            }),
+            client_1.default.clientAccessLog.count({ where }),
+            client_1.default.clientAccessLog.groupBy({
+                by: ["success"],
+                where,
+                _count: true,
+            }),
+            client_1.default.clientAccessLog.groupBy({
+                by: ["ipAddress"],
+                where,
+                _count: true,
+            }),
+        ]);
+        const lastFailure = await client_1.default.clientAccessLog.findFirst({
+            where: { ...where, success: false },
+            orderBy: { createdAt: "desc" },
+        });
+        const lastSuccess = await client_1.default.clientAccessLog.findFirst({
+            where: { ...where, success: true },
+            orderBy: { createdAt: "desc" },
+        });
+        return {
+            client,
+            logs,
+            total,
+            statsRows,
+            uniqueIpCount: uniqueIps.length,
+            lastFailure,
+            lastSuccess,
+        };
+    },
+    countRecentFailuresByIp: async (ip, since, source) => {
+        if (source === "admin") {
+            return client_1.default.accessLog.count({
+                where: { ipAddress: ip, success: false, createdAt: { gte: since } },
+            });
+        }
+        return client_1.default.clientAccessLog.count({
+            where: { ipAddress: ip, success: false, createdAt: { gte: since } },
+        });
+    },
+    countRecentInvalidKeysByIp: async (ip, since) => {
+        return client_1.default.keyUsageLog.count({
+            where: { ipAddress: ip, result: { not: "SUCCESS" }, attemptedAt: { gte: since } },
+        });
     },
 };
 //# sourceMappingURL=log.repository.js.map

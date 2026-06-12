@@ -3,7 +3,7 @@ import { env } from "../../config/env";
 import { AppError } from "../../utils/AppError";
 import { logger } from "../../utils/logger";
 import { normalizeIp } from "../../utils/client-ip";
-import { dispatchImmediateAlert } from "../notifications/discord.dispatcher";
+import { notifyIpBlocked } from "../logs/log-alerts.service";
 
 type BlockSource = "ADMIN_LOGIN" | "CLIENT_LOGIN" | "KEY_SCANNING";
 
@@ -100,13 +100,7 @@ async function upsertBlock(
   invalidateCache(normalized);
   logger.warn("IP bloqueado automaticamente", { ip: normalized, reason, source, expiresAt });
 
-  void dispatchImmediateAlert({
-    type: "BRUTE_FORCE_IP",
-    severity: "HIGH",
-    message: `IP ${normalized} bloqueado: ${reason}`,
-    ip: normalized,
-    detectedAt: new Date().toISOString(),
-  });
+  void notifyIpBlocked({ ip: normalized, reason, source });
 }
 
 async function countAdminFailures(ip: string, since: Date): Promise<number> {

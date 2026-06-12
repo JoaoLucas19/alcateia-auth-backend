@@ -10,7 +10,8 @@ const client_1 = __importDefault(require("../../prisma/client"));
 const AppError_1 = require("../../utils/AppError");
 const logger_1 = require("../../utils/logger");
 const enums_1 = require("../../prisma/enums");
-const discord_dispatcher_1 = require("../notifications/discord.dispatcher");
+const log_alerts_service_1 = require("../logs/log-alerts.service");
+const log_repository_1 = require("../logs/log.repository");
 const ip_block_service_1 = require("../security/ip-block.service");
 const banned_hwid_service_1 = require("../banned-hwid/banned-hwid.service");
 const hwid_1 = require("../../utils/hwid");
@@ -57,6 +58,23 @@ function formatUserPayload(client) {
         isBanned: client.isBanned,
     };
 }
+async function afterClientFailure(params) {
+    await (0, ip_block_service_1.evaluateAutoBlock)(params.ipAddress, params.action === "REGISTER" && params.reason === "INVALID_KEY" ? "KEY_SCANNING" : "CLIENT_LOGIN");
+    const since = new Date(Date.now() - 15 * 60 * 1000);
+    const attemptsFromIp = await log_repository_1.logRepository.countRecentFailuresByIp(params.ipAddress, since, "client");
+    if (params.reason === "INVALID_KEY") {
+        const invalidKeys = await log_repository_1.logRepository.countRecentInvalidKeysByIp(params.ipAddress, since);
+        void (0, log_alerts_service_1.notifyKeyScanning)({ ip: params.ipAddress, invalidAttempts: invalidKeys });
+    }
+    void (0, log_alerts_service_1.notifyClientLoginFailed)({
+        username: params.username,
+        ip: params.ipAddress,
+        reason: params.reason,
+        action: params.action,
+        hwid: params.hwid,
+        attemptsFromIp,
+    });
+}
 async function logKeyAttempt(keyId, ipAddress, result, userAgent) {
     if (!keyId)
         return;
@@ -80,6 +98,13 @@ async function assertHwidNotBanned(hwid, ctx) {
             action: ctx.action,
             success: false,
             reason: "HWID_BANNED",
+        });
+        await afterClientFailure({
+            ipAddress: ctx.ipAddress,
+            username: ctx.username,
+            reason: "HWID_BANNED",
+            action: ctx.action,
+            hwid,
         });
         throw new AppError_1.AppError("HWID banido", 403, "HWID_BANNED");
     }
@@ -114,7 +139,7 @@ async function registerClientService(input) {
             success: false,
             reason: "INVALID_KEY",
         });
-        await (0, ip_block_service_1.evaluateAutoBlock)(ipAddress, "KEY_SCANNING");
+        await afterClientFailure({ ipAddress, username, reason: "INVALID_KEY", action: "REGISTER", hwid });
         throw new AppError_1.AppError("Key invalida", 400, "INVALID_KEY");
     }
     if (key.status === enums_1.KeyStatus.REVOKED) {
@@ -257,7 +282,7 @@ async function loginClientService(input) {
             success: false,
             reason: "USER_NOT_FOUND",
         });
-        await (0, ip_block_service_1.evaluateAutoBlock)(ipAddress, "CLIENT_LOGIN");
+        await afterClientFailure({ ipAddress, username, reason: "USER_NOT_FOUND", action: "LOGIN", hwid });
         throw new AppError_1.AppError("Credenciais invalidas", 401, "INVALID_CREDENTIALS");
     }
     if (client.isBanned) {
@@ -270,6 +295,7 @@ async function loginClientService(input) {
             success: false,
             reason: "USER_BANNED",
         });
+        await afterClientFailure({ ipAddress, username, reason: "USER_BANNED", action: "LOGIN", hwid });
         throw new AppError_1.AppError("Conta banida", 403, "USER_BANNED");
     }
     const passwordMatch = await bcrypt_1.default.compare(password, client.passwordHash);
@@ -283,7 +309,7 @@ async function loginClientService(input) {
             success: false,
             reason: "WRONG_PASSWORD",
         });
-        await (0, ip_block_service_1.evaluateAutoBlock)(ipAddress, "CLIENT_LOGIN");
+        await afterClientFailure({ ipAddress, username, reason: "WRONG_PASSWORD", action: "LOGIN", hwid });
         throw new AppError_1.AppError("Credenciais invalidas", 401, "INVALID_CREDENTIALS");
     }
     const lifetime = isLifetimeKey(client.key) || isLifetimeExpiry(client.expiresAt);
@@ -323,14 +349,7 @@ async function loginClientService(input) {
             success: false,
             reason: "HWID_MISMATCH",
         });
-        void (0, discord_dispatcher_1.dispatchImmediateAlert)({
-            type: "HWID_MISMATCH",
-            severity: "HIGH",
-            message: `HWID não autorizado no login do cliente "${username}"`,
-            ip: ipAddress,
-            username,
-            detectedAt: new Date().toISOString(),
-        });
+        await afterClientFailure({ ipAddress, username, reason: "HWID_MISMATCH", action: "LOGIN", hwid: incomingHwid });
         throw new AppError_1.AppError("HWID nao autorizado", 403, "HWID_MISMATCH");
     }
     if ((0, hwid_1.isHwidBound)(storedHwid) && !incomingHwid) {

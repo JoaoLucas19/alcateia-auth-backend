@@ -1,5 +1,12 @@
 import prisma from "../../prisma/client";
-import type { KeysSummary } from "./log.types";
+import type { KeysSummary, LogFeedCategory, LogFeedStatus, UnifiedLogEntry } from "./log.types";
+import {
+  buildAdminAccessEntry,
+  buildClientAccessEntry,
+  buildIpBlockEntry,
+  buildKeyUsageEntry,
+  matchesLogSearch,
+} from "./log.formatters";
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
@@ -426,5 +433,231 @@ export const logRepository = {
       topClientIps,
       hwidMismatches,
     };
+  },
+
+  countAccessLogsInWindow: async (since: Date) => {
+    const [admin, client, keys, blocks] = await Promise.all([
+      prisma.accessLog.count({ where: { createdAt: { gte: since } } }),
+      prisma.clientAccessLog.count({ where: { createdAt: { gte: since } } }),
+      prisma.keyUsageLog.count({ where: { attemptedAt: { gte: since } } }),
+      prisma.blockedIp.count({ where: { blockedAt: { gte: since } } }),
+    ]);
+    return { admin, client, keys, blocks, total: admin + client + keys + blocks };
+  },
+
+  findUnifiedLogFeed: async (params: {
+    since: Date;
+    takePerSource: number;
+    category?: LogFeedCategory;
+    status?: LogFeedStatus;
+    ip?: string;
+    username?: string;
+  }) => {
+    const { since, takePerSource, category = "all", status = "all", ip, username } = params;
+    const ipFilter = ip ? { contains: ip } : undefined;
+    const successFilter =
+      status === "all" ? undefined : status === "success" ? true : false;
+
+    const tasks: Promise<UnifiedLogEntry[]>[] = [];
+
+    if (category === "all" || category === "admin_access") {
+      tasks.push(
+        prisma.accessLog
+          .findMany({
+            where: {
+              createdAt: { gte: since },
+              ...(successFilter !== undefined ? { success: successFilter } : {}),
+              ...(ipFilter ? { ipAddress: ipFilter } : {}),
+              ...(username ? { usernameAttempted: { contains: username } } : {}),
+            },
+            orderBy: { createdAt: "desc" },
+            take: takePerSource,
+          })
+          .then((rows) => rows.map(buildAdminAccessEntry))
+      );
+    }
+
+    if (category === "all" || category === "client_access") {
+      tasks.push(
+        prisma.clientAccessLog
+          .findMany({
+            where: {
+              createdAt: { gte: since },
+              ...(successFilter !== undefined ? { success: successFilter } : {}),
+              ...(ipFilter ? { ipAddress: ipFilter } : {}),
+              ...(username ? { usernameAttempted: { contains: username } } : {}),
+            },
+            orderBy: { createdAt: "desc" },
+            take: takePerSource,
+          })
+          .then((rows) => rows.map(buildClientAccessEntry))
+          .catch(() => [] as UnifiedLogEntry[])
+      );
+    }
+
+    if (category === "all" || category === "key_validation") {
+      tasks.push(
+        prisma.keyUsageLog
+          .findMany({
+            where: {
+              attemptedAt: { gte: since },
+              ...(successFilter === true ? { result: "SUCCESS" } : {}),
+              ...(successFilter === false ? { result: { not: "SUCCESS" } } : {}),
+              ...(ipFilter ? { ipAddress: ipFilter } : {}),
+            },
+            include: { key: { select: { value: true } } },
+            orderBy: { attemptedAt: "desc" },
+            take: takePerSource,
+          })
+          .then((rows) => rows.map(buildKeyUsageEntry))
+      );
+    }
+
+    if (category === "all" || category === "ip_block") {
+      tasks.push(
+        prisma.blockedIp
+          .findMany({
+            where: {
+              blockedAt: { gte: since },
+              ...(ipFilter ? { ipAddress: ipFilter } : {}),
+            },
+            orderBy: { blockedAt: "desc" },
+            take: takePerSource,
+          })
+          .then((rows) => rows.map(buildIpBlockEntry))
+          .catch(() => [] as UnifiedLogEntry[])
+      );
+    }
+
+    const chunks = await Promise.all(tasks);
+    return chunks.flat().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  },
+
+  findClientAccessLogs: async (params: {
+    page: number;
+    limit: number;
+    since?: Date;
+    success?: boolean;
+    ip?: string;
+    username?: string;
+    action?: string;
+  }) => {
+    const where: Record<string, unknown> = {};
+    if (params.success !== undefined) where.success = params.success;
+    if (params.ip) where.ipAddress = { contains: params.ip };
+    if (params.username) where.usernameAttempted = { contains: params.username };
+    if (params.action) where.action = params.action;
+    if (params.since) where.createdAt = { gte: params.since };
+
+    const [data, total] = await Promise.all([
+      prisma.clientAccessLog.findMany({
+        where,
+        skip: (params.page - 1) * params.limit,
+        take: params.limit,
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.clientAccessLog.count({ where }),
+    ]);
+
+    return {
+      data: data.map(buildClientAccessEntry),
+      total,
+      page: params.page,
+      totalPages: Math.ceil(total / params.limit),
+    };
+  },
+
+  investigateIp: async (ip: string, since: Date) => {
+    const normalized = ip.trim();
+    const [block, adminLogs, clientLogs, keyLogs] = await Promise.all([
+      prisma.blockedIp.findFirst({
+        where: {
+          ipAddress: normalized,
+          OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+        },
+      }),
+      prisma.accessLog.findMany({
+        where: { ipAddress: { contains: normalized }, createdAt: { gte: since } },
+        orderBy: { createdAt: "desc" },
+        take: 100,
+      }),
+      prisma.clientAccessLog.findMany({
+        where: { ipAddress: { contains: normalized }, createdAt: { gte: since } },
+        orderBy: { createdAt: "desc" },
+        take: 100,
+      }),
+      prisma.keyUsageLog.findMany({
+        where: { ipAddress: { contains: normalized }, attemptedAt: { gte: since } },
+        include: { key: { select: { value: true } } },
+        orderBy: { attemptedAt: "desc" },
+        take: 100,
+      }),
+    ]);
+
+    return { block, adminLogs, clientLogs, keyLogs };
+  },
+
+  getClientAuditData: async (username: string, since: Date, page: number, limit: number) => {
+    const client = await prisma.client.findUnique({
+      where: { username },
+      include: { key: { include: { product: true } } },
+    });
+
+    const where = { usernameAttempted: username, createdAt: { gte: since } };
+    const [logs, total, statsRows, uniqueIps] = await Promise.all([
+      prisma.clientAccessLog.findMany({
+        where,
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.clientAccessLog.count({ where }),
+      prisma.clientAccessLog.groupBy({
+        by: ["success"],
+        where,
+        _count: true,
+      }),
+      prisma.clientAccessLog.groupBy({
+        by: ["ipAddress"],
+        where,
+        _count: true,
+      }),
+    ]);
+
+    const lastFailure = await prisma.clientAccessLog.findFirst({
+      where: { ...where, success: false },
+      orderBy: { createdAt: "desc" },
+    });
+    const lastSuccess = await prisma.clientAccessLog.findFirst({
+      where: { ...where, success: true },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return {
+      client,
+      logs,
+      total,
+      statsRows,
+      uniqueIpCount: uniqueIps.length,
+      lastFailure,
+      lastSuccess,
+    };
+  },
+
+  countRecentFailuresByIp: async (ip: string, since: Date, source: "admin" | "client") => {
+    if (source === "admin") {
+      return prisma.accessLog.count({
+        where: { ipAddress: ip, success: false, createdAt: { gte: since } },
+      });
+    }
+    return prisma.clientAccessLog.count({
+      where: { ipAddress: ip, success: false, createdAt: { gte: since } },
+    });
+  },
+
+  countRecentInvalidKeysByIp: async (ip: string, since: Date) => {
+    return prisma.keyUsageLog.count({
+      where: { ipAddress: ip, result: { not: "SUCCESS" }, attemptedAt: { gte: since } },
+    });
   },
 };

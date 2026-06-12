@@ -12,7 +12,7 @@ const env_1 = require("../../config/env");
 const AppError_1 = require("../../utils/AppError");
 const logger_1 = require("../../utils/logger");
 const client_ip_1 = require("../../utils/client-ip");
-const discord_dispatcher_1 = require("../notifications/discord.dispatcher");
+const log_alerts_service_1 = require("../logs/log-alerts.service");
 const blockCache = new Map();
 const CACHE_TTL_MS = 30000;
 function cacheKey(ip) {
@@ -82,13 +82,7 @@ async function upsertBlock(ip, reason, durationMs, source) {
     });
     invalidateCache(normalized);
     logger_1.logger.warn("IP bloqueado automaticamente", { ip: normalized, reason, source, expiresAt });
-    void (0, discord_dispatcher_1.dispatchImmediateAlert)({
-        type: "BRUTE_FORCE_IP",
-        severity: "HIGH",
-        message: `IP ${normalized} bloqueado: ${reason}`,
-        ip: normalized,
-        detectedAt: new Date().toISOString(),
-    });
+    void (0, log_alerts_service_1.notifyIpBlocked)({ ip: normalized, reason, source });
 }
 async function countAdminFailures(ip, since) {
     return client_1.default.accessLog.count({

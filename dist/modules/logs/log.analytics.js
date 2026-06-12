@@ -1,10 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.reasonLabel = void 0;
 exports.buildTimeline24h = buildTimeline24h;
 exports.aggregateSuspiciousIps = aggregateSuspiciousIps;
 exports.detectSecurityAlerts = detectSecurityAlerts;
 exports.computeThreatLevel = computeThreatLevel;
-exports.reasonLabel = reasonLabel;
+const log_formatters_1 = require("./log.formatters");
+Object.defineProperty(exports, "reasonLabel", { enumerable: true, get: function () { return log_formatters_1.reasonLabel; } });
 const BRUTE_FORCE_IP_THRESHOLD = 8;
 const BRUTE_FORCE_USERNAME_THRESHOLD = 10;
 const HIGH_FAILURE_RATE_THRESHOLD = 0.35;
@@ -162,6 +164,27 @@ function detectSecurityAlerts(input) {
             detectedAt: now,
         });
     }
+    for (const row of input.clientFailuresByIp ?? []) {
+        if (row._count >= BRUTE_FORCE_IP_THRESHOLD) {
+            alerts.push({
+                type: "CLIENT_LOGIN_FAILED",
+                severity: row._count >= BRUTE_FORCE_IP_THRESHOLD * 2 ? "HIGH" : "MEDIUM",
+                message: `IP ${row.ipAddress} com ${row._count} falhas de login cliente em 24h`,
+                ip: row.ipAddress,
+                count: row._count,
+                detectedAt: now,
+            });
+        }
+    }
+    if ((input.clientFailed24h ?? 0) >= 20) {
+        alerts.push({
+            type: "CLIENT_LOGIN_FAILED",
+            severity: "MEDIUM",
+            message: `${input.clientFailed24h} falhas de login cliente nas últimas 24h`,
+            count: input.clientFailed24h,
+            detectedAt: now,
+        });
+    }
     return alerts.sort((a, b) => severityWeight(b.severity) - severityWeight(a.severity));
 }
 function severityWeight(level) {
@@ -195,24 +218,5 @@ function computeThreatLevel(alerts, suspiciousIps) {
         level = "MEDIUM";
     return { level, score };
 }
-function reasonLabel(reason) {
-    const labels = {
-        USER_NOT_FOUND: "Usuário não encontrado",
-        WRONG_PASSWORD: "Senha incorreta",
-        USER_BANNED: "Conta banida",
-        SUBSCRIPTION_EXPIRED: "Assinatura expirada",
-        KEY_REVOKED: "Licença revogada",
-        HWID_MISMATCH: "HWID não autorizado",
-        HWID_MISSING: "HWID não enviado pelo loader",
-        HWID_INVALID: "HWID inválido ou não reconhecido",
-        INVALID_KEY: "Key inválida",
-        KEY_ALREADY_USED: "Key já utilizada",
-        KEY_EXPIRED: "Key expirada",
-        USERNAME_TAKEN: "Usuário já cadastrado",
-        PRODUCT_INACTIVE: "Produto inativo",
-    };
-    if (!reason)
-        return "Desconhecido";
-    return labels[reason] ?? reason;
-}
+// reasonLabel re-exported from log.formatters above
 //# sourceMappingURL=log.analytics.js.map

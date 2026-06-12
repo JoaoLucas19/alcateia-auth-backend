@@ -86,9 +86,9 @@ export declare const keyRepository: {
             id: string;
             result: import("../../prisma/enums").ValidationResult;
             ipAddress: string;
+            keyId: string;
             userAgent: string | null;
             attemptedAt: Date;
-            keyId: string;
         }[];
     } & {
         id: string;

@@ -42,6 +42,11 @@ function shouldNotifyType(
       return notify.notifyHighThreat;
     case "HWID_MISMATCH":
       return notify.notifyHighThreat;
+    case "CLIENT_LOGIN_FAILED":
+    case "ADMIN_LOGIN_FAILED":
+      return notify.notifyBruteForce;
+    case "IP_BLOCKED":
+      return notify.notifyHighThreat;
     default:
       return notify.notifyHighThreat;
   }
