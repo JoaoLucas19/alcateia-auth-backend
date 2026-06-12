@@ -25,7 +25,7 @@ export declare const clientRepository: {
                 createdById: string;
                 customerEmail: string | null;
                 customerName: string | null;
-                status: import("@prisma/client").$Enums.KeyStatus;
+                status: import("../../prisma/enums").KeyStatus;
                 isPermanent: boolean;
                 activatedAt: Date | null;
             };
@@ -64,7 +64,7 @@ export declare const clientRepository: {
             createdById: string;
             customerEmail: string | null;
             customerName: string | null;
-            status: import("@prisma/client").$Enums.KeyStatus;
+            status: import("../../prisma/enums").KeyStatus;
             isPermanent: boolean;
             activatedAt: Date | null;
         };
@@ -99,7 +99,7 @@ export declare const clientRepository: {
             createdById: string;
             customerEmail: string | null;
             customerName: string | null;
-            status: import("@prisma/client").$Enums.KeyStatus;
+            status: import("../../prisma/enums").KeyStatus;
             isPermanent: boolean;
             activatedAt: Date | null;
         };
@@ -134,7 +134,7 @@ export declare const clientRepository: {
             createdById: string;
             customerEmail: string | null;
             customerName: string | null;
-            status: import("@prisma/client").$Enums.KeyStatus;
+            status: import("../../prisma/enums").KeyStatus;
             isPermanent: boolean;
             activatedAt: Date | null;
         };
@@ -169,7 +169,7 @@ export declare const clientRepository: {
             createdById: string;
             customerEmail: string | null;
             customerName: string | null;
-            status: import("@prisma/client").$Enums.KeyStatus;
+            status: import("../../prisma/enums").KeyStatus;
             isPermanent: boolean;
             activatedAt: Date | null;
         };
@@ -204,7 +204,7 @@ export declare const clientRepository: {
             createdById: string;
             customerEmail: string | null;
             customerName: string | null;
-            status: import("@prisma/client").$Enums.KeyStatus;
+            status: import("../../prisma/enums").KeyStatus;
             isPermanent: boolean;
             activatedAt: Date | null;
         };

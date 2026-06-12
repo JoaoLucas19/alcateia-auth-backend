@@ -1,4 +1,4 @@
-import { KeyStatus } from "@prisma/client";
+import { KeyStatus } from "../../prisma/enums";
 /** Limpeza explícita (bot/admin) — retorna contagens */
 export declare function runCleanupExpiredKeys(): Promise<{
     markedExpired: number;
@@ -50,7 +50,7 @@ export declare function listKeys(filters: {
         productId: string;
         createdById: string;
         customerEmail: string | null;
-        status: import("@prisma/client").$Enums.KeyStatus;
+        status: KeyStatus;
         isPermanent: boolean;
         activatedAt: Date | null;
     }[];
@@ -78,7 +78,7 @@ export declare function getKey(id: string): Promise<{
     };
     usageLogs: {
         id: string;
-        result: import("@prisma/client").$Enums.ValidationResult;
+        result: import("../../prisma/enums").ValidationResult;
         ipAddress: string;
         userAgent: string | null;
         attemptedAt: Date;
@@ -91,7 +91,7 @@ export declare function getKey(id: string): Promise<{
     productId: string;
     createdById: string;
     customerEmail: string | null;
-    status: import("@prisma/client").$Enums.KeyStatus;
+    status: KeyStatus;
     isPermanent: boolean;
     activatedAt: Date | null;
 }>;
@@ -104,7 +104,7 @@ export declare function revokeKey(id: string): Promise<{
     createdById: string;
     customerEmail: string | null;
     customerName: string | null;
-    status: import("@prisma/client").$Enums.KeyStatus;
+    status: KeyStatus;
     isPermanent: boolean;
     activatedAt: Date | null;
 }>;
@@ -122,7 +122,7 @@ export declare function updateKey(id: string, data: {
     createdById: string;
     customerEmail: string | null;
     customerName: string | null;
-    status: import("@prisma/client").$Enums.KeyStatus;
+    status: KeyStatus;
     isPermanent: boolean;
     activatedAt: Date | null;
 }>;
@@ -135,7 +135,7 @@ export declare function deleteKey(id: string): Promise<{
     createdById: string;
     customerEmail: string | null;
     customerName: string | null;
-    status: import("@prisma/client").$Enums.KeyStatus;
+    status: KeyStatus;
     isPermanent: boolean;
     activatedAt: Date | null;
 }>;

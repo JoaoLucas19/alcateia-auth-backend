@@ -9,7 +9,7 @@ const bcrypt_1 = __importDefault(require("bcrypt"));
 const client_1 = __importDefault(require("../../prisma/client"));
 const AppError_1 = require("../../utils/AppError");
 const logger_1 = require("../../utils/logger");
-const client_2 = require("@prisma/client");
+const enums_1 = require("../../prisma/enums");
 const discord_dispatcher_1 = require("../notifications/discord.dispatcher");
 const ip_block_service_1 = require("../security/ip-block.service");
 const banned_hwid_service_1 = require("../banned-hwid/banned-hwid.service");
@@ -117,8 +117,8 @@ async function registerClientService(input) {
         await (0, ip_block_service_1.evaluateAutoBlock)(ipAddress, "KEY_SCANNING");
         throw new AppError_1.AppError("Key invalida", 400, "INVALID_KEY");
     }
-    if (key.status === client_2.KeyStatus.REVOKED) {
-        await logKeyAttempt(key.id, ipAddress, client_2.ValidationResult.REVOKED);
+    if (key.status === enums_1.KeyStatus.REVOKED) {
+        await logKeyAttempt(key.id, ipAddress, enums_1.ValidationResult.REVOKED);
         await logClientAccess({
             username,
             ipAddress,
@@ -129,8 +129,8 @@ async function registerClientService(input) {
         });
         throw new AppError_1.AppError("Key revogada", 403, "KEY_REVOKED");
     }
-    if (key.status === client_2.KeyStatus.USED || key.client) {
-        await logKeyAttempt(key.id, ipAddress, client_2.ValidationResult.ALREADY_USED);
+    if (key.status === enums_1.KeyStatus.USED || key.client) {
+        await logKeyAttempt(key.id, ipAddress, enums_1.ValidationResult.ALREADY_USED);
         await logClientAccess({
             username,
             ipAddress,
@@ -141,8 +141,8 @@ async function registerClientService(input) {
         });
         throw new AppError_1.AppError("Key ja utilizada", 409, "KEY_ALREADY_USED");
     }
-    if (key.status === client_2.KeyStatus.EXPIRED) {
-        await logKeyAttempt(key.id, ipAddress, client_2.ValidationResult.EXPIRED);
+    if (key.status === enums_1.KeyStatus.EXPIRED) {
+        await logKeyAttempt(key.id, ipAddress, enums_1.ValidationResult.EXPIRED);
         await logClientAccess({
             username,
             ipAddress,
@@ -154,8 +154,8 @@ async function registerClientService(input) {
         throw new AppError_1.AppError("Key expirada", 403, "KEY_EXPIRED");
     }
     if (key.expiresAt && key.expiresAt < new Date()) {
-        await client_1.default.key.update({ where: { id: key.id }, data: { status: client_2.KeyStatus.EXPIRED } });
-        await logKeyAttempt(key.id, ipAddress, client_2.ValidationResult.EXPIRED);
+        await client_1.default.key.update({ where: { id: key.id }, data: { status: enums_1.KeyStatus.EXPIRED } });
+        await logKeyAttempt(key.id, ipAddress, enums_1.ValidationResult.EXPIRED);
         await logClientAccess({
             username,
             ipAddress,
@@ -208,7 +208,7 @@ async function registerClientService(input) {
         await tx.key.update({
             where: { id: key.id },
             data: {
-                status: client_2.KeyStatus.USED,
+                status: enums_1.KeyStatus.USED,
                 activatedAt: new Date(),
                 expiresAt,
                 isPermanent: key.isPermanent,
@@ -221,7 +221,7 @@ async function registerClientService(input) {
                 keyId: key.id,
                 ipAddress,
                 userAgent: "NeverClient/1.0",
-                result: client_2.ValidationResult.SUCCESS,
+                result: enums_1.ValidationResult.SUCCESS,
             },
         });
         return created;
@@ -299,7 +299,7 @@ async function loginClientService(input) {
         });
         throw new AppError_1.AppError("Assinatura expirada", 403, "SUBSCRIPTION_EXPIRED");
     }
-    if (client.key.status === client_2.KeyStatus.REVOKED) {
+    if (client.key.status === enums_1.KeyStatus.REVOKED) {
         await logClientAccess({
             clientId: client.id,
             username,
@@ -313,7 +313,7 @@ async function loginClientService(input) {
     }
     const storedHwid = (0, hwid_1.normalizeHwid)(client.hwid);
     if ((0, hwid_1.isHwidBound)(storedHwid) && incomingHwid && !(0, hwid_1.hwidsEqual)(storedHwid, incomingHwid)) {
-        await logKeyAttempt(client.keyId, ipAddress, client_2.ValidationResult.INVALID_KEY);
+        await logKeyAttempt(client.keyId, ipAddress, enums_1.ValidationResult.INVALID_KEY);
         await logClientAccess({
             clientId: client.id,
             username,

@@ -7,7 +7,7 @@
  * Uso no Railway:
  *   railway run npx ts-node scripts/fix-lifetime-key.ts
  */
-import { PrismaClient } from "@prisma/client";
+import prisma from "../src/prisma/client";
 
 const LIFETIME_EXPIRY = new Date("2099-12-31T23:59:59.999Z");
 
@@ -15,8 +15,6 @@ const KEY_VALUE = process.env.FIX_KEY_VALUE ?? "ALCATEIA-1045-5971";
 const USERNAME = process.env.FIX_USERNAME ?? "white";
 
 async function main() {
-  const prisma = new PrismaClient();
-
   const key = await prisma.key.findUnique({
     where: { value: KEY_VALUE },
     include: { client: true },

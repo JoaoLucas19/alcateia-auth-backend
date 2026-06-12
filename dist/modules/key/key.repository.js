@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.keyRepository = void 0;
 const client_1 = __importDefault(require("../../prisma/client"));
-const client_2 = require("@prisma/client");
+const enums_1 = require("../../prisma/enums");
 const LIFETIME_EXPIRY = new Date("2099-12-31T23:59:59.999Z");
 exports.keyRepository = {
     create: (data) => client_1.default.key.create({ data }),
@@ -13,7 +13,7 @@ exports.keyRepository = {
     findPaginated: async ({ page, limit, status, productId, search, }) => {
         const where = {
             // Painel: por padrão oculta keys já expiradas (período encerrado)
-            ...(status ? { status } : { status: { not: client_2.KeyStatus.EXPIRED } }),
+            ...(status ? { status } : { status: { not: enums_1.KeyStatus.EXPIRED } }),
             ...(productId && { productId }),
             ...(search && {
                 OR: [
@@ -105,7 +105,7 @@ exports.keyRepository = {
     deleteExpiredKeys: async () => {
         const expiredFilter = {
             isPermanent: false,
-            status: client_2.KeyStatus.EXPIRED,
+            status: enums_1.KeyStatus.EXPIRED,
             expiresAt: {
                 not: null,
                 lt: new Date(),
@@ -141,7 +141,7 @@ exports.keyRepository = {
         const where = onlyUnused
             ? {
                 ...permanentWhere,
-                status: client_2.KeyStatus.ACTIVE,
+                status: enums_1.KeyStatus.ACTIVE,
                 activatedAt: null,
                 client: { is: null },
             }

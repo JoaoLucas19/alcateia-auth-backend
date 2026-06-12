@@ -1,4 +1,4 @@
-import { KeyStatus, Prisma } from "@prisma/client";
+import { KeyStatus, Prisma } from "../../prisma/enums";
 interface KeyFilters {
     page: number;
     limit: number;
@@ -24,10 +24,12 @@ export declare const keyRepository: {
         createdById: string;
         customerEmail: string | null;
         customerName: string | null;
-        status: import("@prisma/client").$Enums.KeyStatus;
+        status: KeyStatus;
         isPermanent: boolean;
         activatedAt: Date | null;
-    }, never, import("@prisma/client/runtime/library").DefaultArgs, Prisma.PrismaClientOptions>;
+    }, never, import("@prisma/client/runtime/client").DefaultArgs, {
+        omit: Prisma.GlobalOmitConfig | undefined;
+    }>;
     createMany: (keys: {
         value: string;
         productId: string;
@@ -57,7 +59,7 @@ export declare const keyRepository: {
             createdById: string;
             customerEmail: string | null;
             customerName: string | null;
-            status: import("@prisma/client").$Enums.KeyStatus;
+            status: KeyStatus;
             isPermanent: boolean;
             activatedAt: Date | null;
         })[];
@@ -82,7 +84,7 @@ export declare const keyRepository: {
         };
         usageLogs: {
             id: string;
-            result: import("@prisma/client").$Enums.ValidationResult;
+            result: import("../../prisma/enums").ValidationResult;
             ipAddress: string;
             userAgent: string | null;
             attemptedAt: Date;
@@ -97,10 +99,12 @@ export declare const keyRepository: {
         createdById: string;
         customerEmail: string | null;
         customerName: string | null;
-        status: import("@prisma/client").$Enums.KeyStatus;
+        status: KeyStatus;
         isPermanent: boolean;
         activatedAt: Date | null;
-    }) | null, null, import("@prisma/client/runtime/library").DefaultArgs, Prisma.PrismaClientOptions>;
+    }) | null, null, import("@prisma/client/runtime/client").DefaultArgs, {
+        omit: Prisma.GlobalOmitConfig | undefined;
+    }>;
     findByValue: (value: string) => Prisma.Prisma__KeyClient<{
         id: string;
         expiresAt: Date | null;
@@ -110,10 +114,12 @@ export declare const keyRepository: {
         createdById: string;
         customerEmail: string | null;
         customerName: string | null;
-        status: import("@prisma/client").$Enums.KeyStatus;
+        status: KeyStatus;
         isPermanent: boolean;
         activatedAt: Date | null;
-    } | null, null, import("@prisma/client/runtime/library").DefaultArgs, Prisma.PrismaClientOptions>;
+    } | null, null, import("@prisma/client/runtime/client").DefaultArgs, {
+        omit: Prisma.GlobalOmitConfig | undefined;
+    }>;
     valueExists: (value: string) => Promise<boolean>;
     update: (id: string, data: {
         customerEmail?: string;
@@ -129,10 +135,12 @@ export declare const keyRepository: {
         createdById: string;
         customerEmail: string | null;
         customerName: string | null;
-        status: import("@prisma/client").$Enums.KeyStatus;
+        status: KeyStatus;
         isPermanent: boolean;
         activatedAt: Date | null;
-    }, never, import("@prisma/client/runtime/library").DefaultArgs, Prisma.PrismaClientOptions>;
+    }, never, import("@prisma/client/runtime/client").DefaultArgs, {
+        omit: Prisma.GlobalOmitConfig | undefined;
+    }>;
     revoke: (id: string) => Prisma.Prisma__KeyClient<{
         id: string;
         expiresAt: Date | null;
@@ -142,10 +150,12 @@ export declare const keyRepository: {
         createdById: string;
         customerEmail: string | null;
         customerName: string | null;
-        status: import("@prisma/client").$Enums.KeyStatus;
+        status: KeyStatus;
         isPermanent: boolean;
         activatedAt: Date | null;
-    }, never, import("@prisma/client/runtime/library").DefaultArgs, Prisma.PrismaClientOptions>;
+    }, never, import("@prisma/client/runtime/client").DefaultArgs, {
+        omit: Prisma.GlobalOmitConfig | undefined;
+    }>;
     activate: (id: string) => Prisma.Prisma__KeyClient<{
         id: string;
         expiresAt: Date | null;
@@ -155,10 +165,12 @@ export declare const keyRepository: {
         createdById: string;
         customerEmail: string | null;
         customerName: string | null;
-        status: import("@prisma/client").$Enums.KeyStatus;
+        status: KeyStatus;
         isPermanent: boolean;
         activatedAt: Date | null;
-    }, never, import("@prisma/client/runtime/library").DefaultArgs, Prisma.PrismaClientOptions>;
+    }, never, import("@prisma/client/runtime/client").DefaultArgs, {
+        omit: Prisma.GlobalOmitConfig | undefined;
+    }>;
     markExpiredKeys: () => Prisma.PrismaPromise<Prisma.BatchPayload>;
     deleteExpiredKeys: () => Promise<Prisma.BatchPayload>;
     /** Remove key e dependências (cliente do cheat + logs de uso). */
@@ -171,7 +183,7 @@ export declare const keyRepository: {
         createdById: string;
         customerEmail: string | null;
         customerName: string | null;
-        status: import("@prisma/client").$Enums.KeyStatus;
+        status: KeyStatus;
         isPermanent: boolean;
         activatedAt: Date | null;
     }>;

@@ -2,14 +2,16 @@ export declare const productRepository: {
     create: (data: {
         name: string;
         description?: string;
-    }) => import("@prisma/client").Prisma.Prisma__ProductClient<{
+    }) => import("../../generated/prisma/models").Prisma__ProductClient<{
         id: string;
         name: string;
         createdAt: Date;
         description: string | null;
         isActive: boolean;
-    }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
-    findAll: () => import("@prisma/client").Prisma.PrismaPromise<({
+    }, never, import("@prisma/client/runtime/client").DefaultArgs, {
+        omit: import("../../generated/prisma/internal/prismaNamespace").GlobalOmitConfig | undefined;
+    }>;
+    findAll: () => import("../../generated/prisma/internal/prismaNamespace").PrismaPromise<({
         _count: {
             keys: number;
         };
@@ -20,9 +22,9 @@ export declare const productRepository: {
         description: string | null;
         isActive: boolean;
     })[]>;
-    findById: (id: string) => import("@prisma/client").Prisma.Prisma__ProductClient<({
+    findById: (id: string) => import("../../generated/prisma/models").Prisma__ProductClient<({
         keys: {
-            status: import("@prisma/client").$Enums.KeyStatus;
+            status: import("../../prisma/enums").KeyStatus;
         }[];
         _count: {
             keys: number;
@@ -33,24 +35,30 @@ export declare const productRepository: {
         createdAt: Date;
         description: string | null;
         isActive: boolean;
-    }) | null, null, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    }) | null, null, import("@prisma/client/runtime/client").DefaultArgs, {
+        omit: import("../../generated/prisma/internal/prismaNamespace").GlobalOmitConfig | undefined;
+    }>;
     update: (id: string, data: {
         name?: string;
         description?: string;
         isActive?: boolean;
-    }) => import("@prisma/client").Prisma.Prisma__ProductClient<{
+    }) => import("../../generated/prisma/models").Prisma__ProductClient<{
         id: string;
         name: string;
         createdAt: Date;
         description: string | null;
         isActive: boolean;
-    }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
-    delete: (id: string) => import("@prisma/client").Prisma.Prisma__ProductClient<{
+    }, never, import("@prisma/client/runtime/client").DefaultArgs, {
+        omit: import("../../generated/prisma/internal/prismaNamespace").GlobalOmitConfig | undefined;
+    }>;
+    delete: (id: string) => import("../../generated/prisma/models").Prisma__ProductClient<{
         id: string;
         name: string;
         createdAt: Date;
         description: string | null;
         isActive: boolean;
-    }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    }, never, import("@prisma/client/runtime/client").DefaultArgs, {
+        omit: import("../../generated/prisma/internal/prismaNamespace").GlobalOmitConfig | undefined;
+    }>;
     hasKeys: (id: string) => Promise<boolean>;
 };

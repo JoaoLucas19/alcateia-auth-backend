@@ -1,7 +1,8 @@
 /**
  * Corrige Lifetime no banco apontado pelo .env (confira se e Railway ou localhost).
  */
-import { PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "../src/generated/prisma/client";
+import prisma from "../src/prisma/client";
 
 const LIFETIME_EXPIRY = new Date("2099-12-31T23:59:59.999Z");
 const KEY_VALUE = process.env.FIX_KEY_VALUE ?? "ALCATEIA-1045-5971";
@@ -53,7 +54,6 @@ async function listRecentKeys(prisma: PrismaClient) {
 
 async function main() {
   printDatabaseTarget();
-  const prisma = new PrismaClient();
   await ensureIsPermanentColumn(prisma);
 
   let key = await prisma.key.findUnique({

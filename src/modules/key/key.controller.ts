@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import * as keyService from "./key.service";
-import { KeyStatus } from "@prisma/client";
+import { KeyStatus } from "../../prisma/enums";
 
 export async function cleanupExpired(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {

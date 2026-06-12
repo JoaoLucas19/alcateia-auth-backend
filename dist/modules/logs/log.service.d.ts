@@ -19,16 +19,16 @@ export declare const logService: {
         clientLogins: LoginStatsBlock;
     }>;
     getDashboard(): Promise<{
-        keysByStatus: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.KeyGroupByOutputType, "status"[]> & {
+        keysByStatus: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").KeyGroupByOutputType, "status"[]> & {
             _count: number;
         })[];
-        logins24h: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.AccessLogGroupByOutputType, "success"[]> & {
+        logins24h: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").AccessLogGroupByOutputType, "success"[]> & {
             _count: number;
         })[];
-        validations24h: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.KeyUsageLogGroupByOutputType, "result"[]> & {
+        validations24h: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").KeyUsageLogGroupByOutputType, "result"[]> & {
             _count: number;
         })[];
-        topInvalidIps: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.KeyUsageLogGroupByOutputType, "ipAddress"[]> & {
+        topInvalidIps: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").KeyUsageLogGroupByOutputType, "ipAddress"[]> & {
             _count: number;
         })[];
         keys: import("./log.types").KeysSummary;
@@ -113,21 +113,21 @@ export declare const logService: {
         };
         period: {
             days: number;
-            admin: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.AccessLogGroupByOutputType, "success"[]> & {
+            admin: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").AccessLogGroupByOutputType, "success"[]> & {
                 _count: number;
             })[];
-            client: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.ClientAccessLogGroupByOutputType, "success"[]> & {
+            client: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").ClientAccessLogGroupByOutputType, "success"[]> & {
                 _count: number;
             })[];
-            keyValidations: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.KeyUsageLogGroupByOutputType, "result"[]> & {
+            keyValidations: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").KeyUsageLogGroupByOutputType, "result"[]> & {
                 _count: number;
             })[];
         };
         rankings: {
-            topAdminFailedIps: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.AccessLogGroupByOutputType, "ipAddress"[]> & {
+            topAdminFailedIps: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").AccessLogGroupByOutputType, "ipAddress"[]> & {
                 _count: number;
             })[];
-            topClientFailedIps: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.ClientAccessLogGroupByOutputType, "ipAddress"[]> & {
+            topClientFailedIps: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").ClientAccessLogGroupByOutputType, "ipAddress"[]> & {
                 _count: number;
             })[];
         };

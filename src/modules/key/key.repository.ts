@@ -1,5 +1,5 @@
 import prisma from "../../prisma/client";
-import { KeyStatus, Prisma } from "@prisma/client";
+import { KeyStatus, Prisma } from "../../prisma/enums";
 
 const LIFETIME_EXPIRY = new Date("2099-12-31T23:59:59.999Z");
 

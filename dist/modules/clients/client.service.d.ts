@@ -22,7 +22,7 @@ export declare function resolveClientLookup(lookup: ClientLookup): Promise<{
         createdById: string;
         customerEmail: string | null;
         customerName: string | null;
-        status: import("@prisma/client").$Enums.KeyStatus;
+        status: import("../../prisma/enums").KeyStatus;
         isPermanent: boolean;
         activatedAt: Date | null;
     };

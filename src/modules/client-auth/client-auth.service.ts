@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import prisma from "../../prisma/client";
 import { AppError } from "../../utils/AppError";
 import { logger } from "../../utils/logger";
-import { KeyStatus, ValidationResult } from "@prisma/client";
+import { KeyStatus, ValidationResult } from "../../prisma/enums";
 import { dispatchImmediateAlert } from "../notifications/discord.dispatcher";
 import { evaluateAutoBlock } from "../security/ip-block.service";
 import { isHwidBanned } from "../banned-hwid/banned-hwid.service";
