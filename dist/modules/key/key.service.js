@@ -6,6 +6,8 @@ exports.generateKeys = generateKeys;
 exports.listKeys = listKeys;
 exports.getKey = getKey;
 exports.revokeKey = revokeKey;
+exports.pauseKey = pauseKey;
+exports.unpauseKey = unpauseKey;
 exports.updateKey = updateKey;
 exports.deleteKey = deleteKey;
 const key_repository_1 = require("./key.repository");
@@ -13,6 +15,9 @@ const product_repository_1 = require("../products/product.repository");
 const client_repository_1 = require("../clients/client.repository");
 const keyGenerator_1 = require("../../utils/keyGenerator");
 const AppError_1 = require("../../utils/AppError");
+const enums_1 = require("../../prisma/enums");
+const reseller_repository_1 = require("../resellers/reseller.repository");
+const reseller_service_1 = require("../resellers/reseller.service");
 const LIFETIME_EXPIRY = new Date("2099-12-31T23:59:59.999Z");
 function parseExpiresAt(value) {
     if (value == null)
@@ -30,9 +35,30 @@ function canDeleteKey(key) {
     // Permanentes: admin pode excluir (remove cliente vinculado se houver)
     if (isPermanentKey(key))
         return true;
-    if (key.status === "USED" || key.status === "REVOKED")
+    if (key.status === "USED" || key.status === "REVOKED" || key.status === "PAUSED")
         return true;
     return key.status === "ACTIVE" && !key.activatedAt;
+}
+function canPauseKey(key) {
+    return key.status === "ACTIVE" || key.status === "USED";
+}
+function canUnpauseKey(key) {
+    return key.status === "PAUSED";
+}
+function resolveStatusAfterUnpause(key) {
+    if (key.client || key.activatedAt)
+        return enums_1.KeyStatus.USED;
+    return enums_1.KeyStatus.ACTIVE;
+}
+function withKeyFlags(key) {
+    return {
+        ...key,
+        customerName: key.customerName ?? key.client?.username ?? null,
+        registeredUsername: key.client?.username ?? null,
+        canDelete: canDeleteKey(key),
+        canPause: canPauseKey(key),
+        canUnpause: canUnpauseKey(key),
+    };
 }
 // Limpeza automática de keys expiradas
 async function cleanupExpiredKeys() {
@@ -71,6 +97,11 @@ async function generateKeys(data) {
         throw new AppError_1.AppError("Produto não encontrado", 404, "PRODUCT_NOT_FOUND");
     if (!product.isActive)
         throw new AppError_1.AppError("Produto inativo", 400, "PRODUCT_INACTIVE");
+    if (data.resellerId) {
+        const reseller = await reseller_repository_1.resellerRepository.findById(data.resellerId);
+        if (!reseller)
+            throw new AppError_1.AppError("Loja/revendedor não encontrado", 404, "RESELLER_NOT_FOUND");
+    }
     const values = await (0, keyGenerator_1.generateUniqueKeys)(data.quantity, key_repository_1.keyRepository.valueExists);
     const isPermanent = data.isPermanent === true;
     const expiresAt = isPermanent
@@ -84,10 +115,15 @@ async function generateKeys(data) {
         customerName: data.customerName,
         isPermanent,
         expiresAt,
+        resellerId: data.resellerId,
     })));
+    if (data.resellerId) {
+        await (0, reseller_service_1.recordKeyGeneration)(data.resellerId, values.length, data.actorUsername ?? "admin");
+    }
     return {
         generated: values.length,
         keys: values,
+        resellerId: data.resellerId ?? null,
     };
 }
 async function listKeys(filters) {
@@ -96,35 +132,47 @@ async function listKeys(filters) {
     const result = await key_repository_1.keyRepository.findPaginated(filters);
     return {
         ...result,
-        data: result.data.map((key) => ({
-            ...key,
-            // Nome do cliente que registrou a key (fallback p/ keys antigas sem customerName)
-            customerName: key.customerName ?? key.client?.username ?? null,
-            registeredUsername: key.client?.username ?? null,
-            canDelete: canDeleteKey(key),
-        })),
+        data: result.data.map((key) => withKeyFlags(key)),
     };
 }
 async function getKey(id) {
     const key = await key_repository_1.keyRepository.findById(id);
     if (!key)
         throw new AppError_1.AppError("Key não encontrada", 404, "KEY_NOT_FOUND");
-    return {
-        ...key,
-        customerName: key.customerName ?? key.client?.username ?? null,
-        registeredUsername: key.client?.username ?? null,
-        canDelete: canDeleteKey(key),
-    };
+    return withKeyFlags(key);
 }
 async function revokeKey(id) {
     const key = await key_repository_1.keyRepository.findById(id);
     if (!key)
         throw new AppError_1.AppError("Key não encontrada", 404, "KEY_NOT_FOUND");
-    if (key.status === "REVOKED" ||
-        key.status === "USED") {
+    if (key.status === "REVOKED" || key.status === "USED") {
         throw new AppError_1.AppError("Key já inativa", 400, "KEY_ALREADY_INACTIVE");
     }
     return key_repository_1.keyRepository.revoke(id);
+}
+async function pauseKey(id) {
+    const key = await key_repository_1.keyRepository.findById(id);
+    if (!key)
+        throw new AppError_1.AppError("Key não encontrada", 404, "KEY_NOT_FOUND");
+    if (key.status === "PAUSED") {
+        throw new AppError_1.AppError("Key já está pausada", 400, "KEY_ALREADY_PAUSED");
+    }
+    if (!canPauseKey(key)) {
+        throw new AppError_1.AppError("Somente keys ativas ou usadas podem ser pausadas", 400, "KEY_CANNOT_BE_PAUSED");
+    }
+    const updated = await key_repository_1.keyRepository.setStatus(id, enums_1.KeyStatus.PAUSED);
+    return withKeyFlags(updated);
+}
+async function unpauseKey(id) {
+    const key = await key_repository_1.keyRepository.findById(id);
+    if (!key)
+        throw new AppError_1.AppError("Key não encontrada", 404, "KEY_NOT_FOUND");
+    if (!canUnpauseKey(key)) {
+        throw new AppError_1.AppError("Key não está pausada", 400, "KEY_NOT_PAUSED");
+    }
+    const nextStatus = resolveStatusAfterUnpause(key);
+    const updated = await key_repository_1.keyRepository.setStatus(id, nextStatus);
+    return withKeyFlags(updated);
 }
 async function updateKey(id, data) {
     const key = await key_repository_1.keyRepository.findById(id);

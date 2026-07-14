@@ -4,9 +4,9 @@ declare function cleanupOldFailedLogins(): Promise<void>;
 export declare function runCleanupFailedLogins(hours?: number): Promise<{
     retentionHours: number;
     message: string;
-    adminDeleted: any;
-    clientDeleted: any;
-    total: any;
+    adminDeleted: number;
+    clientDeleted: number;
+    total: number;
 }>;
 export declare const logService: {
     cleanupOldFailedLogins: typeof cleanupOldFailedLogins;
@@ -33,19 +33,27 @@ export declare const logService: {
         };
     }>;
     getDashboard(): Promise<{
-        keysByStatus: any;
-        logins24h: any;
-        validations24h: any;
-        topInvalidIps: any;
+        keysByStatus: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").KeyGroupByOutputType, "status"[]> & {
+            _count: number;
+        })[];
+        logins24h: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").AccessLogGroupByOutputType, "success"[]> & {
+            _count: number;
+        })[];
+        validations24h: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").KeyUsageLogGroupByOutputType, "result"[]> & {
+            _count: number;
+        })[];
+        topInvalidIps: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").KeyUsageLogGroupByOutputType, "ipAddress"[]> & {
+            _count: number;
+        })[];
         keys: import("./log.types").KeysSummary;
         clients: {
-            total: any;
-            banned: any;
-            expired: any;
+            total: number;
+            banned: number;
+            expired: number;
             active: number;
         };
         metrics: {
-            activations24h: any;
+            activations24h: number;
             adminLoginsOk24h: number;
             adminLoginsFailed24h: number;
             clientLoginsOk24h: number;
@@ -72,8 +80,21 @@ export declare const logService: {
                 uniqueFailedIps24h: number;
             };
             suspiciousIps: import("./log.types").SuspiciousIpEntry[];
-            topFailedUsernames: any;
-            failuresByReason: any[];
+            topFailedUsernames: {
+                username: string;
+                attempts: number;
+            }[];
+            failuresByReason: ({
+                source: "admin";
+                reason: string;
+                label: string;
+                count: number;
+            } | {
+                source: "client";
+                reason: string;
+                label: string;
+                count: number;
+            })[];
             timeline24h: import("./log.types").TimelineHourBucket[];
             recentFailedLogins: UnifiedFailedLogin[];
             checks: {
@@ -107,8 +128,21 @@ export declare const logService: {
                 uniqueFailedIps24h: number;
             };
             suspiciousIps: import("./log.types").SuspiciousIpEntry[];
-            topFailedUsernames: any;
-            failuresByReason: any[];
+            topFailedUsernames: {
+                username: string;
+                attempts: number;
+            }[];
+            failuresByReason: ({
+                source: "admin";
+                reason: string;
+                label: string;
+                count: number;
+            } | {
+                source: "client";
+                reason: string;
+                label: string;
+                count: number;
+            })[];
             timeline24h: import("./log.types").TimelineHourBucket[];
             recentFailedLogins: UnifiedFailedLogin[];
             checks: {
@@ -121,20 +155,30 @@ export declare const logService: {
         };
         period: {
             days: number;
-            admin: any;
-            client: any;
-            keyValidations: any;
+            admin: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").AccessLogGroupByOutputType, "success"[]> & {
+                _count: number;
+            })[];
+            client: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").ClientAccessLogGroupByOutputType, "success"[]> & {
+                _count: number;
+            })[];
+            keyValidations: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").KeyUsageLogGroupByOutputType, "result"[]> & {
+                _count: number;
+            })[];
         };
         rankings: {
-            topAdminFailedIps: any;
-            topClientFailedIps: any;
+            topAdminFailedIps: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").AccessLogGroupByOutputType, "ipAddress"[]> & {
+                _count: number;
+            })[];
+            topClientFailedIps: (import("../../generated/prisma/internal/prismaNamespace").PickEnumerable<import("../../generated/prisma/models").ClientAccessLogGroupByOutputType, "ipAddress"[]> & {
+                _count: number;
+            })[];
         };
-        hwidMismatches: any;
+        hwidMismatches: number;
         keys: import("./log.types").KeysSummary;
         clients: {
-            total: any;
-            banned: any;
-            expired: any;
+            total: number;
+            banned: number;
+            expired: number;
             active: number;
         };
     }>;
@@ -145,7 +189,32 @@ export declare const logService: {
         ip?: string;
         hours?: number;
     }): Promise<{
-        data: any[];
+        data: ({
+            reasonCode: string;
+            reasonLabel: string;
+            event: string;
+            detail: string;
+            status: "failed";
+            createdAt: string;
+            id: string;
+            source: "admin";
+            username: string;
+            ip: string;
+            reason: string;
+        } | {
+            reasonCode: string;
+            reasonLabel: string;
+            event: string;
+            detail: string;
+            status: "failed";
+            createdAt: string;
+            id: string;
+            source: "client";
+            username: string;
+            ip: string;
+            reason: string;
+            action: string;
+        })[];
         total: number;
         page: number;
         totalPages: number;
@@ -177,8 +246,8 @@ export declare const logService: {
         username?: string;
         action?: string;
     }): Promise<{
-        data: any;
-        total: any;
+        data: import("./log.types").UnifiedLogEntry[];
+        total: number;
         page: number;
         totalPages: number;
     }>;

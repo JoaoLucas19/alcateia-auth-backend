@@ -1,0 +1,2 @@
+-- AlterEnum: permite pausar keys (ACTIVE ou USED)
+ALTER TABLE `Key` MODIFY COLUMN `status` ENUM('ACTIVE', 'USED', 'REVOKED', 'EXPIRED', 'PAUSED') NOT NULL DEFAULT 'ACTIVE';

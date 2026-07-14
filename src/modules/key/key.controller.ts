@@ -23,8 +23,12 @@ export async function cleanupPermanent(req: Request, res: Response, next: NextFu
 
 export async function generate(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const result = await keyService.generateKeys({ ...req.body, createdById: req.admin!.id });
-    res.status(201).json({ data: result });
+    const result = await keyService.generateKeys({
+      ...req.body,
+      createdById: req.admin!.id,
+      actorUsername: req.admin!.username,
+    });
+    res.status(201).json({ success: true, data: result });
   } catch (err) { next(err); }
 }
 
@@ -53,6 +57,32 @@ export async function revoke(req: Request, res: Response, next: NextFunction): P
     const key = await keyService.revokeKey(String(req.params.id));
     res.status(200).json({ data: key });
   } catch (err) { next(err); }
+}
+
+export async function pause(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const key = await keyService.pauseKey(String(req.params.id));
+    res.status(200).json({
+      success: true,
+      data: key,
+      message: "Key pausada com sucesso",
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function unpause(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const key = await keyService.unpauseKey(String(req.params.id));
+    res.status(200).json({
+      success: true,
+      data: key,
+      message: "Key reativada com sucesso",
+    });
+  } catch (err) {
+    next(err);
+  }
 }
 
 export async function update(req: Request, res: Response, next: NextFunction): Promise<void> {

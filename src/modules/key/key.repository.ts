@@ -20,6 +20,7 @@ export const keyRepository = {
     customerName?: string;
     expiresAt?: Date;
     isPermanent?: boolean;
+    resellerId?: string;
   }) => prisma.key.create({ data }),
 
   createMany: (
@@ -31,6 +32,7 @@ export const keyRepository = {
       customerName?: string;
       expiresAt?: Date;
       isPermanent?: boolean;
+      resellerId?: string;
     }[],
   ) => prisma.key.createMany({ data: keys }),
 
@@ -128,6 +130,17 @@ export const keyRepository = {
     prisma.key.update({
       where: { id },
       data: { status: "REVOKED" },
+    }),
+
+  setStatus: (id: string, status: KeyStatus) =>
+    prisma.key.update({
+      where: { id },
+      data: { status },
+      include: {
+        product: { select: { name: true } },
+        createdBy: { select: { username: true } },
+        client: { select: { username: true } },
+      },
     }),
 
   activate: (id: string) =>

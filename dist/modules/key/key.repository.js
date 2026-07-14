@@ -78,6 +78,15 @@ exports.keyRepository = {
         where: { id },
         data: { status: "REVOKED" },
     }),
+    setStatus: (id, status) => client_1.default.key.update({
+        where: { id },
+        data: { status },
+        include: {
+            product: { select: { name: true } },
+            createdBy: { select: { username: true } },
+            client: { select: { username: true } },
+        },
+    }),
     activate: (id) => client_1.default.key.update({
         where: { id },
         data: {

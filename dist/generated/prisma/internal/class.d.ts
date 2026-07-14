@@ -140,6 +140,28 @@ export interface PrismaClient<in LogOpts extends Prisma.LogLevel = never, in out
         omit: OmitOpts;
     }>;
     /**
+     * `prisma.reseller`: Exposes CRUD operations for the **Reseller** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more Resellers
+      * const resellers = await prisma.reseller.findMany()
+      * ```
+      */
+    get reseller(): Prisma.ResellerDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
+     * `prisma.resellerHistory`: Exposes CRUD operations for the **ResellerHistory** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more ResellerHistories
+      * const resellerHistories = await prisma.resellerHistory.findMany()
+      * ```
+      */
+    get resellerHistory(): Prisma.ResellerHistoryDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
      * `prisma.key`: Exposes CRUD operations for the **Key** model.
       * Example usage:
       * ```ts

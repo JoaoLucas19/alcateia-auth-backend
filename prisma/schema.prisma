@@ -12,6 +12,14 @@ enum KeyStatus {
   USED
   REVOKED
   EXPIRED
+  PAUSED
+}
+
+enum ResellerStatus {
+  ACTIVE
+  PAUSED
+  BANNED
+  INACTIVE
 }
 
 enum ValidationResult {
@@ -43,6 +51,43 @@ model Product {
   keys Key[]
 }
 
+/// Loja / parceiro revendedor no painel admin
+model Reseller {
+  id      String         @id @default(uuid())
+  name    String
+  owner   String
+  discord String?
+  email   String?
+  notes   String?        @db.Text
+  status  ResellerStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  keys    Key[]
+  history ResellerHistory[]
+
+  @@index([status])
+  @@index([name])
+  @@map("resellers")
+}
+
+model ResellerHistory {
+  id          String @id @default(uuid())
+  resellerId  String
+  reseller    Reseller @relation(fields: [resellerId], references: [id], onDelete: Cascade)
+
+  type        String
+  description String   @db.Text
+  actor       String   @default("admin")
+  metadata    String?  @db.Text
+
+  createdAt DateTime @default(now())
+
+  @@index([resellerId, createdAt])
+  @@map("reseller_history")
+}
+
 model Key {
   id String @id @default(uuid())
 
@@ -53,6 +98,9 @@ model Key {
 
   createdById String
   createdBy   Admin  @relation(fields: [createdById], references: [id])
+
+  resellerId String?
+  reseller   Reseller? @relation(fields: [resellerId], references: [id], onDelete: SetNull)
 
   customerEmail String?
   customerName  String?
@@ -67,6 +115,9 @@ model Key {
 
   usageLogs KeyUsageLog[]
   client    Client?
+
+  @@index([resellerId])
+  @@index([status])
 }
 
 /// Usuário final do cheat (cadastro com key no menu interno)

@@ -13,6 +13,16 @@ export type Admin = Prisma.AdminModel;
  */
 export type Product = Prisma.ProductModel;
 /**
+ * Model Reseller
+ * Loja / parceiro revendedor no painel admin
+ */
+export type Reseller = Prisma.ResellerModel;
+/**
+ * Model ResellerHistory
+ *
+ */
+export type ResellerHistory = Prisma.ResellerHistoryModel;
+/**
  * Model Key
  *
  */

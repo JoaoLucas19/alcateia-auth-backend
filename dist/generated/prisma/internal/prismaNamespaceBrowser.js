@@ -48,7 +48,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.NotificationSettingsOrderByRelevanceFieldEnum = exports.WhitelistedUidOrderByRelevanceFieldEnum = exports.AccessLogOrderByRelevanceFieldEnum = exports.KeyUsageLogOrderByRelevanceFieldEnum = exports.ClientAccessLogOrderByRelevanceFieldEnum = exports.BannedHwidOrderByRelevanceFieldEnum = exports.BlockedIpOrderByRelevanceFieldEnum = exports.ClientOrderByRelevanceFieldEnum = exports.KeyOrderByRelevanceFieldEnum = exports.ProductOrderByRelevanceFieldEnum = exports.AdminOrderByRelevanceFieldEnum = exports.NullsOrder = exports.SortOrder = exports.NotificationSettingsScalarFieldEnum = exports.WhitelistedUidScalarFieldEnum = exports.AccessLogScalarFieldEnum = exports.KeyUsageLogScalarFieldEnum = exports.ClientAccessLogScalarFieldEnum = exports.BannedHwidScalarFieldEnum = exports.BlockedIpScalarFieldEnum = exports.ClientScalarFieldEnum = exports.KeyScalarFieldEnum = exports.ProductScalarFieldEnum = exports.AdminScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
+exports.NotificationSettingsOrderByRelevanceFieldEnum = exports.WhitelistedUidOrderByRelevanceFieldEnum = exports.AccessLogOrderByRelevanceFieldEnum = exports.KeyUsageLogOrderByRelevanceFieldEnum = exports.ClientAccessLogOrderByRelevanceFieldEnum = exports.BannedHwidOrderByRelevanceFieldEnum = exports.BlockedIpOrderByRelevanceFieldEnum = exports.ClientOrderByRelevanceFieldEnum = exports.KeyOrderByRelevanceFieldEnum = exports.ResellerHistoryOrderByRelevanceFieldEnum = exports.ResellerOrderByRelevanceFieldEnum = exports.ProductOrderByRelevanceFieldEnum = exports.AdminOrderByRelevanceFieldEnum = exports.NullsOrder = exports.SortOrder = exports.NotificationSettingsScalarFieldEnum = exports.WhitelistedUidScalarFieldEnum = exports.AccessLogScalarFieldEnum = exports.KeyUsageLogScalarFieldEnum = exports.ClientAccessLogScalarFieldEnum = exports.BannedHwidScalarFieldEnum = exports.BlockedIpScalarFieldEnum = exports.ClientScalarFieldEnum = exports.KeyScalarFieldEnum = exports.ResellerHistoryScalarFieldEnum = exports.ResellerScalarFieldEnum = exports.ProductScalarFieldEnum = exports.AdminScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
 const runtime = __importStar(require("@prisma/client/runtime/index-browser"));
 exports.Decimal = runtime.Decimal;
 exports.NullTypes = {
@@ -77,6 +77,8 @@ exports.AnyNull = runtime.AnyNull;
 exports.ModelName = {
     Admin: 'Admin',
     Product: 'Product',
+    Reseller: 'Reseller',
+    ResellerHistory: 'ResellerHistory',
     Key: 'Key',
     Client: 'Client',
     BlockedIp: 'BlockedIp',
@@ -110,11 +112,32 @@ exports.ProductScalarFieldEnum = {
     isActive: 'isActive',
     createdAt: 'createdAt'
 };
+exports.ResellerScalarFieldEnum = {
+    id: 'id',
+    name: 'name',
+    owner: 'owner',
+    discord: 'discord',
+    email: 'email',
+    notes: 'notes',
+    status: 'status',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+exports.ResellerHistoryScalarFieldEnum = {
+    id: 'id',
+    resellerId: 'resellerId',
+    type: 'type',
+    description: 'description',
+    actor: 'actor',
+    metadata: 'metadata',
+    createdAt: 'createdAt'
+};
 exports.KeyScalarFieldEnum = {
     id: 'id',
     value: 'value',
     productId: 'productId',
     createdById: 'createdById',
+    resellerId: 'resellerId',
     customerEmail: 'customerEmail',
     customerName: 'customerName',
     status: 'status',
@@ -216,11 +239,28 @@ exports.ProductOrderByRelevanceFieldEnum = {
     name: 'name',
     description: 'description'
 };
+exports.ResellerOrderByRelevanceFieldEnum = {
+    id: 'id',
+    name: 'name',
+    owner: 'owner',
+    discord: 'discord',
+    email: 'email',
+    notes: 'notes'
+};
+exports.ResellerHistoryOrderByRelevanceFieldEnum = {
+    id: 'id',
+    resellerId: 'resellerId',
+    type: 'type',
+    description: 'description',
+    actor: 'actor',
+    metadata: 'metadata'
+};
 exports.KeyOrderByRelevanceFieldEnum = {
     id: 'id',
     value: 'value',
     productId: 'productId',
     createdById: 'createdById',
+    resellerId: 'resellerId',
     customerEmail: 'customerEmail',
     customerName: 'customerName'
 };

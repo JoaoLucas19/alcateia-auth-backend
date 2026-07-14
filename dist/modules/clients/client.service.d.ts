@@ -4,7 +4,42 @@ export type ClientLookup = {
     key?: string;
     discordId?: string;
 };
-export declare function resolveClientLookup(lookup: ClientLookup): Promise<any>;
+export declare function resolveClientLookup(lookup: ClientLookup): Promise<{
+    key: {
+        product: {
+            id: string;
+            name: string;
+            createdAt: Date;
+            description: string | null;
+            isActive: boolean;
+        };
+    } & {
+        id: string;
+        expiresAt: Date | null;
+        createdAt: Date;
+        value: string;
+        productId: string;
+        createdById: string;
+        resellerId: string | null;
+        customerEmail: string | null;
+        customerName: string | null;
+        status: import("../../prisma/enums").KeyStatus;
+        isPermanent: boolean;
+        activatedAt: Date | null;
+    };
+} & {
+    id: string;
+    expiresAt: Date;
+    createdAt: Date;
+    keyId: string;
+    hwid: string | null;
+    isBanned: boolean;
+    username: string;
+    passwordHash: string;
+    discordId: string | null;
+    loginCount: number;
+    lastLoginAt: Date | null;
+}>;
 export declare function listClients(filters: {
     page: number;
     limit: number;
@@ -43,23 +78,23 @@ export declare function listClients(filters: {
         };
     }[];
     summary: {
-        total: any;
-        active: any;
-        banned: any;
-        expired: any;
-        withoutHwid: any;
+        total: number;
+        active: number;
+        banned: number;
+        expired: number;
+        withoutHwid: number;
     };
-    total: any;
+    total: number;
     page: number;
     limit: number;
     totalPages: number;
 }>;
 export declare function getClientsSummary(): Promise<{
-    total: any;
-    active: any;
-    banned: any;
-    expired: any;
-    withoutHwid: any;
+    total: number;
+    active: number;
+    banned: number;
+    expired: number;
+    withoutHwid: number;
 }>;
 export declare function getClient(id: string): Promise<{
     id: string;
@@ -343,5 +378,5 @@ export declare function repairInvalidClientHwids(): Promise<{
     message: string;
     fixed: number;
     cleared: number;
-    scanned: any;
+    scanned: number;
 }>;

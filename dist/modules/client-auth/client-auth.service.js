@@ -154,6 +154,17 @@ async function registerClientService(input) {
         });
         throw new AppError_1.AppError("Key revogada", 403, "KEY_REVOKED");
     }
+    if (key.status === enums_1.KeyStatus.PAUSED) {
+        await logClientAccess({
+            username,
+            ipAddress,
+            hwid,
+            action: "REGISTER",
+            success: false,
+            reason: "KEY_PAUSED",
+        });
+        throw new AppError_1.AppError("Key pausada", 403, "KEY_PAUSED");
+    }
     if (key.status === enums_1.KeyStatus.USED || key.client) {
         await logKeyAttempt(key.id, ipAddress, enums_1.ValidationResult.ALREADY_USED);
         await logClientAccess({
@@ -336,6 +347,18 @@ async function loginClientService(input) {
             reason: "KEY_REVOKED",
         });
         throw new AppError_1.AppError("Licenca revogada", 403, "KEY_REVOKED");
+    }
+    if (client.key.status === enums_1.KeyStatus.PAUSED) {
+        await logClientAccess({
+            clientId: client.id,
+            username,
+            ipAddress,
+            hwid,
+            action: "LOGIN",
+            success: false,
+            reason: "KEY_PAUSED",
+        });
+        throw new AppError_1.AppError("Licenca pausada", 403, "KEY_PAUSED");
     }
     const storedHwid = (0, hwid_1.normalizeHwid)(client.hwid);
     if ((0, hwid_1.isHwidBound)(storedHwid) && incomingHwid && !(0, hwid_1.hwidsEqual)(storedHwid, incomingHwid)) {

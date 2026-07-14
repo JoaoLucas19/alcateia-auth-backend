@@ -15,6 +15,7 @@ const REASON_LABELS = {
     USER_BANNED: "Conta banida",
     SUBSCRIPTION_EXPIRED: "Assinatura expirada",
     KEY_REVOKED: "Licença revogada",
+    KEY_PAUSED: "Key pausada",
     HWID_MISMATCH: "HWID não autorizado",
     HWID_MISSING: "HWID não enviado pelo loader",
     HWID_INVALID: "HWID inválido ou não reconhecido",

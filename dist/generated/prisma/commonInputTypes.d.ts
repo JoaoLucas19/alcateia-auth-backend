@@ -123,6 +123,21 @@ export type BoolWithAggregatesFilter<$PrismaModel = never> = {
     _min?: Prisma.NestedBoolFilter<$PrismaModel>;
     _max?: Prisma.NestedBoolFilter<$PrismaModel>;
 };
+export type EnumResellerStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.ResellerStatus | Prisma.EnumResellerStatusFieldRefInput<$PrismaModel>;
+    in?: $Enums.ResellerStatus[];
+    notIn?: $Enums.ResellerStatus[];
+    not?: Prisma.NestedEnumResellerStatusFilter<$PrismaModel> | $Enums.ResellerStatus;
+};
+export type EnumResellerStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ResellerStatus | Prisma.EnumResellerStatusFieldRefInput<$PrismaModel>;
+    in?: $Enums.ResellerStatus[];
+    notIn?: $Enums.ResellerStatus[];
+    not?: Prisma.NestedEnumResellerStatusWithAggregatesFilter<$PrismaModel> | $Enums.ResellerStatus;
+    _count?: Prisma.NestedIntFilter<$PrismaModel>;
+    _min?: Prisma.NestedEnumResellerStatusFilter<$PrismaModel>;
+    _max?: Prisma.NestedEnumResellerStatusFilter<$PrismaModel>;
+};
 export type EnumKeyStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.KeyStatus | Prisma.EnumKeyStatusFieldRefInput<$PrismaModel>;
     in?: $Enums.KeyStatus[];
@@ -316,6 +331,21 @@ export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
     _count?: Prisma.NestedIntFilter<$PrismaModel>;
     _min?: Prisma.NestedBoolFilter<$PrismaModel>;
     _max?: Prisma.NestedBoolFilter<$PrismaModel>;
+};
+export type NestedEnumResellerStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.ResellerStatus | Prisma.EnumResellerStatusFieldRefInput<$PrismaModel>;
+    in?: $Enums.ResellerStatus[];
+    notIn?: $Enums.ResellerStatus[];
+    not?: Prisma.NestedEnumResellerStatusFilter<$PrismaModel> | $Enums.ResellerStatus;
+};
+export type NestedEnumResellerStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ResellerStatus | Prisma.EnumResellerStatusFieldRefInput<$PrismaModel>;
+    in?: $Enums.ResellerStatus[];
+    notIn?: $Enums.ResellerStatus[];
+    not?: Prisma.NestedEnumResellerStatusWithAggregatesFilter<$PrismaModel> | $Enums.ResellerStatus;
+    _count?: Prisma.NestedIntFilter<$PrismaModel>;
+    _min?: Prisma.NestedEnumResellerStatusFilter<$PrismaModel>;
+    _max?: Prisma.NestedEnumResellerStatusFilter<$PrismaModel>;
 };
 export type NestedEnumKeyStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.KeyStatus | Prisma.EnumKeyStatusFieldRefInput<$PrismaModel>;

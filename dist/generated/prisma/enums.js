@@ -9,12 +9,19 @@
 * 🟢 You can import this file directly.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ValidationResult = exports.KeyStatus = void 0;
+exports.ValidationResult = exports.ResellerStatus = exports.KeyStatus = void 0;
 exports.KeyStatus = {
     ACTIVE: 'ACTIVE',
     USED: 'USED',
     REVOKED: 'REVOKED',
-    EXPIRED: 'EXPIRED'
+    EXPIRED: 'EXPIRED',
+    PAUSED: 'PAUSED'
+};
+exports.ResellerStatus = {
+    ACTIVE: 'ACTIVE',
+    PAUSED: 'PAUSED',
+    BANNED: 'BANNED',
+    INACTIVE: 'INACTIVE'
 };
 exports.ValidationResult = {
     SUCCESS: 'SUCCESS',

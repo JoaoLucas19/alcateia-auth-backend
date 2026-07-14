@@ -14,6 +14,7 @@ function assertApiKey(key) {
         throw new AppError_1.AppError("Chave invalida", 403, "INVALID_KEY");
     }
 }
+/** ToxicUidBypass.dll pode chamar /uid/check sem key. */
 function assertApiKeyForCheck(key) {
     const k = String(key ?? "").trim();
     if (!k) {
@@ -22,7 +23,9 @@ function assertApiKeyForCheck(key) {
     assertApiKey(k);
 }
 function denyText(uid) {
-    return ("ACCESS DENIED. Your UID " + uid + " is NOT whitelisted for UID Bypass. Please contact Owner for assistance.");
+    return ("ACCESS DENIED. Your UID " +
+        uid +
+        " is NOT whitelisted for UID Bypass. Please contact Owner for assistance.");
 }
 function sendError(res, err) {
     if (err instanceof AppError_1.AppError) {

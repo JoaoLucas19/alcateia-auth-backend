@@ -1,5 +1,7 @@
 export type * from './models/Admin';
 export type * from './models/Product';
+export type * from './models/Reseller';
+export type * from './models/ResellerHistory';
 export type * from './models/Key';
 export type * from './models/Client';
 export type * from './models/BlockedIp';

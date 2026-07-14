@@ -4,15 +4,25 @@ export declare function listBannedHwids(filters: {
     limit: number;
     search?: string;
 }): Promise<{
-    total: any;
-    items: any;
+    total: number;
+    items: {
+        id: string;
+        reason: string | null;
+        createdAt: Date;
+        hwid: string;
+    }[];
     page: number;
     limit: number;
     totalPages: number;
 }>;
 export declare function banHwid(hwid: string, reason?: string): Promise<{
     message: string;
-    data: any;
+    data: {
+        id: string;
+        reason: string | null;
+        createdAt: Date;
+        hwid: string;
+    };
 }>;
 export declare function unbanHwidById(id: string): Promise<{
     message: string;

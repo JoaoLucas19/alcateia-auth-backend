@@ -5,6 +5,8 @@ import {
   list,
   getById,
   revoke,
+  pause,
+  unpause,
   update,
   remove,
   cleanupExpired,
@@ -23,6 +25,7 @@ const generateSchema = z.object({
     { message: "expiresAt deve ser uma data futura" }
   ),
   isPermanent: z.boolean().optional(),
+  resellerId: z.string().uuid("resellerId deve ser um UUID válido").optional(),
 });
 
 const updateSchema = z.object({
@@ -42,6 +45,8 @@ router.post("/generate", validate(generateSchema), generate);
 router.get("/", list);
 router.get("/:id", getById);
 router.patch("/:id/revoke", revoke);
+router.patch("/:id/pause", pause);
+router.patch("/:id/unpause", unpause);
 router.patch("/:id", validate(updateSchema), update);
 router.delete("/:id", remove);
 

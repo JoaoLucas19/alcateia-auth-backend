@@ -209,6 +209,18 @@ export async function registerClientService(input: ClientRegisterInput) {
     throw new AppError("Key revogada", 403, "KEY_REVOKED");
   }
 
+  if (key.status === KeyStatus.PAUSED) {
+    await logClientAccess({
+      username,
+      ipAddress,
+      hwid,
+      action: "REGISTER",
+      success: false,
+      reason: "KEY_PAUSED",
+    });
+    throw new AppError("Key pausada", 403, "KEY_PAUSED");
+  }
+
   if (key.status === KeyStatus.USED || key.client) {
     await logKeyAttempt(key.id, ipAddress, ValidationResult.ALREADY_USED);
     await logClientAccess({
@@ -412,6 +424,19 @@ export async function loginClientService(input: ClientAuthInput) {
       reason: "KEY_REVOKED",
     });
     throw new AppError("Licenca revogada", 403, "KEY_REVOKED");
+  }
+
+  if (client.key.status === KeyStatus.PAUSED) {
+    await logClientAccess({
+      clientId: client.id,
+      username,
+      ipAddress,
+      hwid,
+      action: "LOGIN",
+      success: false,
+      reason: "KEY_PAUSED",
+    });
+    throw new AppError("Licenca pausada", 403, "KEY_PAUSED");
   }
 
   const storedHwid = normalizeHwid(client.hwid);

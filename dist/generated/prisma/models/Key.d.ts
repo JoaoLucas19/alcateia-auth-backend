@@ -16,6 +16,7 @@ export type KeyMinAggregateOutputType = {
     value: string | null;
     productId: string | null;
     createdById: string | null;
+    resellerId: string | null;
     customerEmail: string | null;
     customerName: string | null;
     status: $Enums.KeyStatus | null;
@@ -29,6 +30,7 @@ export type KeyMaxAggregateOutputType = {
     value: string | null;
     productId: string | null;
     createdById: string | null;
+    resellerId: string | null;
     customerEmail: string | null;
     customerName: string | null;
     status: $Enums.KeyStatus | null;
@@ -42,6 +44,7 @@ export type KeyCountAggregateOutputType = {
     value: number;
     productId: number;
     createdById: number;
+    resellerId: number;
     customerEmail: number;
     customerName: number;
     status: number;
@@ -56,6 +59,7 @@ export type KeyMinAggregateInputType = {
     value?: true;
     productId?: true;
     createdById?: true;
+    resellerId?: true;
     customerEmail?: true;
     customerName?: true;
     status?: true;
@@ -69,6 +73,7 @@ export type KeyMaxAggregateInputType = {
     value?: true;
     productId?: true;
     createdById?: true;
+    resellerId?: true;
     customerEmail?: true;
     customerName?: true;
     status?: true;
@@ -82,6 +87,7 @@ export type KeyCountAggregateInputType = {
     value?: true;
     productId?: true;
     createdById?: true;
+    resellerId?: true;
     customerEmail?: true;
     customerName?: true;
     status?: true;
@@ -158,6 +164,7 @@ export type KeyGroupByOutputType = {
     value: string;
     productId: string;
     createdById: string;
+    resellerId: string | null;
     customerEmail: string | null;
     customerName: string | null;
     status: $Enums.KeyStatus;
@@ -180,6 +187,7 @@ export type KeyWhereInput = {
     value?: Prisma.StringFilter<"Key"> | string;
     productId?: Prisma.StringFilter<"Key"> | string;
     createdById?: Prisma.StringFilter<"Key"> | string;
+    resellerId?: Prisma.StringNullableFilter<"Key"> | string | null;
     customerEmail?: Prisma.StringNullableFilter<"Key"> | string | null;
     customerName?: Prisma.StringNullableFilter<"Key"> | string | null;
     status?: Prisma.EnumKeyStatusFilter<"Key"> | $Enums.KeyStatus;
@@ -189,6 +197,7 @@ export type KeyWhereInput = {
     createdAt?: Prisma.DateTimeFilter<"Key"> | Date | string;
     product?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>;
     createdBy?: Prisma.XOR<Prisma.AdminScalarRelationFilter, Prisma.AdminWhereInput>;
+    reseller?: Prisma.XOR<Prisma.ResellerNullableScalarRelationFilter, Prisma.ResellerWhereInput> | null;
     usageLogs?: Prisma.KeyUsageLogListRelationFilter;
     client?: Prisma.XOR<Prisma.ClientNullableScalarRelationFilter, Prisma.ClientWhereInput> | null;
 };
@@ -197,6 +206,7 @@ export type KeyOrderByWithRelationInput = {
     value?: Prisma.SortOrder;
     productId?: Prisma.SortOrder;
     createdById?: Prisma.SortOrder;
+    resellerId?: Prisma.SortOrderInput | Prisma.SortOrder;
     customerEmail?: Prisma.SortOrderInput | Prisma.SortOrder;
     customerName?: Prisma.SortOrderInput | Prisma.SortOrder;
     status?: Prisma.SortOrder;
@@ -206,6 +216,7 @@ export type KeyOrderByWithRelationInput = {
     createdAt?: Prisma.SortOrder;
     product?: Prisma.ProductOrderByWithRelationInput;
     createdBy?: Prisma.AdminOrderByWithRelationInput;
+    reseller?: Prisma.ResellerOrderByWithRelationInput;
     usageLogs?: Prisma.KeyUsageLogOrderByRelationAggregateInput;
     client?: Prisma.ClientOrderByWithRelationInput;
     _relevance?: Prisma.KeyOrderByRelevanceInput;
@@ -218,6 +229,7 @@ export type KeyWhereUniqueInput = Prisma.AtLeast<{
     NOT?: Prisma.KeyWhereInput | Prisma.KeyWhereInput[];
     productId?: Prisma.StringFilter<"Key"> | string;
     createdById?: Prisma.StringFilter<"Key"> | string;
+    resellerId?: Prisma.StringNullableFilter<"Key"> | string | null;
     customerEmail?: Prisma.StringNullableFilter<"Key"> | string | null;
     customerName?: Prisma.StringNullableFilter<"Key"> | string | null;
     status?: Prisma.EnumKeyStatusFilter<"Key"> | $Enums.KeyStatus;
@@ -227,6 +239,7 @@ export type KeyWhereUniqueInput = Prisma.AtLeast<{
     createdAt?: Prisma.DateTimeFilter<"Key"> | Date | string;
     product?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>;
     createdBy?: Prisma.XOR<Prisma.AdminScalarRelationFilter, Prisma.AdminWhereInput>;
+    reseller?: Prisma.XOR<Prisma.ResellerNullableScalarRelationFilter, Prisma.ResellerWhereInput> | null;
     usageLogs?: Prisma.KeyUsageLogListRelationFilter;
     client?: Prisma.XOR<Prisma.ClientNullableScalarRelationFilter, Prisma.ClientWhereInput> | null;
 }, "id" | "value">;
@@ -235,6 +248,7 @@ export type KeyOrderByWithAggregationInput = {
     value?: Prisma.SortOrder;
     productId?: Prisma.SortOrder;
     createdById?: Prisma.SortOrder;
+    resellerId?: Prisma.SortOrderInput | Prisma.SortOrder;
     customerEmail?: Prisma.SortOrderInput | Prisma.SortOrder;
     customerName?: Prisma.SortOrderInput | Prisma.SortOrder;
     status?: Prisma.SortOrder;
@@ -254,6 +268,7 @@ export type KeyScalarWhereWithAggregatesInput = {
     value?: Prisma.StringWithAggregatesFilter<"Key"> | string;
     productId?: Prisma.StringWithAggregatesFilter<"Key"> | string;
     createdById?: Prisma.StringWithAggregatesFilter<"Key"> | string;
+    resellerId?: Prisma.StringNullableWithAggregatesFilter<"Key"> | string | null;
     customerEmail?: Prisma.StringNullableWithAggregatesFilter<"Key"> | string | null;
     customerName?: Prisma.StringNullableWithAggregatesFilter<"Key"> | string | null;
     status?: Prisma.EnumKeyStatusWithAggregatesFilter<"Key"> | $Enums.KeyStatus;
@@ -274,6 +289,7 @@ export type KeyCreateInput = {
     createdAt?: Date | string;
     product: Prisma.ProductCreateNestedOneWithoutKeysInput;
     createdBy: Prisma.AdminCreateNestedOneWithoutKeysInput;
+    reseller?: Prisma.ResellerCreateNestedOneWithoutKeysInput;
     usageLogs?: Prisma.KeyUsageLogCreateNestedManyWithoutKeyInput;
     client?: Prisma.ClientCreateNestedOneWithoutKeyInput;
 };
@@ -282,6 +298,7 @@ export type KeyUncheckedCreateInput = {
     value: string;
     productId: string;
     createdById: string;
+    resellerId?: string | null;
     customerEmail?: string | null;
     customerName?: string | null;
     status?: $Enums.KeyStatus;
@@ -304,6 +321,7 @@ export type KeyUpdateInput = {
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     product?: Prisma.ProductUpdateOneRequiredWithoutKeysNestedInput;
     createdBy?: Prisma.AdminUpdateOneRequiredWithoutKeysNestedInput;
+    reseller?: Prisma.ResellerUpdateOneWithoutKeysNestedInput;
     usageLogs?: Prisma.KeyUsageLogUpdateManyWithoutKeyNestedInput;
     client?: Prisma.ClientUpdateOneWithoutKeyNestedInput;
 };
@@ -312,6 +330,7 @@ export type KeyUncheckedUpdateInput = {
     value?: Prisma.StringFieldUpdateOperationsInput | string;
     productId?: Prisma.StringFieldUpdateOperationsInput | string;
     createdById?: Prisma.StringFieldUpdateOperationsInput | string;
+    resellerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     customerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     status?: Prisma.EnumKeyStatusFieldUpdateOperationsInput | $Enums.KeyStatus;
@@ -327,6 +346,7 @@ export type KeyCreateManyInput = {
     value: string;
     productId: string;
     createdById: string;
+    resellerId?: string | null;
     customerEmail?: string | null;
     customerName?: string | null;
     status?: $Enums.KeyStatus;
@@ -351,6 +371,7 @@ export type KeyUncheckedUpdateManyInput = {
     value?: Prisma.StringFieldUpdateOperationsInput | string;
     productId?: Prisma.StringFieldUpdateOperationsInput | string;
     createdById?: Prisma.StringFieldUpdateOperationsInput | string;
+    resellerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     customerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     status?: Prisma.EnumKeyStatusFieldUpdateOperationsInput | $Enums.KeyStatus;
@@ -377,6 +398,7 @@ export type KeyCountOrderByAggregateInput = {
     value?: Prisma.SortOrder;
     productId?: Prisma.SortOrder;
     createdById?: Prisma.SortOrder;
+    resellerId?: Prisma.SortOrder;
     customerEmail?: Prisma.SortOrder;
     customerName?: Prisma.SortOrder;
     status?: Prisma.SortOrder;
@@ -390,6 +412,7 @@ export type KeyMaxOrderByAggregateInput = {
     value?: Prisma.SortOrder;
     productId?: Prisma.SortOrder;
     createdById?: Prisma.SortOrder;
+    resellerId?: Prisma.SortOrder;
     customerEmail?: Prisma.SortOrder;
     customerName?: Prisma.SortOrder;
     status?: Prisma.SortOrder;
@@ -403,6 +426,7 @@ export type KeyMinOrderByAggregateInput = {
     value?: Prisma.SortOrder;
     productId?: Prisma.SortOrder;
     createdById?: Prisma.SortOrder;
+    resellerId?: Prisma.SortOrder;
     customerEmail?: Prisma.SortOrder;
     customerName?: Prisma.SortOrder;
     status?: Prisma.SortOrder;
@@ -491,6 +515,44 @@ export type KeyUncheckedUpdateManyWithoutProductNestedInput = {
     updateMany?: Prisma.KeyUpdateManyWithWhereWithoutProductInput | Prisma.KeyUpdateManyWithWhereWithoutProductInput[];
     deleteMany?: Prisma.KeyScalarWhereInput | Prisma.KeyScalarWhereInput[];
 };
+export type KeyCreateNestedManyWithoutResellerInput = {
+    create?: Prisma.XOR<Prisma.KeyCreateWithoutResellerInput, Prisma.KeyUncheckedCreateWithoutResellerInput> | Prisma.KeyCreateWithoutResellerInput[] | Prisma.KeyUncheckedCreateWithoutResellerInput[];
+    connectOrCreate?: Prisma.KeyCreateOrConnectWithoutResellerInput | Prisma.KeyCreateOrConnectWithoutResellerInput[];
+    createMany?: Prisma.KeyCreateManyResellerInputEnvelope;
+    connect?: Prisma.KeyWhereUniqueInput | Prisma.KeyWhereUniqueInput[];
+};
+export type KeyUncheckedCreateNestedManyWithoutResellerInput = {
+    create?: Prisma.XOR<Prisma.KeyCreateWithoutResellerInput, Prisma.KeyUncheckedCreateWithoutResellerInput> | Prisma.KeyCreateWithoutResellerInput[] | Prisma.KeyUncheckedCreateWithoutResellerInput[];
+    connectOrCreate?: Prisma.KeyCreateOrConnectWithoutResellerInput | Prisma.KeyCreateOrConnectWithoutResellerInput[];
+    createMany?: Prisma.KeyCreateManyResellerInputEnvelope;
+    connect?: Prisma.KeyWhereUniqueInput | Prisma.KeyWhereUniqueInput[];
+};
+export type KeyUpdateManyWithoutResellerNestedInput = {
+    create?: Prisma.XOR<Prisma.KeyCreateWithoutResellerInput, Prisma.KeyUncheckedCreateWithoutResellerInput> | Prisma.KeyCreateWithoutResellerInput[] | Prisma.KeyUncheckedCreateWithoutResellerInput[];
+    connectOrCreate?: Prisma.KeyCreateOrConnectWithoutResellerInput | Prisma.KeyCreateOrConnectWithoutResellerInput[];
+    upsert?: Prisma.KeyUpsertWithWhereUniqueWithoutResellerInput | Prisma.KeyUpsertWithWhereUniqueWithoutResellerInput[];
+    createMany?: Prisma.KeyCreateManyResellerInputEnvelope;
+    set?: Prisma.KeyWhereUniqueInput | Prisma.KeyWhereUniqueInput[];
+    disconnect?: Prisma.KeyWhereUniqueInput | Prisma.KeyWhereUniqueInput[];
+    delete?: Prisma.KeyWhereUniqueInput | Prisma.KeyWhereUniqueInput[];
+    connect?: Prisma.KeyWhereUniqueInput | Prisma.KeyWhereUniqueInput[];
+    update?: Prisma.KeyUpdateWithWhereUniqueWithoutResellerInput | Prisma.KeyUpdateWithWhereUniqueWithoutResellerInput[];
+    updateMany?: Prisma.KeyUpdateManyWithWhereWithoutResellerInput | Prisma.KeyUpdateManyWithWhereWithoutResellerInput[];
+    deleteMany?: Prisma.KeyScalarWhereInput | Prisma.KeyScalarWhereInput[];
+};
+export type KeyUncheckedUpdateManyWithoutResellerNestedInput = {
+    create?: Prisma.XOR<Prisma.KeyCreateWithoutResellerInput, Prisma.KeyUncheckedCreateWithoutResellerInput> | Prisma.KeyCreateWithoutResellerInput[] | Prisma.KeyUncheckedCreateWithoutResellerInput[];
+    connectOrCreate?: Prisma.KeyCreateOrConnectWithoutResellerInput | Prisma.KeyCreateOrConnectWithoutResellerInput[];
+    upsert?: Prisma.KeyUpsertWithWhereUniqueWithoutResellerInput | Prisma.KeyUpsertWithWhereUniqueWithoutResellerInput[];
+    createMany?: Prisma.KeyCreateManyResellerInputEnvelope;
+    set?: Prisma.KeyWhereUniqueInput | Prisma.KeyWhereUniqueInput[];
+    disconnect?: Prisma.KeyWhereUniqueInput | Prisma.KeyWhereUniqueInput[];
+    delete?: Prisma.KeyWhereUniqueInput | Prisma.KeyWhereUniqueInput[];
+    connect?: Prisma.KeyWhereUniqueInput | Prisma.KeyWhereUniqueInput[];
+    update?: Prisma.KeyUpdateWithWhereUniqueWithoutResellerInput | Prisma.KeyUpdateWithWhereUniqueWithoutResellerInput[];
+    updateMany?: Prisma.KeyUpdateManyWithWhereWithoutResellerInput | Prisma.KeyUpdateManyWithWhereWithoutResellerInput[];
+    deleteMany?: Prisma.KeyScalarWhereInput | Prisma.KeyScalarWhereInput[];
+};
 export type EnumKeyStatusFieldUpdateOperationsInput = {
     set?: $Enums.KeyStatus;
 };
@@ -529,6 +591,7 @@ export type KeyCreateWithoutCreatedByInput = {
     expiresAt?: Date | string | null;
     createdAt?: Date | string;
     product: Prisma.ProductCreateNestedOneWithoutKeysInput;
+    reseller?: Prisma.ResellerCreateNestedOneWithoutKeysInput;
     usageLogs?: Prisma.KeyUsageLogCreateNestedManyWithoutKeyInput;
     client?: Prisma.ClientCreateNestedOneWithoutKeyInput;
 };
@@ -536,6 +599,7 @@ export type KeyUncheckedCreateWithoutCreatedByInput = {
     id?: string;
     value: string;
     productId: string;
+    resellerId?: string | null;
     customerEmail?: string | null;
     customerName?: string | null;
     status?: $Enums.KeyStatus;
@@ -575,6 +639,7 @@ export type KeyScalarWhereInput = {
     value?: Prisma.StringFilter<"Key"> | string;
     productId?: Prisma.StringFilter<"Key"> | string;
     createdById?: Prisma.StringFilter<"Key"> | string;
+    resellerId?: Prisma.StringNullableFilter<"Key"> | string | null;
     customerEmail?: Prisma.StringNullableFilter<"Key"> | string | null;
     customerName?: Prisma.StringNullableFilter<"Key"> | string | null;
     status?: Prisma.EnumKeyStatusFilter<"Key"> | $Enums.KeyStatus;
@@ -594,6 +659,7 @@ export type KeyCreateWithoutProductInput = {
     expiresAt?: Date | string | null;
     createdAt?: Date | string;
     createdBy: Prisma.AdminCreateNestedOneWithoutKeysInput;
+    reseller?: Prisma.ResellerCreateNestedOneWithoutKeysInput;
     usageLogs?: Prisma.KeyUsageLogCreateNestedManyWithoutKeyInput;
     client?: Prisma.ClientCreateNestedOneWithoutKeyInput;
 };
@@ -601,6 +667,7 @@ export type KeyUncheckedCreateWithoutProductInput = {
     id?: string;
     value: string;
     createdById: string;
+    resellerId?: string | null;
     customerEmail?: string | null;
     customerName?: string | null;
     status?: $Enums.KeyStatus;
@@ -632,7 +699,7 @@ export type KeyUpdateManyWithWhereWithoutProductInput = {
     where: Prisma.KeyScalarWhereInput;
     data: Prisma.XOR<Prisma.KeyUpdateManyMutationInput, Prisma.KeyUncheckedUpdateManyWithoutProductInput>;
 };
-export type KeyCreateWithoutClientInput = {
+export type KeyCreateWithoutResellerInput = {
     id?: string;
     value: string;
     customerEmail?: string | null;
@@ -645,12 +712,65 @@ export type KeyCreateWithoutClientInput = {
     product: Prisma.ProductCreateNestedOneWithoutKeysInput;
     createdBy: Prisma.AdminCreateNestedOneWithoutKeysInput;
     usageLogs?: Prisma.KeyUsageLogCreateNestedManyWithoutKeyInput;
+    client?: Prisma.ClientCreateNestedOneWithoutKeyInput;
+};
+export type KeyUncheckedCreateWithoutResellerInput = {
+    id?: string;
+    value: string;
+    productId: string;
+    createdById: string;
+    customerEmail?: string | null;
+    customerName?: string | null;
+    status?: $Enums.KeyStatus;
+    isPermanent?: boolean;
+    activatedAt?: Date | string | null;
+    expiresAt?: Date | string | null;
+    createdAt?: Date | string;
+    usageLogs?: Prisma.KeyUsageLogUncheckedCreateNestedManyWithoutKeyInput;
+    client?: Prisma.ClientUncheckedCreateNestedOneWithoutKeyInput;
+};
+export type KeyCreateOrConnectWithoutResellerInput = {
+    where: Prisma.KeyWhereUniqueInput;
+    create: Prisma.XOR<Prisma.KeyCreateWithoutResellerInput, Prisma.KeyUncheckedCreateWithoutResellerInput>;
+};
+export type KeyCreateManyResellerInputEnvelope = {
+    data: Prisma.KeyCreateManyResellerInput | Prisma.KeyCreateManyResellerInput[];
+    skipDuplicates?: boolean;
+};
+export type KeyUpsertWithWhereUniqueWithoutResellerInput = {
+    where: Prisma.KeyWhereUniqueInput;
+    update: Prisma.XOR<Prisma.KeyUpdateWithoutResellerInput, Prisma.KeyUncheckedUpdateWithoutResellerInput>;
+    create: Prisma.XOR<Prisma.KeyCreateWithoutResellerInput, Prisma.KeyUncheckedCreateWithoutResellerInput>;
+};
+export type KeyUpdateWithWhereUniqueWithoutResellerInput = {
+    where: Prisma.KeyWhereUniqueInput;
+    data: Prisma.XOR<Prisma.KeyUpdateWithoutResellerInput, Prisma.KeyUncheckedUpdateWithoutResellerInput>;
+};
+export type KeyUpdateManyWithWhereWithoutResellerInput = {
+    where: Prisma.KeyScalarWhereInput;
+    data: Prisma.XOR<Prisma.KeyUpdateManyMutationInput, Prisma.KeyUncheckedUpdateManyWithoutResellerInput>;
+};
+export type KeyCreateWithoutClientInput = {
+    id?: string;
+    value: string;
+    customerEmail?: string | null;
+    customerName?: string | null;
+    status?: $Enums.KeyStatus;
+    isPermanent?: boolean;
+    activatedAt?: Date | string | null;
+    expiresAt?: Date | string | null;
+    createdAt?: Date | string;
+    product: Prisma.ProductCreateNestedOneWithoutKeysInput;
+    createdBy: Prisma.AdminCreateNestedOneWithoutKeysInput;
+    reseller?: Prisma.ResellerCreateNestedOneWithoutKeysInput;
+    usageLogs?: Prisma.KeyUsageLogCreateNestedManyWithoutKeyInput;
 };
 export type KeyUncheckedCreateWithoutClientInput = {
     id?: string;
     value: string;
     productId: string;
     createdById: string;
+    resellerId?: string | null;
     customerEmail?: string | null;
     customerName?: string | null;
     status?: $Enums.KeyStatus;
@@ -685,6 +805,7 @@ export type KeyUpdateWithoutClientInput = {
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     product?: Prisma.ProductUpdateOneRequiredWithoutKeysNestedInput;
     createdBy?: Prisma.AdminUpdateOneRequiredWithoutKeysNestedInput;
+    reseller?: Prisma.ResellerUpdateOneWithoutKeysNestedInput;
     usageLogs?: Prisma.KeyUsageLogUpdateManyWithoutKeyNestedInput;
 };
 export type KeyUncheckedUpdateWithoutClientInput = {
@@ -692,6 +813,7 @@ export type KeyUncheckedUpdateWithoutClientInput = {
     value?: Prisma.StringFieldUpdateOperationsInput | string;
     productId?: Prisma.StringFieldUpdateOperationsInput | string;
     createdById?: Prisma.StringFieldUpdateOperationsInput | string;
+    resellerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     customerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     status?: Prisma.EnumKeyStatusFieldUpdateOperationsInput | $Enums.KeyStatus;
@@ -713,6 +835,7 @@ export type KeyCreateWithoutUsageLogsInput = {
     createdAt?: Date | string;
     product: Prisma.ProductCreateNestedOneWithoutKeysInput;
     createdBy: Prisma.AdminCreateNestedOneWithoutKeysInput;
+    reseller?: Prisma.ResellerCreateNestedOneWithoutKeysInput;
     client?: Prisma.ClientCreateNestedOneWithoutKeyInput;
 };
 export type KeyUncheckedCreateWithoutUsageLogsInput = {
@@ -720,6 +843,7 @@ export type KeyUncheckedCreateWithoutUsageLogsInput = {
     value: string;
     productId: string;
     createdById: string;
+    resellerId?: string | null;
     customerEmail?: string | null;
     customerName?: string | null;
     status?: $Enums.KeyStatus;
@@ -754,6 +878,7 @@ export type KeyUpdateWithoutUsageLogsInput = {
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     product?: Prisma.ProductUpdateOneRequiredWithoutKeysNestedInput;
     createdBy?: Prisma.AdminUpdateOneRequiredWithoutKeysNestedInput;
+    reseller?: Prisma.ResellerUpdateOneWithoutKeysNestedInput;
     client?: Prisma.ClientUpdateOneWithoutKeyNestedInput;
 };
 export type KeyUncheckedUpdateWithoutUsageLogsInput = {
@@ -761,6 +886,7 @@ export type KeyUncheckedUpdateWithoutUsageLogsInput = {
     value?: Prisma.StringFieldUpdateOperationsInput | string;
     productId?: Prisma.StringFieldUpdateOperationsInput | string;
     createdById?: Prisma.StringFieldUpdateOperationsInput | string;
+    resellerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     customerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     status?: Prisma.EnumKeyStatusFieldUpdateOperationsInput | $Enums.KeyStatus;
@@ -774,6 +900,7 @@ export type KeyCreateManyCreatedByInput = {
     id?: string;
     value: string;
     productId: string;
+    resellerId?: string | null;
     customerEmail?: string | null;
     customerName?: string | null;
     status?: $Enums.KeyStatus;
@@ -793,6 +920,7 @@ export type KeyUpdateWithoutCreatedByInput = {
     expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     product?: Prisma.ProductUpdateOneRequiredWithoutKeysNestedInput;
+    reseller?: Prisma.ResellerUpdateOneWithoutKeysNestedInput;
     usageLogs?: Prisma.KeyUsageLogUpdateManyWithoutKeyNestedInput;
     client?: Prisma.ClientUpdateOneWithoutKeyNestedInput;
 };
@@ -800,6 +928,7 @@ export type KeyUncheckedUpdateWithoutCreatedByInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     value?: Prisma.StringFieldUpdateOperationsInput | string;
     productId?: Prisma.StringFieldUpdateOperationsInput | string;
+    resellerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     customerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     status?: Prisma.EnumKeyStatusFieldUpdateOperationsInput | $Enums.KeyStatus;
@@ -814,6 +943,7 @@ export type KeyUncheckedUpdateManyWithoutCreatedByInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     value?: Prisma.StringFieldUpdateOperationsInput | string;
     productId?: Prisma.StringFieldUpdateOperationsInput | string;
+    resellerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     customerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     status?: Prisma.EnumKeyStatusFieldUpdateOperationsInput | $Enums.KeyStatus;
@@ -826,6 +956,7 @@ export type KeyCreateManyProductInput = {
     id?: string;
     value: string;
     createdById: string;
+    resellerId?: string | null;
     customerEmail?: string | null;
     customerName?: string | null;
     status?: $Enums.KeyStatus;
@@ -845,6 +976,7 @@ export type KeyUpdateWithoutProductInput = {
     expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     createdBy?: Prisma.AdminUpdateOneRequiredWithoutKeysNestedInput;
+    reseller?: Prisma.ResellerUpdateOneWithoutKeysNestedInput;
     usageLogs?: Prisma.KeyUsageLogUpdateManyWithoutKeyNestedInput;
     client?: Prisma.ClientUpdateOneWithoutKeyNestedInput;
 };
@@ -852,6 +984,7 @@ export type KeyUncheckedUpdateWithoutProductInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     value?: Prisma.StringFieldUpdateOperationsInput | string;
     createdById?: Prisma.StringFieldUpdateOperationsInput | string;
+    resellerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     customerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     status?: Prisma.EnumKeyStatusFieldUpdateOperationsInput | $Enums.KeyStatus;
@@ -865,6 +998,63 @@ export type KeyUncheckedUpdateWithoutProductInput = {
 export type KeyUncheckedUpdateManyWithoutProductInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     value?: Prisma.StringFieldUpdateOperationsInput | string;
+    createdById?: Prisma.StringFieldUpdateOperationsInput | string;
+    resellerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    customerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    status?: Prisma.EnumKeyStatusFieldUpdateOperationsInput | $Enums.KeyStatus;
+    isPermanent?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+};
+export type KeyCreateManyResellerInput = {
+    id?: string;
+    value: string;
+    productId: string;
+    createdById: string;
+    customerEmail?: string | null;
+    customerName?: string | null;
+    status?: $Enums.KeyStatus;
+    isPermanent?: boolean;
+    activatedAt?: Date | string | null;
+    expiresAt?: Date | string | null;
+    createdAt?: Date | string;
+};
+export type KeyUpdateWithoutResellerInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    value?: Prisma.StringFieldUpdateOperationsInput | string;
+    customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    customerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    status?: Prisma.EnumKeyStatusFieldUpdateOperationsInput | $Enums.KeyStatus;
+    isPermanent?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    product?: Prisma.ProductUpdateOneRequiredWithoutKeysNestedInput;
+    createdBy?: Prisma.AdminUpdateOneRequiredWithoutKeysNestedInput;
+    usageLogs?: Prisma.KeyUsageLogUpdateManyWithoutKeyNestedInput;
+    client?: Prisma.ClientUpdateOneWithoutKeyNestedInput;
+};
+export type KeyUncheckedUpdateWithoutResellerInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    value?: Prisma.StringFieldUpdateOperationsInput | string;
+    productId?: Prisma.StringFieldUpdateOperationsInput | string;
+    createdById?: Prisma.StringFieldUpdateOperationsInput | string;
+    customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    customerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    status?: Prisma.EnumKeyStatusFieldUpdateOperationsInput | $Enums.KeyStatus;
+    isPermanent?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    usageLogs?: Prisma.KeyUsageLogUncheckedUpdateManyWithoutKeyNestedInput;
+    client?: Prisma.ClientUncheckedUpdateOneWithoutKeyNestedInput;
+};
+export type KeyUncheckedUpdateManyWithoutResellerInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    value?: Prisma.StringFieldUpdateOperationsInput | string;
+    productId?: Prisma.StringFieldUpdateOperationsInput | string;
     createdById?: Prisma.StringFieldUpdateOperationsInput | string;
     customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     customerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
@@ -903,6 +1093,7 @@ export type KeySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
     value?: boolean;
     productId?: boolean;
     createdById?: boolean;
+    resellerId?: boolean;
     customerEmail?: boolean;
     customerName?: boolean;
     status?: boolean;
@@ -912,6 +1103,7 @@ export type KeySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
     createdAt?: boolean;
     product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>;
     createdBy?: boolean | Prisma.AdminDefaultArgs<ExtArgs>;
+    reseller?: boolean | Prisma.Key$resellerArgs<ExtArgs>;
     usageLogs?: boolean | Prisma.Key$usageLogsArgs<ExtArgs>;
     client?: boolean | Prisma.Key$clientArgs<ExtArgs>;
     _count?: boolean | Prisma.KeyCountOutputTypeDefaultArgs<ExtArgs>;
@@ -921,6 +1113,7 @@ export type KeySelectScalar = {
     value?: boolean;
     productId?: boolean;
     createdById?: boolean;
+    resellerId?: boolean;
     customerEmail?: boolean;
     customerName?: boolean;
     status?: boolean;
@@ -929,10 +1122,11 @@ export type KeySelectScalar = {
     expiresAt?: boolean;
     createdAt?: boolean;
 };
-export type KeyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "value" | "productId" | "createdById" | "customerEmail" | "customerName" | "status" | "isPermanent" | "activatedAt" | "expiresAt" | "createdAt", ExtArgs["result"]["key"]>;
+export type KeyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "value" | "productId" | "createdById" | "resellerId" | "customerEmail" | "customerName" | "status" | "isPermanent" | "activatedAt" | "expiresAt" | "createdAt", ExtArgs["result"]["key"]>;
 export type KeyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>;
     createdBy?: boolean | Prisma.AdminDefaultArgs<ExtArgs>;
+    reseller?: boolean | Prisma.Key$resellerArgs<ExtArgs>;
     usageLogs?: boolean | Prisma.Key$usageLogsArgs<ExtArgs>;
     client?: boolean | Prisma.Key$clientArgs<ExtArgs>;
     _count?: boolean | Prisma.KeyCountOutputTypeDefaultArgs<ExtArgs>;
@@ -942,6 +1136,7 @@ export type $KeyPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     objects: {
         product: Prisma.$ProductPayload<ExtArgs>;
         createdBy: Prisma.$AdminPayload<ExtArgs>;
+        reseller: Prisma.$ResellerPayload<ExtArgs> | null;
         usageLogs: Prisma.$KeyUsageLogPayload<ExtArgs>[];
         client: Prisma.$ClientPayload<ExtArgs> | null;
     };
@@ -950,6 +1145,7 @@ export type $KeyPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
         value: string;
         productId: string;
         createdById: string;
+        resellerId: string | null;
         customerEmail: string | null;
         customerName: string | null;
         status: $Enums.KeyStatus;
@@ -1236,6 +1432,7 @@ export interface Prisma__KeyClient<T, Null = never, ExtArgs extends runtime.Type
     readonly [Symbol.toStringTag]: "PrismaPromise";
     product<T extends Prisma.ProductDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductDefaultArgs<ExtArgs>>): Prisma.Prisma__ProductClient<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>;
     createdBy<T extends Prisma.AdminDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminDefaultArgs<ExtArgs>>): Prisma.Prisma__AdminClient<runtime.Types.Result.GetResult<Prisma.$AdminPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>;
+    reseller<T extends Prisma.Key$resellerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Key$resellerArgs<ExtArgs>>): Prisma.Prisma__ResellerClient<runtime.Types.Result.GetResult<Prisma.$ResellerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>;
     usageLogs<T extends Prisma.Key$usageLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Key$usageLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$KeyUsageLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     client<T extends Prisma.Key$clientArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Key$clientArgs<ExtArgs>>): Prisma.Prisma__ClientClient<runtime.Types.Result.GetResult<Prisma.$ClientPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>;
     /**
@@ -1267,6 +1464,7 @@ export interface KeyFieldRefs {
     readonly value: Prisma.FieldRef<"Key", 'String'>;
     readonly productId: Prisma.FieldRef<"Key", 'String'>;
     readonly createdById: Prisma.FieldRef<"Key", 'String'>;
+    readonly resellerId: Prisma.FieldRef<"Key", 'String'>;
     readonly customerEmail: Prisma.FieldRef<"Key", 'String'>;
     readonly customerName: Prisma.FieldRef<"Key", 'String'>;
     readonly status: Prisma.FieldRef<"Key", 'KeyStatus'>;
@@ -1605,6 +1803,24 @@ export type KeyDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.InternalA
      * Limit how many Keys to delete.
      */
     limit?: number;
+};
+/**
+ * Key.reseller
+ */
+export type Key$resellerArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Reseller
+     */
+    select?: Prisma.ResellerSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the Reseller
+     */
+    omit?: Prisma.ResellerOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: Prisma.ResellerInclude<ExtArgs> | null;
+    where?: Prisma.ResellerWhereInput;
 };
 /**
  * Key.usageLogs

@@ -19,6 +19,7 @@ const client_routes_1 = __importDefault(require("./modules/clients/client.routes
 const notification_routes_1 = __importDefault(require("./modules/notifications/notification.routes"));
 const banned_hwid_routes_1 = __importDefault(require("./modules/banned-hwid/banned-hwid.routes"));
 const uid_bypass_routes_1 = __importDefault(require("./modules/uid-bypass/uid-bypass.routes"));
+const reseller_routes_1 = __importDefault(require("./modules/resellers/reseller.routes"));
 const discord_poller_1 = require("./modules/notifications/discord.poller");
 const failed_login_cleanup_1 = require("./modules/logs/failed-login-cleanup");
 const app = (0, express_1.default)();
@@ -88,6 +89,7 @@ app.use("/auth", client_auth_routes_1.default);
 app.use("/uid", uid_bypass_routes_1.default);
 app.use("/api/products", authenticatedApiLimiter, product_routes_1.default);
 app.use("/api/keys", authenticatedApiLimiter, key_routes_1.default);
+app.use("/api/resellers", authenticatedApiLimiter, reseller_routes_1.default);
 app.use("/api/logs", authenticatedApiLimiter, log_routes_1.default);
 app.use("/api/notifications", authenticatedApiLimiter, notification_routes_1.default);
 app.use("/api/admin/banned-hwids", authenticatedApiLimiter, banned_hwid_routes_1.default);

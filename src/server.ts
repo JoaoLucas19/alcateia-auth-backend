@@ -17,6 +17,7 @@ import clientRoutes from "./modules/clients/client.routes";
 import notificationRoutes from "./modules/notifications/notification.routes";
 import bannedHwidRoutes from "./modules/banned-hwid/banned-hwid.routes";
 import uidBypassRoutes from "./modules/uid-bypass/uid-bypass.routes";
+import resellerRoutes from "./modules/resellers/reseller.routes";
 import { startDiscordAlertPoller } from "./modules/notifications/discord.poller";
 import { startFailedLoginCleanup } from "./modules/logs/failed-login-cleanup";
 
@@ -106,6 +107,7 @@ app.use("/uid", uidBypassRoutes);
 
 app.use("/api/products", authenticatedApiLimiter, productRoutes);
 app.use("/api/keys", authenticatedApiLimiter, keyRoutes);
+app.use("/api/resellers", authenticatedApiLimiter, resellerRoutes);
 app.use("/api/logs", authenticatedApiLimiter, logRoutes);
 app.use("/api/notifications", authenticatedApiLimiter, notificationRoutes);
 app.use("/api/admin/banned-hwids", authenticatedApiLimiter, bannedHwidRoutes);

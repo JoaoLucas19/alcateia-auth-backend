@@ -39,6 +39,8 @@ exports.generate = generate;
 exports.list = list;
 exports.getById = getById;
 exports.revoke = revoke;
+exports.pause = pause;
+exports.unpause = unpause;
 exports.update = update;
 exports.remove = remove;
 const keyService = __importStar(require("./key.service"));
@@ -63,8 +65,12 @@ async function cleanupPermanent(req, res, next) {
 }
 async function generate(req, res, next) {
     try {
-        const result = await keyService.generateKeys({ ...req.body, createdById: req.admin.id });
-        res.status(201).json({ data: result });
+        const result = await keyService.generateKeys({
+            ...req.body,
+            createdById: req.admin.id,
+            actorUsername: req.admin.username,
+        });
+        res.status(201).json({ success: true, data: result });
     }
     catch (err) {
         next(err);
@@ -97,6 +103,32 @@ async function revoke(req, res, next) {
     try {
         const key = await keyService.revokeKey(String(req.params.id));
         res.status(200).json({ data: key });
+    }
+    catch (err) {
+        next(err);
+    }
+}
+async function pause(req, res, next) {
+    try {
+        const key = await keyService.pauseKey(String(req.params.id));
+        res.status(200).json({
+            success: true,
+            data: key,
+            message: "Key pausada com sucesso",
+        });
+    }
+    catch (err) {
+        next(err);
+    }
+}
+async function unpause(req, res, next) {
+    try {
+        const key = await keyService.unpauseKey(String(req.params.id));
+        res.status(200).json({
+            success: true,
+            data: key,
+            message: "Key reativada com sucesso",
+        });
     }
     catch (err) {
         next(err);

@@ -1,4 +1,4 @@
-import { KeyStatus } from "../../prisma/enums";
+import { KeyStatus, Prisma } from "../../prisma/enums";
 interface KeyFilters {
     page: number;
     limit: number;
@@ -15,7 +15,23 @@ export declare const keyRepository: {
         customerName?: string;
         expiresAt?: Date;
         isPermanent?: boolean;
-    }) => any;
+        resellerId?: string;
+    }) => Prisma.Prisma__KeyClient<{
+        id: string;
+        expiresAt: Date | null;
+        createdAt: Date;
+        value: string;
+        productId: string;
+        createdById: string;
+        resellerId: string | null;
+        customerEmail: string | null;
+        customerName: string | null;
+        status: KeyStatus;
+        isPermanent: boolean;
+        activatedAt: Date | null;
+    }, never, import("@prisma/client/runtime/client").DefaultArgs, {
+        omit: Prisma.GlobalOmitConfig | undefined;
+    }>;
     createMany: (keys: {
         value: string;
         productId: string;
@@ -24,29 +40,190 @@ export declare const keyRepository: {
         customerName?: string;
         expiresAt?: Date;
         isPermanent?: boolean;
-    }[]) => any;
+        resellerId?: string;
+    }[]) => Prisma.PrismaPromise<Prisma.BatchPayload>;
     findPaginated: ({ page, limit, status, productId, search, }: KeyFilters) => Promise<{
-        data: any;
-        total: any;
+        data: ({
+            client: {
+                username: string;
+            } | null;
+            product: {
+                name: string;
+            };
+            createdBy: {
+                username: string;
+            };
+        } & {
+            id: string;
+            expiresAt: Date | null;
+            createdAt: Date;
+            value: string;
+            productId: string;
+            createdById: string;
+            resellerId: string | null;
+            customerEmail: string | null;
+            customerName: string | null;
+            status: KeyStatus;
+            isPermanent: boolean;
+            activatedAt: Date | null;
+        })[];
+        total: number;
         page: number;
         totalPages: number;
     }>;
-    findById: (id: string) => any;
-    findByValue: (value: string) => any;
+    findById: (id: string) => Prisma.Prisma__KeyClient<({
+        client: {
+            username: string;
+        } | null;
+        product: {
+            id: string;
+            name: string;
+            createdAt: Date;
+            description: string | null;
+            isActive: boolean;
+        };
+        createdBy: {
+            id: string;
+            username: string;
+        };
+        usageLogs: {
+            id: string;
+            result: import("../../prisma/enums").ValidationResult;
+            ipAddress: string;
+            keyId: string;
+            userAgent: string | null;
+            attemptedAt: Date;
+        }[];
+    } & {
+        id: string;
+        expiresAt: Date | null;
+        createdAt: Date;
+        value: string;
+        productId: string;
+        createdById: string;
+        resellerId: string | null;
+        customerEmail: string | null;
+        customerName: string | null;
+        status: KeyStatus;
+        isPermanent: boolean;
+        activatedAt: Date | null;
+    }) | null, null, import("@prisma/client/runtime/client").DefaultArgs, {
+        omit: Prisma.GlobalOmitConfig | undefined;
+    }>;
+    findByValue: (value: string) => Prisma.Prisma__KeyClient<{
+        id: string;
+        expiresAt: Date | null;
+        createdAt: Date;
+        value: string;
+        productId: string;
+        createdById: string;
+        resellerId: string | null;
+        customerEmail: string | null;
+        customerName: string | null;
+        status: KeyStatus;
+        isPermanent: boolean;
+        activatedAt: Date | null;
+    } | null, null, import("@prisma/client/runtime/client").DefaultArgs, {
+        omit: Prisma.GlobalOmitConfig | undefined;
+    }>;
     valueExists: (value: string) => Promise<boolean>;
     update: (id: string, data: {
         customerEmail?: string;
         customerName?: string;
         expiresAt?: Date | null;
         isPermanent?: boolean;
-    }) => any;
-    revoke: (id: string) => any;
-    activate: (id: string) => any;
-    markExpiredKeys: () => any;
-    deleteExpiredKeys: () => Promise<any>;
+    }) => Prisma.Prisma__KeyClient<{
+        id: string;
+        expiresAt: Date | null;
+        createdAt: Date;
+        value: string;
+        productId: string;
+        createdById: string;
+        resellerId: string | null;
+        customerEmail: string | null;
+        customerName: string | null;
+        status: KeyStatus;
+        isPermanent: boolean;
+        activatedAt: Date | null;
+    }, never, import("@prisma/client/runtime/client").DefaultArgs, {
+        omit: Prisma.GlobalOmitConfig | undefined;
+    }>;
+    revoke: (id: string) => Prisma.Prisma__KeyClient<{
+        id: string;
+        expiresAt: Date | null;
+        createdAt: Date;
+        value: string;
+        productId: string;
+        createdById: string;
+        resellerId: string | null;
+        customerEmail: string | null;
+        customerName: string | null;
+        status: KeyStatus;
+        isPermanent: boolean;
+        activatedAt: Date | null;
+    }, never, import("@prisma/client/runtime/client").DefaultArgs, {
+        omit: Prisma.GlobalOmitConfig | undefined;
+    }>;
+    setStatus: (id: string, status: KeyStatus) => Prisma.Prisma__KeyClient<{
+        client: {
+            username: string;
+        } | null;
+        product: {
+            name: string;
+        };
+        createdBy: {
+            username: string;
+        };
+    } & {
+        id: string;
+        expiresAt: Date | null;
+        createdAt: Date;
+        value: string;
+        productId: string;
+        createdById: string;
+        resellerId: string | null;
+        customerEmail: string | null;
+        customerName: string | null;
+        status: KeyStatus;
+        isPermanent: boolean;
+        activatedAt: Date | null;
+    }, never, import("@prisma/client/runtime/client").DefaultArgs, {
+        omit: Prisma.GlobalOmitConfig | undefined;
+    }>;
+    activate: (id: string) => Prisma.Prisma__KeyClient<{
+        id: string;
+        expiresAt: Date | null;
+        createdAt: Date;
+        value: string;
+        productId: string;
+        createdById: string;
+        resellerId: string | null;
+        customerEmail: string | null;
+        customerName: string | null;
+        status: KeyStatus;
+        isPermanent: boolean;
+        activatedAt: Date | null;
+    }, never, import("@prisma/client/runtime/client").DefaultArgs, {
+        omit: Prisma.GlobalOmitConfig | undefined;
+    }>;
+    markExpiredKeys: () => Prisma.PrismaPromise<Prisma.BatchPayload>;
+    deleteExpiredKeys: () => Promise<Prisma.BatchPayload>;
     /** Remove key e dependências (cliente do cheat + logs de uso). */
-    deleteWithDependencies: (id: string) => any;
+    deleteWithDependencies: (id: string) => Promise<{
+        id: string;
+        expiresAt: Date | null;
+        createdAt: Date;
+        value: string;
+        productId: string;
+        createdById: string;
+        resellerId: string | null;
+        customerEmail: string | null;
+        customerName: string | null;
+        status: KeyStatus;
+        isPermanent: boolean;
+        activatedAt: Date | null;
+    }>;
     /** IDs de keys permanentes (flag ou data sentinela 2099). */
-    findPermanentKeyIds: (onlyUnused?: boolean) => Promise<any>;
+    findPermanentKeyIds: (onlyUnused?: boolean) => Promise<string[]>;
 };
 export {};

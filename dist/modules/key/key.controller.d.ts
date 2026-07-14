@@ -5,5 +5,7 @@ export declare function generate(req: Request, res: Response, next: NextFunction
 export declare function list(req: Request, res: Response, next: NextFunction): Promise<void>;
 export declare function getById(req: Request, res: Response, next: NextFunction): Promise<void>;
 export declare function revoke(req: Request, res: Response, next: NextFunction): Promise<void>;
+export declare function pause(req: Request, res: Response, next: NextFunction): Promise<void>;
+export declare function unpause(req: Request, res: Response, next: NextFunction): Promise<void>;
 export declare function update(req: Request, res: Response, next: NextFunction): Promise<void>;
 export declare function remove(req: Request, res: Response, next: NextFunction): Promise<void>;

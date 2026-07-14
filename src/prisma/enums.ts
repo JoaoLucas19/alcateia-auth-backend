@@ -1,1 +1,1 @@
-export { KeyStatus, ValidationResult, Prisma } from "../generated/prisma/client";
+export { KeyStatus, ResellerStatus, ValidationResult, Prisma } from "../generated/prisma/client";

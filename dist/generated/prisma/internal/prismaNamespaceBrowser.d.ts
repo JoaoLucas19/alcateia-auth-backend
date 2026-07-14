@@ -28,6 +28,8 @@ export declare const AnyNull: import("@prisma/client-runtime-utils").AnyNullClas
 export declare const ModelName: {
     readonly Admin: "Admin";
     readonly Product: "Product";
+    readonly Reseller: "Reseller";
+    readonly ResellerHistory: "ResellerHistory";
     readonly Key: "Key";
     readonly Client: "Client";
     readonly BlockedIp: "BlockedIp";
@@ -62,11 +64,34 @@ export declare const ProductScalarFieldEnum: {
     readonly createdAt: "createdAt";
 };
 export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum];
+export declare const ResellerScalarFieldEnum: {
+    readonly id: "id";
+    readonly name: "name";
+    readonly owner: "owner";
+    readonly discord: "discord";
+    readonly email: "email";
+    readonly notes: "notes";
+    readonly status: "status";
+    readonly createdAt: "createdAt";
+    readonly updatedAt: "updatedAt";
+};
+export type ResellerScalarFieldEnum = (typeof ResellerScalarFieldEnum)[keyof typeof ResellerScalarFieldEnum];
+export declare const ResellerHistoryScalarFieldEnum: {
+    readonly id: "id";
+    readonly resellerId: "resellerId";
+    readonly type: "type";
+    readonly description: "description";
+    readonly actor: "actor";
+    readonly metadata: "metadata";
+    readonly createdAt: "createdAt";
+};
+export type ResellerHistoryScalarFieldEnum = (typeof ResellerHistoryScalarFieldEnum)[keyof typeof ResellerHistoryScalarFieldEnum];
 export declare const KeyScalarFieldEnum: {
     readonly id: "id";
     readonly value: "value";
     readonly productId: "productId";
     readonly createdById: "createdById";
+    readonly resellerId: "resellerId";
     readonly customerEmail: "customerEmail";
     readonly customerName: "customerName";
     readonly status: "status";
@@ -181,11 +206,30 @@ export declare const ProductOrderByRelevanceFieldEnum: {
     readonly description: "description";
 };
 export type ProductOrderByRelevanceFieldEnum = (typeof ProductOrderByRelevanceFieldEnum)[keyof typeof ProductOrderByRelevanceFieldEnum];
+export declare const ResellerOrderByRelevanceFieldEnum: {
+    readonly id: "id";
+    readonly name: "name";
+    readonly owner: "owner";
+    readonly discord: "discord";
+    readonly email: "email";
+    readonly notes: "notes";
+};
+export type ResellerOrderByRelevanceFieldEnum = (typeof ResellerOrderByRelevanceFieldEnum)[keyof typeof ResellerOrderByRelevanceFieldEnum];
+export declare const ResellerHistoryOrderByRelevanceFieldEnum: {
+    readonly id: "id";
+    readonly resellerId: "resellerId";
+    readonly type: "type";
+    readonly description: "description";
+    readonly actor: "actor";
+    readonly metadata: "metadata";
+};
+export type ResellerHistoryOrderByRelevanceFieldEnum = (typeof ResellerHistoryOrderByRelevanceFieldEnum)[keyof typeof ResellerHistoryOrderByRelevanceFieldEnum];
 export declare const KeyOrderByRelevanceFieldEnum: {
     readonly id: "id";
     readonly value: "value";
     readonly productId: "productId";
     readonly createdById: "createdById";
+    readonly resellerId: "resellerId";
     readonly customerEmail: "customerEmail";
     readonly customerName: "customerName";
 };

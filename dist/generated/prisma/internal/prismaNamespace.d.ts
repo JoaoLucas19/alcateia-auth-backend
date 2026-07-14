@@ -233,6 +233,8 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export declare const ModelName: {
     readonly Admin: "Admin";
     readonly Product: "Product";
+    readonly Reseller: "Reseller";
+    readonly ResellerHistory: "ResellerHistory";
     readonly Key: "Key";
     readonly Client: "Client";
     readonly BlockedIp: "BlockedIp";
@@ -254,7 +256,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         omit: GlobalOmitOptions;
     };
     meta: {
-        modelProps: "admin" | "product" | "key" | "client" | "blockedIp" | "bannedHwid" | "clientAccessLog" | "keyUsageLog" | "accessLog" | "whitelistedUid" | "notificationSettings";
+        modelProps: "admin" | "product" | "reseller" | "resellerHistory" | "key" | "client" | "blockedIp" | "bannedHwid" | "clientAccessLog" | "keyUsageLog" | "accessLog" | "whitelistedUid" | "notificationSettings";
         txIsolationLevel: TransactionIsolationLevel;
     };
     model: {
@@ -387,6 +389,138 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
                 count: {
                     args: Prisma.ProductCountArgs<ExtArgs>;
                     result: runtime.Types.Utils.Optional<Prisma.ProductCountAggregateOutputType> | number;
+                };
+            };
+        };
+        Reseller: {
+            payload: Prisma.$ResellerPayload<ExtArgs>;
+            fields: Prisma.ResellerFieldRefs;
+            operations: {
+                findUnique: {
+                    args: Prisma.ResellerFindUniqueArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ResellerPayload> | null;
+                };
+                findUniqueOrThrow: {
+                    args: Prisma.ResellerFindUniqueOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ResellerPayload>;
+                };
+                findFirst: {
+                    args: Prisma.ResellerFindFirstArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ResellerPayload> | null;
+                };
+                findFirstOrThrow: {
+                    args: Prisma.ResellerFindFirstOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ResellerPayload>;
+                };
+                findMany: {
+                    args: Prisma.ResellerFindManyArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ResellerPayload>[];
+                };
+                create: {
+                    args: Prisma.ResellerCreateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ResellerPayload>;
+                };
+                createMany: {
+                    args: Prisma.ResellerCreateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                delete: {
+                    args: Prisma.ResellerDeleteArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ResellerPayload>;
+                };
+                update: {
+                    args: Prisma.ResellerUpdateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ResellerPayload>;
+                };
+                deleteMany: {
+                    args: Prisma.ResellerDeleteManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateMany: {
+                    args: Prisma.ResellerUpdateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                upsert: {
+                    args: Prisma.ResellerUpsertArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ResellerPayload>;
+                };
+                aggregate: {
+                    args: Prisma.ResellerAggregateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.AggregateReseller>;
+                };
+                groupBy: {
+                    args: Prisma.ResellerGroupByArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.ResellerGroupByOutputType>[];
+                };
+                count: {
+                    args: Prisma.ResellerCountArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.ResellerCountAggregateOutputType> | number;
+                };
+            };
+        };
+        ResellerHistory: {
+            payload: Prisma.$ResellerHistoryPayload<ExtArgs>;
+            fields: Prisma.ResellerHistoryFieldRefs;
+            operations: {
+                findUnique: {
+                    args: Prisma.ResellerHistoryFindUniqueArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ResellerHistoryPayload> | null;
+                };
+                findUniqueOrThrow: {
+                    args: Prisma.ResellerHistoryFindUniqueOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ResellerHistoryPayload>;
+                };
+                findFirst: {
+                    args: Prisma.ResellerHistoryFindFirstArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ResellerHistoryPayload> | null;
+                };
+                findFirstOrThrow: {
+                    args: Prisma.ResellerHistoryFindFirstOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ResellerHistoryPayload>;
+                };
+                findMany: {
+                    args: Prisma.ResellerHistoryFindManyArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ResellerHistoryPayload>[];
+                };
+                create: {
+                    args: Prisma.ResellerHistoryCreateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ResellerHistoryPayload>;
+                };
+                createMany: {
+                    args: Prisma.ResellerHistoryCreateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                delete: {
+                    args: Prisma.ResellerHistoryDeleteArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ResellerHistoryPayload>;
+                };
+                update: {
+                    args: Prisma.ResellerHistoryUpdateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ResellerHistoryPayload>;
+                };
+                deleteMany: {
+                    args: Prisma.ResellerHistoryDeleteManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateMany: {
+                    args: Prisma.ResellerHistoryUpdateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                upsert: {
+                    args: Prisma.ResellerHistoryUpsertArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ResellerHistoryPayload>;
+                };
+                aggregate: {
+                    args: Prisma.ResellerHistoryAggregateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.AggregateResellerHistory>;
+                };
+                groupBy: {
+                    args: Prisma.ResellerHistoryGroupByArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.ResellerHistoryGroupByOutputType>[];
+                };
+                count: {
+                    args: Prisma.ResellerHistoryCountArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.ResellerHistoryCountAggregateOutputType> | number;
                 };
             };
         };
@@ -1034,11 +1168,34 @@ export declare const ProductScalarFieldEnum: {
     readonly createdAt: "createdAt";
 };
 export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum];
+export declare const ResellerScalarFieldEnum: {
+    readonly id: "id";
+    readonly name: "name";
+    readonly owner: "owner";
+    readonly discord: "discord";
+    readonly email: "email";
+    readonly notes: "notes";
+    readonly status: "status";
+    readonly createdAt: "createdAt";
+    readonly updatedAt: "updatedAt";
+};
+export type ResellerScalarFieldEnum = (typeof ResellerScalarFieldEnum)[keyof typeof ResellerScalarFieldEnum];
+export declare const ResellerHistoryScalarFieldEnum: {
+    readonly id: "id";
+    readonly resellerId: "resellerId";
+    readonly type: "type";
+    readonly description: "description";
+    readonly actor: "actor";
+    readonly metadata: "metadata";
+    readonly createdAt: "createdAt";
+};
+export type ResellerHistoryScalarFieldEnum = (typeof ResellerHistoryScalarFieldEnum)[keyof typeof ResellerHistoryScalarFieldEnum];
 export declare const KeyScalarFieldEnum: {
     readonly id: "id";
     readonly value: "value";
     readonly productId: "productId";
     readonly createdById: "createdById";
+    readonly resellerId: "resellerId";
     readonly customerEmail: "customerEmail";
     readonly customerName: "customerName";
     readonly status: "status";
@@ -1153,11 +1310,30 @@ export declare const ProductOrderByRelevanceFieldEnum: {
     readonly description: "description";
 };
 export type ProductOrderByRelevanceFieldEnum = (typeof ProductOrderByRelevanceFieldEnum)[keyof typeof ProductOrderByRelevanceFieldEnum];
+export declare const ResellerOrderByRelevanceFieldEnum: {
+    readonly id: "id";
+    readonly name: "name";
+    readonly owner: "owner";
+    readonly discord: "discord";
+    readonly email: "email";
+    readonly notes: "notes";
+};
+export type ResellerOrderByRelevanceFieldEnum = (typeof ResellerOrderByRelevanceFieldEnum)[keyof typeof ResellerOrderByRelevanceFieldEnum];
+export declare const ResellerHistoryOrderByRelevanceFieldEnum: {
+    readonly id: "id";
+    readonly resellerId: "resellerId";
+    readonly type: "type";
+    readonly description: "description";
+    readonly actor: "actor";
+    readonly metadata: "metadata";
+};
+export type ResellerHistoryOrderByRelevanceFieldEnum = (typeof ResellerHistoryOrderByRelevanceFieldEnum)[keyof typeof ResellerHistoryOrderByRelevanceFieldEnum];
 export declare const KeyOrderByRelevanceFieldEnum: {
     readonly id: "id";
     readonly value: "value";
     readonly productId: "productId";
     readonly createdById: "createdById";
+    readonly resellerId: "resellerId";
     readonly customerEmail: "customerEmail";
     readonly customerName: "customerName";
 };
@@ -1235,6 +1411,10 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  * Reference to a field of type 'Boolean'
  */
 export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>;
+/**
+ * Reference to a field of type 'ResellerStatus'
+ */
+export type EnumResellerStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ResellerStatus'>;
 /**
  * Reference to a field of type 'KeyStatus'
  */
@@ -1362,6 +1542,8 @@ export type PrismaClientOptions = ({
 export type GlobalOmitConfig = {
     admin?: Prisma.AdminOmit;
     product?: Prisma.ProductOmit;
+    reseller?: Prisma.ResellerOmit;
+    resellerHistory?: Prisma.ResellerHistoryOmit;
     key?: Prisma.KeyOmit;
     client?: Prisma.ClientOmit;
     blockedIp?: Prisma.BlockedIpOmit;

@@ -12,6 +12,7 @@ const generateSchema = zod_1.z.object({
     customerName: zod_1.z.string().optional(),
     expiresAt: zod_1.z.string().datetime().optional().refine((v) => !v || new Date(v) > new Date(), { message: "expiresAt deve ser uma data futura" }),
     isPermanent: zod_1.z.boolean().optional(),
+    resellerId: zod_1.z.string().uuid("resellerId deve ser um UUID válido").optional(),
 });
 const updateSchema = zod_1.z.object({
     customerEmail: zod_1.z.string().email().optional(),
@@ -27,6 +28,8 @@ router.post("/generate", (0, validate_middleware_1.validate)(generateSchema), ke
 router.get("/", key_controller_1.list);
 router.get("/:id", key_controller_1.getById);
 router.patch("/:id/revoke", key_controller_1.revoke);
+router.patch("/:id/pause", key_controller_1.pause);
+router.patch("/:id/unpause", key_controller_1.unpause);
 router.patch("/:id", (0, validate_middleware_1.validate)(updateSchema), key_controller_1.update);
 router.delete("/:id", key_controller_1.remove);
 exports.default = router;
