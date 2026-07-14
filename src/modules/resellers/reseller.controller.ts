@@ -9,7 +9,14 @@ function actorOf(req: Request): string {
 export async function overview(_req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const data = await resellerService.getOverview();
-    res.status(200).json({ success: true, data });
+    res.status(200).json({
+      success: true,
+      data,
+      // atalhos para o frontend (evita tabela vazia se o parser errar nested)
+      metrics: data.metrics,
+      ranking: data.ranking,
+      stores: data.stores,
+    });
   } catch (err) {
     next(err);
   }
@@ -19,11 +26,25 @@ export async function list(req: Request, res: Response, next: NextFunction): Pro
   try {
     const page = Number(req.query.page) || 1;
     const limit = Math.min(Number(req.query.limit) || 20, 100);
-    const status = (req.query.status as "all" | "active" | "paused" | "banned" | undefined) ?? "all";
+    const rawStatus = typeof req.query.status === "string" ? req.query.status.trim().toLowerCase() : "all";
+    const status = (["all", "active", "paused", "banned"].includes(rawStatus)
+      ? rawStatus
+      : "all") as "all" | "active" | "paused" | "banned";
     const search = typeof req.query.search === "string" ? req.query.search.trim() : undefined;
 
-    const data = await resellerService.listResellers({ page, limit, status, search });
-    res.status(200).json({ success: true, data });
+    const result = await resellerService.listResellers({ page, limit, status, search });
+
+    // data = array de lojas (compatível com o painel)
+    // também envia stores/items para parsers alternativos
+    res.status(200).json({
+      success: true,
+      data: result.data,
+      stores: result.data,
+      items: result.data,
+      total: result.total,
+      page: result.page,
+      totalPages: result.totalPages,
+    });
   } catch (err) {
     next(err);
   }
