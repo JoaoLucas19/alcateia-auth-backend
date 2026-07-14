@@ -121,8 +121,18 @@ export async function listKeys(req: Request, res: Response, next: NextFunction):
   try {
     const page = Number(req.query.page) || 1;
     const limit = Math.min(Number(req.query.limit) || 50, 100);
-    const data = await resellerService.listResellerKeys(String(req.params.id), page, limit);
-    res.status(200).json({ success: true, data });
+    const result = await resellerService.listResellerKeys(String(req.params.id), page, limit);
+
+    // data = array de keys (evita modal vazio quando o painel lê json.data como lista)
+    res.status(200).json({
+      success: true,
+      data: result.data,
+      keys: result.data,
+      items: result.data,
+      total: result.total,
+      page: result.page,
+      totalPages: result.totalPages,
+    });
   } catch (err) {
     next(err);
   }
@@ -150,8 +160,17 @@ export async function history(req: Request, res: Response, next: NextFunction): 
   try {
     const page = Number(req.query.page) || 1;
     const limit = Math.min(Number(req.query.limit) || 50, 100);
-    const data = await resellerService.listResellerHistory(String(req.params.id), page, limit);
-    res.status(200).json({ success: true, data });
+    const result = await resellerService.listResellerHistory(String(req.params.id), page, limit);
+
+    res.status(200).json({
+      success: true,
+      data: result.data,
+      history: result.data,
+      items: result.data,
+      total: result.total,
+      page: result.page,
+      totalPages: result.totalPages,
+    });
   } catch (err) {
     next(err);
   }
