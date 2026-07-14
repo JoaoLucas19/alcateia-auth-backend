@@ -32,6 +32,7 @@ export declare function listKeys(filters: {
     status?: KeyStatus;
     productId?: string;
     search?: string;
+    resellerId?: string;
 }): Promise<{
     data: ({
         client: {

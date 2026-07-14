@@ -39,8 +39,9 @@ export async function list(req: Request, res: Response, next: NextFunction): Pro
     const status = req.query.status as KeyStatus | undefined;
     const productId = req.query.productId as string | undefined;
     const search = req.query.search as string | undefined;
+    const resellerId = req.query.resellerId as string | undefined;
 
-    const result = await keyService.listKeys({ page, limit, status, productId, search });
+    const result = await keyService.listKeys({ page, limit, status, productId, search, resellerId });
     res.status(200).json({ data: result });
   } catch (err) { next(err); }
 }

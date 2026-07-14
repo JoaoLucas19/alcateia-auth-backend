@@ -122,16 +122,31 @@ export async function listKeys(req: Request, res: Response, next: NextFunction):
     const page = Number(req.query.page) || 1;
     const limit = Math.min(Number(req.query.limit) || 50, 100);
     const result = await resellerService.listResellerKeys(String(req.params.id), page, limit);
+    const keys = result.data;
 
-    // data = array de keys (evita modal vazio quando o painel lê json.data como lista)
+    /**
+     * Formato maximamente compatível com o parser do painel:
+     * - json.keys / json.items / json.list → array
+     * - json.data → objeto com .keys / .data / .list (após unwrap de authFetch)
+     * - json.data.keys funciona quando fazem const payload = json.data
+     */
     res.status(200).json({
       success: true,
-      data: result.data,
-      keys: result.data,
-      items: result.data,
+      keys,
+      items: keys,
+      list: keys,
       total: result.total,
       page: result.page,
       totalPages: result.totalPages,
+      data: {
+        keys,
+        data: keys,
+        list: keys,
+        items: keys,
+        total: result.total,
+        page: result.page,
+        totalPages: result.totalPages,
+      },
     });
   } catch (err) {
     next(err);

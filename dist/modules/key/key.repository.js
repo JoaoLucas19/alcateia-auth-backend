@@ -10,11 +10,12 @@ const LIFETIME_EXPIRY = new Date("2099-12-31T23:59:59.999Z");
 exports.keyRepository = {
     create: (data) => client_1.default.key.create({ data }),
     createMany: (keys) => client_1.default.key.createMany({ data: keys }),
-    findPaginated: async ({ page, limit, status, productId, search, }) => {
+    findPaginated: async ({ page, limit, status, productId, search, resellerId, }) => {
         const where = {
             // Painel: por padrão oculta keys já expiradas (período encerrado)
             ...(status ? { status } : { status: { not: enums_1.KeyStatus.EXPIRED } }),
             ...(productId && { productId }),
+            ...(resellerId && { resellerId }),
             ...(search && {
                 OR: [
                     { value: { contains: search } },

@@ -5,6 +5,7 @@ interface KeyFilters {
     status?: KeyStatus;
     productId?: string;
     search?: string;
+    resellerId?: string;
 }
 export declare const keyRepository: {
     create: (data: {
@@ -42,7 +43,7 @@ export declare const keyRepository: {
         isPermanent?: boolean;
         resellerId?: string;
     }[]) => Prisma.PrismaPromise<Prisma.BatchPayload>;
-    findPaginated: ({ page, limit, status, productId, search, }: KeyFilters) => Promise<{
+    findPaginated: ({ page, limit, status, productId, search, resellerId, }: KeyFilters) => Promise<{
         data: ({
             client: {
                 username: string;

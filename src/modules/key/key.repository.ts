@@ -9,6 +9,7 @@ interface KeyFilters {
   status?: KeyStatus;
   productId?: string;
   search?: string;
+  resellerId?: string;
 }
 
 export const keyRepository = {
@@ -42,11 +43,13 @@ export const keyRepository = {
     status,
     productId,
     search,
+    resellerId,
   }: KeyFilters) => {
     const where = {
       // Painel: por padrão oculta keys já expiradas (período encerrado)
       ...(status ? { status } : { status: { not: KeyStatus.EXPIRED } }),
       ...(productId && { productId }),
+      ...(resellerId && { resellerId }),
       ...(search && {
         OR: [
           { value: { contains: search } },

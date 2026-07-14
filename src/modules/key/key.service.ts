@@ -175,6 +175,7 @@ export async function listKeys(filters: {
   status?: KeyStatus;
   productId?: string;
   search?: string;
+  resellerId?: string;
 }) {
 
   // Remove automaticamente keys expiradas

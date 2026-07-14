@@ -83,7 +83,8 @@ async function list(req, res, next) {
         const status = req.query.status;
         const productId = req.query.productId;
         const search = req.query.search;
-        const result = await keyService.listKeys({ page, limit, status, productId, search });
+        const resellerId = req.query.resellerId;
+        const result = await keyService.listKeys({ page, limit, status, productId, search, resellerId });
         res.status(200).json({ data: result });
     }
     catch (err) {
