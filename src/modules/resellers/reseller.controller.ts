@@ -160,16 +160,39 @@ export async function listKeys(req: Request, res: Response, next: NextFunction):
 export async function bulkKeys(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { action, keyIds } = req.body as {
-      action: "pause" | "ban" | "unpause" | "reactivate";
+      action: "pause" | "ban" | "unpause" | "reactivate" | "delete";
       keyIds: string[];
     };
-    const data = await resellerService.bulkUpdateResellerKeys(
+    const result = await resellerService.bulkUpdateResellerKeys(
       String(req.params.id),
       action,
       keyIds,
       actorOf(req)
     );
-    res.status(200).json({ success: true, data, message: "Ação em massa concluída" });
+
+    const keys = result.data;
+    res.status(200).json({
+      success: true,
+      message:
+        action === "delete"
+          ? "Key(s) excluída(s) com sucesso"
+          : "Ação em massa concluída",
+      keys,
+      items: keys,
+      list: keys,
+      data: {
+        keys,
+        data: keys,
+        list: keys,
+        items: keys,
+        total: result.total,
+        page: result.page,
+        totalPages: result.totalPages,
+      },
+      total: result.total,
+      page: result.page,
+      totalPages: result.totalPages,
+    });
   } catch (err) {
     next(err);
   }

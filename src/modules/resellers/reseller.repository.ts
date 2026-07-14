@@ -204,6 +204,32 @@ export const resellerRepository = {
       data: { status },
     }),
 
+  deleteKeysWithDependencies: async (keyIds: string[]) => {
+    if (keyIds.length === 0) return { deletedKeys: 0, deletedClients: 0 };
+
+    return prisma.$transaction(async (tx) => {
+      await tx.keyUsageLog.deleteMany({ where: { keyId: { in: keyIds } } });
+
+      const clients = await tx.client.findMany({
+        where: { keyId: { in: keyIds } },
+        select: { id: true },
+      });
+      const clientIds = clients.map((c) => c.id);
+
+      if (clientIds.length > 0) {
+        await tx.clientAccessLog.deleteMany({ where: { clientId: { in: clientIds } } });
+        await tx.client.deleteMany({ where: { id: { in: clientIds } } });
+      }
+
+      await tx.key.deleteMany({ where: { id: { in: keyIds } } });
+
+      return {
+        deletedKeys: keyIds.length,
+        deletedClients: clientIds.length,
+      };
+    });
+  },
+
   /** Banir loja = apagar loja + histórico + keys + clientes vinculados */
   deleteCompletely: async (resellerId: string) => {
     return prisma.$transaction(async (tx) => {

@@ -21,7 +21,7 @@ const updateSchema = zod_1.z.object({
     status: zod_1.z.enum(["ACTIVE", "PAUSED", "BANNED", "INACTIVE"]).optional(),
 });
 const bulkSchema = zod_1.z.object({
-    action: zod_1.z.enum(["pause", "ban", "unpause", "reactivate"]),
+    action: zod_1.z.enum(["pause", "ban", "unpause", "reactivate", "delete"]),
     keyIds: zod_1.z.array(zod_1.z.string().uuid()).min(1).max(200),
 });
 const router = (0, express_1.Router)();

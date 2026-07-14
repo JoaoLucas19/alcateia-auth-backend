@@ -248,6 +248,17 @@ async function bulkUpdateResellerKeys(resellerId, action, keyIds, actor = "admin
         throw new AppError_1.AppError("Nenhuma key válida encontrada para esta loja", 404, "KEYS_NOT_FOUND");
     }
     const ids = keys.map((k) => k.id);
+    if (action === "delete") {
+        const deleted = await reseller_repository_1.resellerRepository.deleteKeysWithDependencies(ids);
+        await reseller_repository_1.resellerRepository.addHistory({
+            resellerId,
+            type: "KEYS_DELETED",
+            description: `${deleted.deletedKeys} key(s) excluída(s)`,
+            actor,
+            metadata: JSON.stringify({ keyIds: ids, deletedClients: deleted.deletedClients }),
+        });
+        return listResellerKeys(resellerId, 1, 50);
+    }
     if (action === "pause") {
         await reseller_repository_1.resellerRepository.updateKeysStatus(ids, enums_1.KeyStatus.PAUSED);
         await reseller_repository_1.resellerRepository.addHistory({

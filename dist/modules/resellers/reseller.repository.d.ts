@@ -170,6 +170,10 @@ export declare const resellerRepository: {
         activatedAt: Date | null;
     }[]>;
     updateKeysStatus: (keyIds: string[], status: KeyStatus) => Prisma.PrismaPromise<Prisma.BatchPayload>;
+    deleteKeysWithDependencies: (keyIds: string[]) => Promise<{
+        deletedKeys: number;
+        deletedClients: number;
+    }>;
     /** Banir loja = apagar loja + histórico + keys + clientes vinculados */
     deleteCompletely: (resellerId: string) => Promise<{
         deletedKeys: number;

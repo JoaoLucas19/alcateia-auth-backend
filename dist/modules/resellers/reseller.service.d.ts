@@ -212,7 +212,7 @@ export declare function listResellerKeys(id: string, page: number, limit: number
     page: number;
     totalPages: number;
 }>;
-export declare function bulkUpdateResellerKeys(resellerId: string, action: "pause" | "ban" | "unpause" | "reactivate", keyIds: string[], actor?: string): Promise<{
+export declare function bulkUpdateResellerKeys(resellerId: string, action: "pause" | "ban" | "unpause" | "reactivate" | "delete", keyIds: string[], actor?: string): Promise<{
     data: {
         id: string;
         value: string;

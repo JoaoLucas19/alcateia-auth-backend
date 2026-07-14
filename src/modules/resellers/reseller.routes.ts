@@ -35,7 +35,7 @@ const updateSchema = z.object({
 });
 
 const bulkSchema = z.object({
-  action: z.enum(["pause", "ban", "unpause", "reactivate"]),
+  action: z.enum(["pause", "ban", "unpause", "reactivate", "delete"]),
   keyIds: z.array(z.string().uuid()).min(1).max(200),
 });
 

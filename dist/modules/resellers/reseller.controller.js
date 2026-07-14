@@ -200,8 +200,29 @@ async function listKeys(req, res, next) {
 async function bulkKeys(req, res, next) {
     try {
         const { action, keyIds } = req.body;
-        const data = await resellerService.bulkUpdateResellerKeys(String(req.params.id), action, keyIds, actorOf(req));
-        res.status(200).json({ success: true, data, message: "Ação em massa concluída" });
+        const result = await resellerService.bulkUpdateResellerKeys(String(req.params.id), action, keyIds, actorOf(req));
+        const keys = result.data;
+        res.status(200).json({
+            success: true,
+            message: action === "delete"
+                ? "Key(s) excluída(s) com sucesso"
+                : "Ação em massa concluída",
+            keys,
+            items: keys,
+            list: keys,
+            data: {
+                keys,
+                data: keys,
+                list: keys,
+                items: keys,
+                total: result.total,
+                page: result.page,
+                totalPages: result.totalPages,
+            },
+            total: result.total,
+            page: result.page,
+            totalPages: result.totalPages,
+        });
     }
     catch (err) {
         next(err);

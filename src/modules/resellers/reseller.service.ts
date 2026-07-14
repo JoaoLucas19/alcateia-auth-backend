@@ -289,7 +289,7 @@ export async function listResellerKeys(id: string, page: number, limit: number) 
 
 export async function bulkUpdateResellerKeys(
   resellerId: string,
-  action: "pause" | "ban" | "unpause" | "reactivate",
+  action: "pause" | "ban" | "unpause" | "reactivate" | "delete",
   keyIds: string[],
   actor = "admin"
 ) {
@@ -306,6 +306,18 @@ export async function bulkUpdateResellerKeys(
   }
 
   const ids = keys.map((k) => k.id);
+
+  if (action === "delete") {
+    const deleted = await resellerRepository.deleteKeysWithDependencies(ids);
+    await resellerRepository.addHistory({
+      resellerId,
+      type: "KEYS_DELETED",
+      description: `${deleted.deletedKeys} key(s) excluída(s)`,
+      actor,
+      metadata: JSON.stringify({ keyIds: ids, deletedClients: deleted.deletedClients }),
+    });
+    return listResellerKeys(resellerId, 1, 50);
+  }
 
   if (action === "pause") {
     await resellerRepository.updateKeysStatus(ids, KeyStatus.PAUSED);
