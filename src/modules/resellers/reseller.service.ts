@@ -234,7 +234,21 @@ async function setStatus(id: string, status: ResellerStatus, type: string, descr
 }
 
 export async function banReseller(id: string, actor = "admin") {
-  return setStatus(id, ResellerStatus.BANNED, "STORE_BANNED", "Loja banida", actor);
+  const existing = await resellerRepository.findById(id);
+  if (!existing) throw new AppError("Loja não encontrada", 404, "RESELLER_NOT_FOUND");
+
+  const storeName = existing.name;
+  const result = await resellerRepository.deleteCompletely(id);
+
+  return {
+    deleted: true,
+    id,
+    name: storeName,
+    deletedKeys: result.deletedKeys,
+    deletedClients: result.deletedClients,
+    message: `Loja "${storeName}" e todos os dados vinculados foram excluídos`,
+    actor,
+  };
 }
 
 export async function unbanReseller(id: string, actor = "admin") {

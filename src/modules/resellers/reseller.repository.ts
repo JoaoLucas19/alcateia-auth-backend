@@ -204,6 +204,44 @@ export const resellerRepository = {
       data: { status },
     }),
 
+  /** Banir loja = apagar loja + histórico + keys + clientes vinculados */
+  deleteCompletely: async (resellerId: string) => {
+    return prisma.$transaction(async (tx) => {
+      const keys = await tx.key.findMany({
+        where: { resellerId },
+        select: { id: true },
+      });
+      const keyIds = keys.map((k) => k.id);
+      let deletedClients = 0;
+
+      if (keyIds.length > 0) {
+        await tx.keyUsageLog.deleteMany({ where: { keyId: { in: keyIds } } });
+
+        const clients = await tx.client.findMany({
+          where: { keyId: { in: keyIds } },
+          select: { id: true },
+        });
+        const clientIds = clients.map((c) => c.id);
+        deletedClients = clientIds.length;
+
+        if (clientIds.length > 0) {
+          await tx.clientAccessLog.deleteMany({ where: { clientId: { in: clientIds } } });
+          await tx.client.deleteMany({ where: { id: { in: clientIds } } });
+        }
+
+        await tx.key.deleteMany({ where: { id: { in: keyIds } } });
+      }
+
+      await tx.resellerHistory.deleteMany({ where: { resellerId } });
+      await tx.reseller.delete({ where: { id: resellerId } });
+
+      return {
+        deletedKeys: keyIds.length,
+        deletedClients,
+      };
+    });
+  },
+
   countFailedLogins24hByReseller: async (since: Date) => {
     const rows = await prisma.clientAccessLog.groupBy({
       by: ["clientId"],

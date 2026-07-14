@@ -136,20 +136,13 @@ export declare function updateReseller(id: string, data: {
     createdAt: string;
 }>;
 export declare function banReseller(id: string, actor?: string): Promise<{
+    deleted: boolean;
     id: string;
     name: string;
-    owner: string;
-    discord: string | null;
-    email: string | null;
-    notes: string | null;
-    status: ResellerStatus;
-    activeKeys: number;
-    expiredKeys: number;
-    bannedKeys: number;
-    pausedKeys: number;
-    totalKeys: number;
-    failedLogins24h: number;
-    createdAt: string;
+    deletedKeys: number;
+    deletedClients: number;
+    message: string;
+    actor: string;
 }>;
 export declare function unbanReseller(id: string, actor?: string): Promise<{
     id: string;

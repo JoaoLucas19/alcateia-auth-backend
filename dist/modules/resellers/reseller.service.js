@@ -189,7 +189,20 @@ async function setStatus(id, status, type, description, actor) {
     return getReseller(id);
 }
 async function banReseller(id, actor = "admin") {
-    return setStatus(id, enums_1.ResellerStatus.BANNED, "STORE_BANNED", "Loja banida", actor);
+    const existing = await reseller_repository_1.resellerRepository.findById(id);
+    if (!existing)
+        throw new AppError_1.AppError("Loja não encontrada", 404, "RESELLER_NOT_FOUND");
+    const storeName = existing.name;
+    const result = await reseller_repository_1.resellerRepository.deleteCompletely(id);
+    return {
+        deleted: true,
+        id,
+        name: storeName,
+        deletedKeys: result.deletedKeys,
+        deletedClients: result.deletedClients,
+        message: `Loja "${storeName}" e todos os dados vinculados foram excluídos`,
+        actor,
+    };
 }
 async function unbanReseller(id, actor = "admin") {
     return setStatus(id, enums_1.ResellerStatus.ACTIVE, "STORE_UNBANNED", "Loja reativada (desbanida)", actor);

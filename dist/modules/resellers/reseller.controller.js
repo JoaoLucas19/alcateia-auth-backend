@@ -125,7 +125,11 @@ async function update(req, res, next) {
 async function ban(req, res, next) {
     try {
         const data = await resellerService.banReseller(String(req.params.id), actorOf(req));
-        res.status(200).json({ success: true, data, message: "Loja banida com sucesso" });
+        res.status(200).json({
+            success: true,
+            data,
+            message: data.message ?? "Loja e todos os dados vinculados foram excluídos",
+        });
     }
     catch (err) {
         next(err);
